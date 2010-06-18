@@ -15,6 +15,8 @@
 #
 LOCAL_PATH := $(call my-dir)
 
+# This builds bouncycastle as a static library for running through proguard.
+# bouncycastle for the device itself is built from these sources by a libcore makefile.
 include $(CLEAR_VARS)
 LOCAL_MODULE := bouncycastle
 LOCAL_SRC_FILES := $(call all-java-files-under,src/main/java)
