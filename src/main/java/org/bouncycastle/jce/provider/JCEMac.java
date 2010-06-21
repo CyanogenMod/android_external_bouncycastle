@@ -1,21 +1,27 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.MacSpi;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Mac;
-import org.bouncycastle.crypto.digests.*;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.MD2Digest;
+// import org.bouncycastle.crypto.digests.MD4Digest;
+// END android-removed
+import org.bouncycastle.crypto.digests.MD5Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.RIPEMD128Digest;
+// import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+// END android-removed
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA224Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.TigerDigest;
+// END android-removed
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 // BEGIN android-removed
-// import org.bouncycastle.crypto.engines.IDEAEngine;
 // import org.bouncycastle.crypto.engines.RC2Engine;
 // import org.bouncycastle.crypto.engines.RC532Engine;
 // import org.bouncycastle.crypto.engines.SkipjackEngine;
@@ -28,8 +34,20 @@ import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 import org.bouncycastle.crypto.macs.OldHMac;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.macs.VMPCMac;
+// END android-removed
+import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+
+import javax.crypto.MacSpi;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -164,10 +182,10 @@ public class JCEMac
         }
     }
 
-    /**
-     * SKIPJACK
-     */
     // BEGIN android-removed
+    // /**
+    //  * SKIPJACK
+    //  */
     // public static class Skipjack
     //     extends JCEMac
     // {
@@ -178,24 +196,10 @@ public class JCEMac
     // }
     // END android-removed
 
-    /**
-     * IDEA
-     */
     // BEGIN android-removed
-    // public static class IDEA
-    //     extends JCEMac
-    // {
-    //     public IDEA()
-    //     {
-    //         super(new CBCBlockCipherMac(new IDEAEngine()));
-    //     }
-    // }
-    // END android-removed
-
-    /**
-     * RC2
-     */
-    // BEGIN android-removed
+    // /**
+    //  * RC2
+    //  */
     // public static class RC2
     //     extends JCEMac
     // {
@@ -206,10 +210,10 @@ public class JCEMac
     // }
     // END android-removed
 
-    /**
-     * RC5
-     */
     // BEGIN android-removed
+    // /**
+    //  * RC5
+    //  */
     // public static class RC5
     //     extends JCEMac
     // {
@@ -220,10 +224,10 @@ public class JCEMac
     // }
     // END android-removed
 
-    /**
-     * GOST28147
-     */
     // BEGIN android-removed
+    // /**
+    //  * GOST28147
+    //  */
     // public static class GOST28147
     //     extends JCEMac
     // {
@@ -232,8 +236,20 @@ public class JCEMac
     //         super(new GOST28147Mac());
     //     }
     // }
+    //
+    // /**
+    //  * VMPC
+    //  */
+    // public static class VMPC
+    //     extends JCEMac
+    // {
+    //     public VMPC()
+    //     {
+    //         super(new VMPCMac());
+    //     }
+    // }
     // END android-removed
-    
+
     /**
      * DES
      */
@@ -258,10 +274,10 @@ public class JCEMac
         }
     }
 
-    /**
-     * SKIPJACK
-     */
     // BEGIN android-removed
+    // /**
+    //  * SKIPJACK
+    //  */
     // public static class SkipjackCFB8
     //     extends JCEMac
     // {
@@ -272,24 +288,10 @@ public class JCEMac
     // }
     // END android-removed
 
-    /**
-     * IDEACFB8
-     */
     // BEGIN android-removed
-    // public static class IDEACFB8
-    //     extends JCEMac
-    // {
-    //     public IDEACFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new IDEAEngine()));
-    //     }
-    // }
-    // END android-removed
-
-    /**
-     * RC2CFB8
-     */
-    // BEGIN android-removed
+    // /**
+    //  * RC2CFB8
+    //  */
     // public static class RC2CFB8
     //     extends JCEMac
     // {
@@ -300,10 +302,10 @@ public class JCEMac
     // }
     // END android-removed
 
-    /**
-     * RC5CFB8
-     */
     // BEGIN android-removed
+    // /**
+    //  * RC5CFB8
+    //  */
     // public static class RC5CFB8
     //     extends JCEMac
     // {
@@ -326,7 +328,33 @@ public class JCEMac
             super(new CBCBlockCipherMac(new DESedeEngine(), 64));
         }
     }
-    
+
+    // BEGIN android-removed
+    // /**
+    //  * DESede64with7816-4Padding
+    //  */
+    // public static class DESede64with7816d4
+    //     extends JCEMac
+    // {
+    //     public DESede64with7816d4()
+    //     {
+    //         super(new CBCBlockCipherMac(new DESedeEngine(), 64, new ISO7816d4Padding()));
+    //     }
+    // }
+    //
+    // /**
+    //  * DES9797Alg3with7816-4Padding
+    //  */
+    // public static class DES9797Alg3with7816d4
+    //     extends JCEMac
+    // {
+    //     public DES9797Alg3with7816d4()
+    //     {
+    //         super(new ISO9797Alg3Mac(new DESEngine(), new ISO7816d4Padding()));
+    //     }
+    // }
+    // END android-removed
+
     /**
      * DES9797Alg3
      */

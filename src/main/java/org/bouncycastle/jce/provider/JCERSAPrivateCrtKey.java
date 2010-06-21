@@ -1,19 +1,16 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.RSAPrivateCrtKeySpec;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+
+import java.math.BigInteger;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPrivateCrtKeySpec;
 
 /**
  * A provider representation for a RSA private key, with CRT factors included.
@@ -22,6 +19,8 @@ public class JCERSAPrivateCrtKey
     extends JCERSAPrivateKey
     implements RSAPrivateCrtKey
 {
+    static final long serialVersionUID = 7834723820638524718L;
+    
     private BigInteger  publicExponent;
     private BigInteger  primeP;
     private BigInteger  primeQ;
@@ -127,7 +126,7 @@ public class JCERSAPrivateCrtKey
     public byte[] getEncoded()
     {
         // BEGIN android-changed
-        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.THE_ONE), new RSAPrivateKeyStructure(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()).getDERObject());
+        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPrivateKeyStructure(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()).getDERObject());
         // END android-changed
 
         return info.getDEREncoded();
@@ -193,16 +192,23 @@ public class JCERSAPrivateCrtKey
         return crtCoefficient;
     }
 
+    public int hashCode()
+    {
+        return this.getModulus().hashCode()
+               ^ this.getPublicExponent().hashCode()
+               ^ this.getPrivateExponent().hashCode();
+    }
+
     public boolean equals(Object o)
     {
-        if (!(o instanceof RSAPrivateCrtKey))
-        {
-            return false;
-        }
-
         if (o == this)
         {
             return true;
+        }
+
+        if (!(o instanceof RSAPrivateCrtKey))
+        {
+            return false;
         }
 
         RSAPrivateCrtKey key = (RSAPrivateCrtKey)o;

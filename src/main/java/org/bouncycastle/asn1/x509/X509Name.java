@@ -1,13 +1,26 @@
 package org.bouncycastle.asn1.x509;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * <pre>
@@ -149,8 +162,22 @@ public class X509Name
      * RFC 3039 PostalAddress - SEQUENCE SIZE (1..6) OF
      * DirectoryString(SIZE(1..30))
      */
-    public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier(
-                    "2.5.4.16");
+    public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier("2.5.4.16");
+
+    /**
+     * RFC 2256 dmdName
+     */
+    public static final DERObjectIdentifier DMD_NAME = new DERObjectIdentifier("2.5.4.54");
+
+    /**
+     * id-at-telephoneNumber
+     */
+    public static final DERObjectIdentifier TELEPHONE_NUMBER = X509ObjectIdentifiers.id_at_telephoneNumber;
+
+    /**
+     * id-at-name
+     */
+    public static final DERObjectIdentifier NAME = X509ObjectIdentifiers.id_at_name;
 
     /**
      * Email address (RSA PKCS#9 extension) - IA5String.
@@ -180,11 +207,6 @@ public class X509Name
     public static final DERObjectIdentifier UID = new DERObjectIdentifier("0.9.2342.19200300.100.1.1");
 
     /**
-     * look up table translating OID values into their common symbols - this static is scheduled for deletion
-     */
-    public static Hashtable OIDLookUp = new Hashtable();
-
-    /**
      * determines whether or not strings should be processed and printed
      * from back to front.
      */
@@ -194,30 +216,36 @@ public class X509Name
      * default look up table translating OID values into their common symbols following
      * the convention in RFC 2253 with a few extras
      */
-    public static Hashtable DefaultSymbols = OIDLookUp;
+    public static final Hashtable DefaultSymbols = new Hashtable();
 
     /**
      * look up table translating OID values into their common symbols following the convention in RFC 2253
      * 
      */
-    public static Hashtable RFC2253Symbols = new Hashtable();
+    public static final Hashtable RFC2253Symbols = new Hashtable();
 
     /**
      * look up table translating OID values into their common symbols following the convention in RFC 1779
      * 
      */
-    public static Hashtable RFC1779Symbols = new Hashtable();
-
-    /**
-     * look up table translating string values into their OIDS -
-     * this static is scheduled for deletion
-     */
-    public static Hashtable SymbolLookUp = new Hashtable();
+    public static final Hashtable RFC1779Symbols = new Hashtable();
 
     /**
      * look up table translating common symbols into their OIDS.
      */
-    public static Hashtable DefaultLookUp = SymbolLookUp;
+    public static final Hashtable DefaultLookUp = new Hashtable();
+
+    /**
+     * look up table translating OID values into their common symbols
+     * @deprecated use DefaultSymbols
+     */
+    public static final Hashtable OIDLookUp = DefaultSymbols;
+
+    /**
+     * look up table translating string values into their OIDS -
+     * @deprecated use DefaultLookUp
+     */
+    public static final Hashtable SymbolLookUp = DefaultLookUp;
 
     // BEGIN android-removed
     //private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
@@ -233,7 +261,7 @@ public class X509Name
         DefaultSymbols.put(CN, "CN");
         DefaultSymbols.put(L, "L");
         DefaultSymbols.put(ST, "ST");
-        DefaultSymbols.put(SN, "SN");
+        DefaultSymbols.put(SN, "SERIALNUMBER");
         DefaultSymbols.put(EmailAddress, "E");
         DefaultSymbols.put(DC, "DC");
         DefaultSymbols.put(UID, "UID");
@@ -256,6 +284,8 @@ public class X509Name
         DefaultSymbols.put(DATE_OF_BIRTH, "DateOfBirth");
         DefaultSymbols.put(POSTAL_CODE, "PostalCode");
         DefaultSymbols.put(BUSINESS_CATEGORY, "BusinessCategory");
+        DefaultSymbols.put(TELEPHONE_NUMBER, "TelephoneNumber");
+        DefaultSymbols.put(NAME, "Name");
 
         RFC2253Symbols.put(C, "C");
         RFC2253Symbols.put(O, "O");
@@ -307,14 +337,19 @@ public class X509Name
         DefaultLookUp.put("dateofbirth", DATE_OF_BIRTH);
         DefaultLookUp.put("postalcode", POSTAL_CODE);
         DefaultLookUp.put("businesscategory", BUSINESS_CATEGORY);
+        DefaultLookUp.put("telephonenumber", TELEPHONE_NUMBER);
+        DefaultLookUp.put("name", NAME);
     }
 
     private X509NameEntryConverter  converter = null;
     // BEGIN android-changed
     private X509NameElementList     elems = new X509NameElementList();
     // END android-changed
-    
+
     private ASN1Sequence            seq;
+
+    private boolean                 isHashCodeCalculated;
+    private int                     hashCodeValue;
 
     /**
      * Return a X509Name based on the passed in tagged object.
@@ -342,7 +377,7 @@ public class X509Name
             return new X509Name((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory \"" + obj.getClass().getName()+"\"");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
@@ -359,32 +394,40 @@ public class X509Name
 
         while (e.hasMoreElements())
         {
-            ASN1Set         set = (ASN1Set)e.nextElement();
+            ASN1Set         set = ASN1Set.getInstance(e.nextElement());
 
             for (int i = 0; i < set.size(); i++) 
             {
+                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i));
+
+                   if (s.size() != 2)
+                   {
+                       throw new IllegalArgumentException("badly sized pair");
+                   }
+
                    // BEGIN android-changed
-                   ASN1Sequence s = (ASN1Sequence)set.getObjectAt(i);
+                   DERObjectIdentifier key = DERObjectIdentifier.getInstance(s.getObjectAt(0));
                    
-                   DERObjectIdentifier key =
-                       (DERObjectIdentifier) s.getObjectAt(0);
                    DEREncodable value = s.getObjectAt(1);
                    String valueStr;
-
-                   if (value instanceof DERString)
+                   if (value instanceof DERString && !(value instanceof DERUniversalString))
                    {
-                       valueStr = ((DERString)value).getString();
+                       String v = ((DERString)value).getString();
+                       if (v.length() > 0 && v.charAt(0) == '#')
+                       {
+                           valueStr = "\\" + v;
+                       }
+                       else
+                       {
+                           valueStr = v;
+                       }
                    }
                    else
                    {
                        valueStr = "#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded()));
                    }
-
-                   /*
-                    * The added flag set to (i != 0), to allow earlier JDK
-                    * compatibility.
-                    */
-                   elems.add(key, valueStr, i != 0);
+                   boolean added = (i != 0);  // to allow earlier JDK compatibility
+                   elems.add(key, valueStr, added);
                    // END android-changed
             }
         }
@@ -400,6 +443,7 @@ public class X509Name
      * <b>Note:</b> if the name you are trying to generate should be
      * following a specific ordering, you should use the constructor
      * with the ordering specified below.
+     * @deprecated use an ordered constructor! The hashtable ordering is rarely correct
      */
     public X509Name(
         Hashtable  attributes)
@@ -434,9 +478,9 @@ public class X509Name
      * ASN.1 counterparts.
      */
     public X509Name(
-        Vector                      ordering,
-        Hashtable                   attributes,
-        X509DefaultEntryConverter   converter)
+        Vector                   ordering,
+        Hashtable                attributes,
+        X509NameEntryConverter   converter)
     {
         // BEGIN android-changed
         DERObjectIdentifier problem = null;
@@ -518,6 +562,16 @@ public class X509Name
             // END android-changed
         }
     }
+
+//    private Boolean isEncoded(String s)
+//    {
+//        if (s.charAt(0) == '#')
+//        {
+//            return TRUE;
+//        }
+//
+//        return FALSE;
+//    }
 
     /**
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
@@ -652,9 +706,10 @@ public class X509Name
             if (value.indexOf('+') > 0)
             {
                 X509NameTokenizer   vTok = new X509NameTokenizer(value, '+');
+                String  v = vTok.nextToken();
 
                 // BEGIN android-changed
-                elems.add(oid, vTok.nextToken());
+                this.elems.add(oid, v);
                 // END android-changed
 
                 while (vTok.hasMoreTokens())
@@ -665,14 +720,14 @@ public class X509Name
                     String  nm = sv.substring(0, ndx);
                     String  vl = sv.substring(ndx + 1);
                     // BEGIN android-changed
-                    elems.add(decodeOID(nm, lookUp), vl, true);
+                    this.elems.add(decodeOID(nm, lookUp), vl, true);
                     // END android-changed
                 }
             }
             else
             {
                 // BEGIN android-changed
-                elems.add(oid, value);
+                this.elems.add(oid, value);
                 // END android-changed
             }
         }
@@ -680,7 +735,7 @@ public class X509Name
         if (reverse)
         {
             // BEGIN android-changed
-            elems = elems.reverse();
+            this.elems = this.elems.reverse();
             // END android-changed
         }
     }
@@ -709,27 +764,59 @@ public class X509Name
      */
     public Vector getValues()
     {
-        // BEGIN android-changed
         Vector  v = new Vector();
+        // BEGIN android-changed
         int     size = elems.size();
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i != size; i++)
         {
             v.addElement(elems.getValue(i));
         }
+        // END android-changed
 
         return v;
+    }
+
+    /**
+     * return a vector of the values found in the name, in the order they
+     * were found, with the DN label corresponding to passed in oid.
+     */
+    public Vector getValues(
+        DERObjectIdentifier oid)
+    {
+        Vector  v = new Vector();
+        int     size = elems.size();
+        // BEGIN android-changed
+
+        for (int i = 0; i != size; i++)
+        {
+            if (elems.getKey(i).equals(oid))
+            {
+                String val = elems.getValue(i);
+
+                if (val.length() > 2 && val.charAt(0) == '\\' && val.charAt(1) == '#')
+                {
+                    v.addElement(val.substring(1));
+                }
+                else
+                {
+                    v.addElement(val);
+                }
+            }
+        }
         // END android-changed
+
+        return v;
     }
 
     public DERObject toASN1Object()
     {
         if (seq == null)
         {
-            // BEGIN android-changed
             ASN1EncodableVector  vec = new ASN1EncodableVector();
             ASN1EncodableVector  sVec = new ASN1EncodableVector();
             DERObjectIdentifier  lstOid = null;
+            // BEGIN android-changed
             int                  size = elems.size();
             
             for (int i = 0; i != size; i++)
@@ -742,8 +829,10 @@ public class X509Name
                 String  str = elems.getValue(i);
 
                 v.add(converter.getConvertedValue(oid, str));
-
-                if (lstOid == null || elems.getAdded(i))
+ 
+                if (lstOid == null 
+                    || this.elems.getAdded(i))
+                // END android-changed
                 {
                     sVec.add(new DERSequence(v));
                 }
@@ -771,94 +860,67 @@ public class X509Name
      * @param inOrder if true the order of both X509 names must be the same,
      * as well as the values associated with each element.
      */
-    public boolean equals(Object _obj, boolean inOrder) 
+    public boolean equals(Object obj, boolean inOrder)
     {
-        if (_obj == this)
+        if (!inOrder)
+        {
+            return this.equals(obj);
+        }
+
+        if (obj == this)
         {
             return true;
         }
 
-        if (!inOrder)
-        {
-            return this.equals(_obj);
-        }
-
-        if (!(_obj instanceof X509Name))
+        if (!(obj instanceof X509Name || obj instanceof ASN1Sequence))
         {
             return false;
         }
-        
-        X509Name _oxn          = (X509Name)_obj;
+
+        DERObject derO = ((DEREncodable)obj).getDERObject();
+
+        if (this.getDERObject().equals(derO))
+        {
+            return true;
+        }
+
+        X509Name other;
+
+        try
+        {
+            other = X509Name.getInstance(obj);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return false;
+        }
+
         // BEGIN android-changed
-        int      _orderingSize = elems.size();
+        int      orderingSize = elems.size();
 
-        if (_orderingSize != _oxn.elems.size()) 
+        if (orderingSize != other.elems.size())
+        // END android-changed
         {
             return false;
         }
-        // END android-changed
-        
-        for(int i = 0; i < _orderingSize; i++) 
+
+        for (int i = 0; i < orderingSize; i++)
         {
             // BEGIN android-changed
-            String  _oid   = elems.getKey(i).getId();
-            String  _val   = elems.getValue(i);
-            
-            String _oOID = _oxn.elems.getKey(i).getId();
-            String _oVal = _oxn.elems.getValue(i);
-            // BEGIN android-changed
+            DERObjectIdentifier  oid = elems.getKey(i);
+            DERObjectIdentifier  oOid = other.elems.getKey(i);
+            // END android-changed
 
-            if (_oid.equals(_oOID))
+            if (oid.equals(oOid))
             {
-                _val = Strings.toLowerCase(_val.trim());
-                _oVal = Strings.toLowerCase(_oVal.trim());
-                if (_val.equals(_oVal))
+                // BEGIN android-changed
+                String value = elems.getValue(i);
+                String oValue = other.elems.getValue(i);
+                // END android-changed
+
+                if (!equivalentStrings(value, oValue))
                 {
-                    continue;
-                }
-                else
-                {
-                    StringBuffer    v1 = new StringBuffer();
-                    StringBuffer    v2 = new StringBuffer();
-
-                    if (_val.length() != 0)
-                    {
-                        char    c1 = _val.charAt(0);
-
-                        v1.append(c1);
-
-                        for (int k = 1; k < _val.length(); k++)
-                        {
-                            char    c2 = _val.charAt(k);
-                            if (!(c1 == ' ' && c2 == ' '))
-                            {
-                                v1.append(c2);
-                            }
-                            c1 = c2;
-                        }
-                    }
-
-                    if (_oVal.length() != 0)
-                    {
-                        char    c1 = _oVal.charAt(0);
-
-                        v2.append(c1);
-
-                        for (int k = 1; k < _oVal.length(); k++)
-                        {
-                            char    c2 = _oVal.charAt(k);
-                            if (!(c1 == ' ' && c2 == ' '))
-                            {
-                                v2.append(c2);
-                            }
-                            c1 = c2;
-                        }
-                    }
-
-                    if (!v1.toString().equals(v2.toString()))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             else
@@ -870,126 +932,124 @@ public class X509Name
         return true;
     }
 
+    public int hashCode()
+    {
+        if (isHashCodeCalculated)
+        {
+            return hashCodeValue;
+        }
+
+        isHashCodeCalculated = true;
+
+        // this needs to be order independent, like equals
+        for (int i = 0; i != elems.size(); i += 1)
+        {
+            String value = (String)elems.getValue(i);
+
+            value = canonicalize(value);
+            value = stripInternalSpaces(value);
+
+            hashCodeValue ^= value.hashCode();
+        }
+
+        return hashCodeValue;
+    }
+
     /**
      * test for equality - note: case is ignored.
      */
-    public boolean equals(Object _obj) 
+    public boolean equals(Object obj)
     {
-        if (_obj == this)
+        if (obj == this)
         {
             return true;
         }
 
-        if (!(_obj instanceof X509Name || _obj instanceof ASN1Sequence))
+        if (!(obj instanceof X509Name || obj instanceof ASN1Sequence))
         {
             return false;
         }
         
-        DERObject derO = ((DEREncodable)_obj).getDERObject();
+        DERObject derO = ((DEREncodable)obj).getDERObject();
         
         if (this.getDERObject().equals(derO))
         {
             return true;
         }
-        
-        if (!(_obj instanceof X509Name))
+
+        X509Name other;
+
+        try
         {
+            other = X509Name.getInstance(obj);
+        }
+        catch (IllegalArgumentException e)
+        { 
             return false;
         }
-        
-        X509Name _oxn          = (X509Name)_obj;
 
         // BEGIN android-changed
-        int      _orderingSize = elems.size();
+        int      orderingSize = elems.size();
 
-        if (_orderingSize != _oxn.elems.size()) 
+        if (orderingSize != other.elems.size())
+            // END android-changed
         {
             return false;
         }
-        // END android-changed
         
-        boolean[] _indexes = new boolean[_orderingSize];
+        boolean[] indexes = new boolean[orderingSize];
+        int       start, end, delta;
 
-        for(int i = 0; i < _orderingSize; i++) 
+        // BEGIN android-changed
+        if (elems.getKey(0).equals(other.elems.getKey(0)))   // guess forward
+        // END android-changed
         {
-            boolean _found = false;
+            start = 0;
+            end = orderingSize;
+            delta = 1;
+        }
+        else  // guess reversed - most common problem
+        {
+            start = orderingSize - 1;
+            end = -1;
+            delta = -1;
+        }
+
+        for (int i = start; i != end; i += delta)
+        {
+            boolean              found = false;
             // BEGIN android-changed
-            String  _oid   = elems.getKey(i).getId();
-            String  _val   = elems.getValue(i);
+            DERObjectIdentifier  oid = elems.getKey(i);
+            String               value = elems.getValue(i);
             // END android-changed
-            
-            for(int j = 0; j < _orderingSize; j++) 
+
+            for (int j = 0; j < orderingSize; j++)
             {
-                if (_indexes[j])
+                if (indexes[j])
                 {
                     continue;
                 }
 
                 // BEGIN android-changed
-                String _oOID = elems.getKey(j).getId();
-                String _oVal = _oxn.elems.getValue(j);
+                DERObjectIdentifier oOid = other.elems.getKey(j);
                 // END android-changed
 
-                if (_oid.equals(_oOID))
+                if (oid.equals(oOid))
                 {
-                    _val = Strings.toLowerCase(_val.trim());
-                    _oVal = Strings.toLowerCase(_oVal.trim());
-                    if (_val.equals(_oVal))
+                    // BEGIN android-changed
+                    String oValue = other.elems.getValue(j);
+                    // END android-changed
+
+                    if (equivalentStrings(value, oValue))
                     {
-                        _indexes[j] = true;
-                        _found      = true;
+                        indexes[j] = true;
+                        found      = true;
                         break;
-                    }
-                    else
-                    {
-                        StringBuffer    v1 = new StringBuffer();
-                        StringBuffer    v2 = new StringBuffer();
-
-                        if (_val.length() != 0)
-                        {
-                            char    c1 = _val.charAt(0);
-
-                            v1.append(c1);
-
-                            for (int k = 1; k < _val.length(); k++)
-                            {
-                                char    c2 = _val.charAt(k);
-                                if (!(c1 == ' ' && c2 == ' '))
-                                {
-                                    v1.append(c2);
-                                }
-                                c1 = c2;
-                            }
-                        }
-
-                        if (_oVal.length() != 0)
-                        {
-                            char    c1 = _oVal.charAt(0);
-
-                            v2.append(c1);
-
-                            for (int k = 1; k < _oVal.length(); k++)
-                            {
-                                char    c2 = _oVal.charAt(k);
-                                if (!(c1 == ' ' && c2 == ' '))
-                                {
-                                    v2.append(c2);
-                                }
-                                c1 = c2;
-                            }
-                        }
-
-                        if (v1.toString().equals(v2.toString()))
-                        {
-                            _indexes[j] = true;
-                            _found      = true;
-                            break;
-                        }
                     }
                 }
             }
 
-            if(!_found)
+            if (!found)
             {
                 return false;
             }
@@ -997,19 +1057,78 @@ public class X509Name
         
         return true;
     }
-    
-    public int hashCode()
-    {
-        ASN1Sequence  seq = (ASN1Sequence)this.getDERObject();
-        Enumeration   e = seq.getObjects();
-        int           hashCode = 0;
 
-        while (e.hasMoreElements())
+    private boolean equivalentStrings(String s1, String s2)
+    {
+        String value = canonicalize(s1);
+        String oValue = canonicalize(s2);
+        
+        if (!value.equals(oValue))
         {
-            hashCode ^= e.nextElement().hashCode();
+            value = stripInternalSpaces(value);
+            oValue = stripInternalSpaces(oValue);
+
+            if (!value.equals(oValue))
+            {
+                return false;
+            }
         }
 
-        return hashCode;
+        return true;
+    }
+
+    private String canonicalize(String s)
+    {
+        String value = Strings.toLowerCase(s.trim());
+        
+        if (value.length() > 0 && value.charAt(0) == '#')
+        {
+            DERObject obj = decodeObject(value);
+
+            if (obj instanceof DERString)
+            {
+                value = Strings.toLowerCase(((DERString)obj).getString().trim());
+            }
+        }
+
+        return value;
+    }
+
+    private ASN1Object decodeObject(String oValue)
+    {
+        try
+        {
+            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("unknown encoding in name: " + e);
+        }
+    }
+
+    private String stripInternalSpaces(
+        String str)
+    {
+        StringBuffer res = new StringBuffer();
+
+        if (str.length() != 0)
+        {
+            char    c1 = str.charAt(0);
+
+            res.append(c1);
+
+            for (int k = 1; k < str.length(); k++)
+            {
+                char    c2 = str.charAt(k);
+                if (!(c1 == ' ' && c2 == ' '))
+                {
+                    res.append(c2);
+                }
+                c1 = c2;
+            }
+        }
+
+        return res.toString();
     }
 
     private void appendValue(
@@ -1032,10 +1151,15 @@ public class X509Name
         buf.append('=');
 
         int     index = buf.length();
-
+        
         buf.append(value);
 
         int     end = buf.length();
+
+        if (value.length() >= 2 && value.charAt(0) == '\\' && value.charAt(1) == '#')
+        {
+            index += 2;   
+        }
 
         while (index != end)
         {
@@ -1043,6 +1167,7 @@ public class X509Name
                || (buf.charAt(index) == '"')
                || (buf.charAt(index) == '\\')
                || (buf.charAt(index) == '+')
+               || (buf.charAt(index) == '=')
                || (buf.charAt(index) == '<')
                || (buf.charAt(index) == '>')
                || (buf.charAt(index) == ';'))
@@ -1073,12 +1198,41 @@ public class X509Name
         Hashtable   oidSymbols)
     {
         StringBuffer            buf = new StringBuffer();
+        Vector                  components = new Vector();
         boolean                 first = true;
+
+        StringBuffer ava = null;
+
+        // BEGIN android-changed
+        for (int i = 0; i < elems.size(); i++)
+        // END android-changed
+        {
+            if (elems.getAdded(i))
+            {
+                ava.append('+');
+                appendValue(ava, oidSymbols,
+                    // BEGIN android-changed
+                    elems.getKey(i),
+                    elems.getValue(i));
+                    // END android-changed
+            }
+            else
+            {
+                ava = new StringBuffer();
+                appendValue(ava, oidSymbols,
+                    // BEGIN android-changed
+                    elems.getKey(i),
+                    elems.getValue(i));
+                    // END android-changed
+                components.addElement(ava);
+            }
+        }
 
         if (reverse)
         {
             // BEGIN android-changed
             for (int i = elems.size() - 1; i >= 0; i--)
+            // END android-changed
             {
                 if (first)
                 {
@@ -1086,26 +1240,15 @@ public class X509Name
                 }
                 else
                 {
-                    if (elems.getAdded(i + 1))
-                    {
-                        buf.append('+');
-                    }
-                    else
-                    {
-                        buf.append(',');
-                    }
+                    buf.append(',');
                 }
 
-                appendValue(buf, oidSymbols, 
-                            elems.getKey(i),
-                            elems.getValue(i));
+                buf.append(components.elementAt(i).toString());
             }
-            // END android-changed
         }
         else
         {
-            // BEGIN android-changed
-            for (int i = 0; i < elems.size(); i++)
+            for (int i = 0; i < components.size(); i++)
             {
                 if (first)
                 {
@@ -1113,21 +1256,11 @@ public class X509Name
                 }
                 else
                 {
-                    if (elems.getAdded(i))
-                    {
-                        buf.append('+');
-                    }
-                    else
-                    {
-                        buf.append(',');
-                    }
+                    buf.append(',');
                 }
 
-                appendValue(buf, oidSymbols, 
-                            elems.getKey(i),
-                            elems.getValue(i));
+                buf.append(components.elementAt(i).toString());
             }
-            // END android-changed
         }
 
         return buf.toString();

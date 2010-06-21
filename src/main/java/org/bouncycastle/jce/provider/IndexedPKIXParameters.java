@@ -75,8 +75,8 @@ public class IndexedPKIXParameters extends PKIXParameters {
         }
     }
 
-    TrustAnchor findTrustAnchor(X509Certificate cert, CertPath certPath,
-            int index) throws CertPathValidatorException {
+    TrustAnchor findTrustAnchor(X509Certificate cert) 
+            throws AnnotatedException {
         // Mimic the alg in CertPathValidatorUtilities.findTrustAnchor().
         Exception verificationException = null;
         X500Principal issuer = cert.getIssuerX500Principal();
@@ -116,9 +116,9 @@ public class IndexedPKIXParameters extends PKIXParameters {
 
         // Throw last verification exception.
         if (verificationException != null) {
-            throw new CertPathValidatorException("TrustAnchor found but"
+            throw new AnnotatedException("TrustAnchor found but"
                     + " certificate verification failed.",
-                    verificationException, certPath, index);
+                    verificationException);
         }
 
         return null;

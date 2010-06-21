@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.encodings;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
@@ -23,9 +25,9 @@ public class PKCS1Encoding
      * true by default.
      * </p>
      */
-    public static String STRICT_LENGTH_ENABLED_PROPERTY = "org.bouncycastle.pkcs1.strict";
+    public static final String STRICT_LENGTH_ENABLED_PROPERTY = "org.bouncycastle.pkcs1.strict";
     
-    private static int      HEADER_LENGTH = 10;
+    private static final int HEADER_LENGTH = 10;
 
     private SecureRandom            random;
     private AsymmetricBlockCipher   engine;
@@ -41,8 +43,25 @@ public class PKCS1Encoding
         AsymmetricBlockCipher   cipher)
     {
         this.engine = cipher;
-        this.useStrictLength = System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY, "true").equals("true");
+        this.useStrictLength = useStrict();
     }   
+
+    //
+    // for J2ME compatibility
+    //
+    private boolean useStrict()
+    {
+        // required if security manager has been installed.
+        String strict = (String)AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
+                return System.getProperty(STRICT_LENGTH_ENABLED_PROPERTY);
+            }
+        });
+
+        return strict == null || strict.equals("true");
+    }
 
     public AsymmetricBlockCipher getUnderlyingCipher()
     {
@@ -68,7 +87,7 @@ public class PKCS1Encoding
             kParam = (AsymmetricKeyParameter)param;
         }
 
-        engine.init(forEncryption, kParam);
+        engine.init(forEncryption, param);
 
         this.forPrivateKey = kParam.isPrivate();
         this.forEncryption = forEncryption;
@@ -124,6 +143,11 @@ public class PKCS1Encoding
         int     inLen)
         throws InvalidCipherTextException
     {
+        if (inLen > getInputBlockSize())
+        {
+            throw new IllegalArgumentException("input data too large");
+        }
+        
         byte[]  block = new byte[engine.getInputBlockSize()];
 
         if (forPrivateKey)
@@ -209,7 +233,7 @@ public class PKCS1Encoding
 
         start++;           // data should start at the next byte
 
-        if (start >= block.length || start < HEADER_LENGTH)
+        if (start > block.length || start < HEADER_LENGTH)
         {
             throw new InvalidCipherTextException("no data in block");
         }

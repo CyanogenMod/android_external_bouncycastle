@@ -1,18 +1,17 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.KeyGeneratorSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
 import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
+
+import javax.crypto.KeyGeneratorSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi
@@ -47,9 +46,8 @@ public class JCEKeyGenerator
     {
         if (random != null)
         {
-            uninitialised = false;
-    
             engine.init(new KeyGenerationParameters(random, defaultKeySize));
+            uninitialised = false;
         }
     }
 
@@ -57,11 +55,10 @@ public class JCEKeyGenerator
         int             keySize,
         SecureRandom    random)
     {
-        uninitialised = false;
-
         try
         {
             engine.init(new KeyGenerationParameters(random, keySize));
+            uninitialised = false;
         }
         catch (IllegalArgumentException e)
         {
@@ -73,11 +70,11 @@ public class JCEKeyGenerator
     {
         if (uninitialised)
         {
-            engine.init(new KeyGenerationParameters(
-                                    new SecureRandom(), defaultKeySize));
+            engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
+            uninitialised = false;
         }
 
-        return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
+        return new SecretKeySpec(engine.generateKey(), algName);
     }
 
     /**
@@ -125,8 +122,8 @@ public class JCEKeyGenerator
         {
             if (uninitialised)
             {
-                engine.init(new KeyGenerationParameters(
-                                        new SecureRandom(), defaultKeySize));
+                engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
+                uninitialised = false;
             }
 
             //
@@ -154,80 +151,61 @@ public class JCEKeyGenerator
     public static class DESede3
         extends JCEKeyGenerator
     {
-        private boolean     keySizeSet = false;
-
         public DESede3()
         {
             super("DESede3", 192, new DESedeKeyGenerator());
         }
-
-        protected void engineInit(
-            int             keySize,
-            SecureRandom    random)
-        {
-            super.engineInit(keySize, random);
-            keySizeSet = true;
-        }
-
-        protected SecretKey engineGenerateKey()
-        {
-            if (uninitialised)
-            {
-                engine.init(new KeyGenerationParameters(
-                                        new SecureRandom(), defaultKeySize));
-            }
-
-            return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
-        }
     }
 
-    /**
-     * SKIPJACK
-     */
-    public static class Skipjack
-        extends JCEKeyGenerator
-    {
-        public Skipjack()
-        {
-            super("SKIPJACK", 80, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Blowfish
-     */
-    public static class Blowfish
-        extends JCEKeyGenerator
-    {
-        public Blowfish()
-        {
-            super("Blowfish", 448, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Twofish
-     */
-    public static class Twofish
-        extends JCEKeyGenerator
-    {
-        public Twofish()
-        {
-            super("Twofish", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC2
-     */
-    public static class RC2
-        extends JCEKeyGenerator
-    {
-        public RC2()
-        {
-            super("RC2", 128, new CipherKeyGenerator());
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * SKIPJACK
+    //  */
+    // public static class Skipjack
+    //     extends JCEKeyGenerator
+    // {
+    //     public Skipjack()
+    //     {
+    //         super("SKIPJACK", 80, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * Blowfish
+    //  */
+    // public static class Blowfish
+    //     extends JCEKeyGenerator
+    // {
+    //     public Blowfish()
+    //     {
+    //         super("Blowfish", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * Twofish
+    //  */
+    // public static class Twofish
+    //     extends JCEKeyGenerator
+    // {
+    //     public Twofish()
+    //     {
+    //         super("Twofish", 256, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * RC2
+    //  */
+    // public static class RC2
+    //     extends JCEKeyGenerator
+    // {
+    //     public RC2()
+    //     {
+    //         super("RC2", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    // END android-removed
 
     /**
      * RC4
@@ -265,140 +243,153 @@ public class JCEKeyGenerator
         }
     }
 
-    /**
-     * RC6
-     */
-    public static class RC6
-        extends JCEKeyGenerator
-    {
-        public RC6()
-        {
-            super("RC6", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * AES
-     */
-    public static class AES
-        extends JCEKeyGenerator
-    {
-        public AES()
-        {
-            super("AES", 192, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES128
-        extends JCEKeyGenerator
-    {
-        public AES128()
-        {
-            super("AES", 128, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES192
-        extends JCEKeyGenerator
-    {
-        public AES192()
-        {
-            super("AES", 192, new CipherKeyGenerator());
-        }
-    }
-
-    public static class AES256
-        extends JCEKeyGenerator
-    {
-        public AES256()
-        {
-            super("AES", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * GOST28147
-     */
-    public static class GOST28147
-        extends JCEKeyGenerator
-    {
-        public GOST28147()
-        {
-            super("GOST28147", 256, new CipherKeyGenerator());
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * RC6
+    //  */
+    // public static class RC6
+    //     extends JCEKeyGenerator
+    // {
+    //     public RC6()
+    //     {
+    //         super("RC6", 256, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * GOST28147
+    //  */
+    // public static class GOST28147
+    //     extends JCEKeyGenerator
+    // {
+    //     public GOST28147()
+    //     {
+    //         super("GOST28147", 256, new CipherKeyGenerator());
+    //     }
+    // }
     
-    /**
-     * Rijndael
-     */
-    public static class Rijndael
-        extends JCEKeyGenerator
-    {
-        public Rijndael()
-        {
-            super("Rijndael", 192, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Serpent
-     */
-    public static class Serpent
-        extends JCEKeyGenerator
-    {
-        public Serpent()
-        {
-            super("Serpent", 192, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * Camellia
-     */
-    public static class Camellia
-        extends JCEKeyGenerator
-    {
-        public Camellia()
-        {
-            super("Camellia", 256, new CipherKeyGenerator());
-        }
-    }
-    
-    /**
-     * CAST5
-     */
-    public static class CAST5
-        extends JCEKeyGenerator
-    {
-        public CAST5()
-        {
-            super("CAST5", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * CAST6
-     */
-    public static class CAST6
-        extends JCEKeyGenerator
-    {
-        public CAST6()
-        {
-            super("CAST6", 256, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * IDEA
-     */
-    public static class IDEA
-        extends JCEKeyGenerator
-    {
-        public IDEA()
-        {
-            super("IDEA", 128, new CipherKeyGenerator());
-        }
-    }
+    // /**
+    //  * Rijndael
+    //  */
+    // public static class Rijndael
+    //     extends JCEKeyGenerator
+    // {
+    //     public Rijndael()
+    //     {
+    //         super("Rijndael", 192, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * Serpent
+    //  */
+    // public static class Serpent
+    //     extends JCEKeyGenerator
+    // {
+    //     public Serpent()
+    //     {
+    //         super("Serpent", 192, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    //
+    //
+    // /**
+    //  * CAST6
+    //  */
+    // public static class CAST6
+    //     extends JCEKeyGenerator
+    // {
+    //     public CAST6()
+    //     {
+    //         super("CAST6", 256, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * TEA
+    //  */
+    // public static class TEA
+    //     extends JCEKeyGenerator
+    // {
+    //     public TEA()
+    //     {
+    //         super("TEA", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * XTEA
+    //  */
+    // public static class XTEA
+    //     extends JCEKeyGenerator
+    // {
+    //     public XTEA()
+    //     {
+    //         super("XTEA", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * Salsa20
+    //  */
+    // public static class Salsa20
+    //     extends JCEKeyGenerator
+    // {
+    //     public Salsa20()
+    //     {
+    //         super("Salsa20", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * HC128
+    //  */
+    // public static class HC128
+    //     extends JCEKeyGenerator
+    // {
+    //     public HC128()
+    //     {
+    //         super("HC128", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * HC256
+    //  */
+    // public static class HC256
+    //     extends JCEKeyGenerator
+    // {
+    //     public HC256()
+    //     {
+    //         super("HC256", 256, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * VMPC
+    //  */
+    // public static class VMPC
+    //     extends JCEKeyGenerator
+    // {
+    //     public VMPC()
+    //     {
+    //         super("VMPC", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * VMPC-KSA3
+    //  */
+    // public static class VMPCKSA3
+    //     extends JCEKeyGenerator
+    // {
+    //     public VMPCKSA3()
+    //     {
+    //         super("VMPC-KSA3", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    // END android-removed
 
     // HMAC Related secret keys..
   
@@ -442,29 +433,29 @@ public class JCEKeyGenerator
     }
 
 
-    /**
-     * RIPE128HMAC
-     */
-    public static class RIPEMD128HMAC
-        extends JCEKeyGenerator
-    {
-        public RIPEMD128HMAC()
-        {
-            super("HMACRIPEMD128", 128, new CipherKeyGenerator());
-        }
-    }
+    // /**
+    //  * RIPE128HMAC
+    //  */
+    // public static class RIPEMD128HMAC
+    //     extends JCEKeyGenerator
+    // {
+    //     public RIPEMD128HMAC()
+    //     {
+    //         super("HMACRIPEMD128", 128, new CipherKeyGenerator());
+    //     }
+    // }
 
-    /**
-     * RIPE160HMAC
-     */
-    public static class RIPEMD160HMAC
-        extends JCEKeyGenerator
-    {
-        public RIPEMD160HMAC()
-        {
-            super("HMACRIPEMD160", 160, new CipherKeyGenerator());
-        }
-    }
+    // /**
+    //  * RIPE160HMAC
+    //  */
+    // public static class RIPEMD160HMAC
+    //     extends JCEKeyGenerator
+    // {
+    //     public RIPEMD160HMAC()
+    //     {
+    //         super("HMACRIPEMD160", 160, new CipherKeyGenerator());
+    //     }
+    // }
 
 
     /**
@@ -527,15 +518,17 @@ public class JCEKeyGenerator
         }
     }
     
-    /**
-     * HMACTIGER
-     */
-    public static class HMACTIGER
-        extends JCEKeyGenerator
-    {
-        public HMACTIGER()
-        {
-            super("HMACTIGER", 192, new CipherKeyGenerator());
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * HMACTIGER
+    //  */
+    // public static class HMACTIGER
+    //     extends JCEKeyGenerator
+    // {
+    //     public HMACTIGER()
+    //     {
+    //         super("HMACTIGER", 192, new CipherKeyGenerator());
+    //     }
+    // }
+    // END android-removed
 }

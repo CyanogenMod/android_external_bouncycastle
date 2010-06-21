@@ -22,7 +22,7 @@ public class CRLDistPoint
     public static CRLDistPoint getInstance(
         Object  obj)
     {
-        if (obj instanceof CRLDistPoint)
+        if (obj instanceof CRLDistPoint || obj == null)
         {
             return (CRLDistPoint)obj;
         }
@@ -31,7 +31,7 @@ public class CRLDistPoint
             return new CRLDistPoint((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public CRLDistPoint(
@@ -79,5 +79,22 @@ public class CRLDistPoint
     public DERObject toASN1Object()
     {
         return seq;
+    }
+
+    public String toString()
+    {
+        StringBuffer buf = new StringBuffer();
+        String       sep = System.getProperty("line.separator");
+
+        buf.append("CRLDistPoint:");
+        buf.append(sep);
+        DistributionPoint dp[] = getDistributionPoints();
+        for (int i = 0; i != dp.length; i++)
+        {
+            buf.append("    ");
+            buf.append(dp[i]);
+            buf.append(sep);
+        }
+        return buf.toString();
     }
 }

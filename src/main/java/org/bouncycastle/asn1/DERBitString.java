@@ -1,10 +1,12 @@
 package org.bouncycastle.asn1;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class DERBitString
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     private static final char[]  table = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -165,13 +167,7 @@ public class DERBitString
     {
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(obj);
-            dOut.close();
-
-            this.data = bOut.toByteArray();
+            this.data = obj.getDERObject().getEncoded(ASN1Encodable.DER);
             this.padBits = 0;
         }
         catch (IOException e)
@@ -220,40 +216,21 @@ public class DERBitString
 
     public int hashCode()
     {
-        int     value = 0;
-
-        for (int i = 0; i != data.length; i++)
-        {
-            value ^= (data[i] & 0xff) << (i % 4);
-        }
-
-        return value;
+        return padBits ^ Arrays.hashCode(data);
     }
-    
-    public boolean equals(
-        Object  o)
+
+    protected boolean asn1Equals(
+        DERObject  o)
     {
         if (!(o instanceof DERBitString))
         {
             return false;
         }
 
-        DERBitString  other = (DERBitString)o;
+        DERBitString other = (DERBitString)o;
 
-        if (data.length != other.data.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != data.length; i++)
-        {
-            if (data[i] != other.data[i])
-            {
-                return false;
-            }
-        }
-
-        return (padBits == other.padBits);
+        return this.padBits == other.padBits
+            && Arrays.areEqual(this.data, other.data);
     }
 
     public String getString()
@@ -275,7 +252,7 @@ public class DERBitString
         
         for (int i = 0; i != string.length; i++)
         {
-            buf.append(table[(string[i] >>> 4) % 0xf]);
+            buf.append(table[(string[i] >>> 4) & 0xf]);
             buf.append(table[string[i] & 0xf]);
         }
         

@@ -1,23 +1,29 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPublicKey;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.DSAPublicKeySpec;
-
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.DSAPublicKeySpec;
+
 public class JDKDSAPublicKey
     implements DSAPublicKey
 {
+    private static final long serialVersionUID = 1752452449903495175L;
+
     private BigInteger      y;
     private DSAParams       dsaSpec;
 
@@ -53,8 +59,8 @@ public class JDKDSAPublicKey
     JDKDSAPublicKey(
         SubjectPublicKeyInfo    info)
     {
-        DSAParameter            params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DERInteger              derY = null;
+
+        DERInteger              derY;
 
         try
         {
@@ -66,7 +72,18 @@ public class JDKDSAPublicKey
         }
 
         this.y = derY.getValue();
-        this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());
+
+        if (isNotNull(info.getAlgorithmId().getParameters()))
+        {
+            DSAParameter params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+            
+            this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());
+        }
+    }
+
+    private boolean isNotNull(DEREncodable parameters)
+    {
+        return parameters != null && !DERNull.INSTANCE.equals(parameters);
     }
 
     public String getAlgorithm()
@@ -81,9 +98,12 @@ public class JDKDSAPublicKey
 
     public byte[] getEncoded()
     {
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(y));
+        if (dsaSpec == null)
+        {
+            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new DERInteger(y)).getDEREncoded();
+        }
 
-        return info.getDEREncoded();
+        return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(y)).getDEREncoded();
     }
 
     public DSAParams getParams()
@@ -106,7 +126,13 @@ public class JDKDSAPublicKey
 
         return buf.toString();
     }
-    
+
+    public int hashCode()
+    {
+        return this.getY().hashCode() ^ this.getParams().getG().hashCode() 
+                ^ this.getParams().getP().hashCode() ^ this.getParams().getQ().hashCode();
+    }
+
     public boolean equals(
         Object o)
     {
@@ -121,5 +147,23 @@ public class JDKDSAPublicKey
             && this.getParams().getG().equals(other.getParams().getG()) 
             && this.getParams().getP().equals(other.getParams().getP()) 
             && this.getParams().getQ().equals(other.getParams().getQ());
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        this.y = (BigInteger)in.readObject();
+        this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(y);
+        out.writeObject(dsaSpec.getP());
+        out.writeObject(dsaSpec.getQ());
+        out.writeObject(dsaSpec.getG());
     }
 }

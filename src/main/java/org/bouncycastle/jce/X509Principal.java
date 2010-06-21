@@ -1,16 +1,24 @@
 package org.bouncycastle.jce;
 
-import java.io.ByteArrayOutputStream;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.X509Name;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.X509Name;
-
+/**
+ * a general extension of X509Name with a couple of extra methods and
+ * constructors.
+ * <p>
+ * Objects of this type can be created from certificates and CRLs using the
+ * PrincipalUtil class.
+ * </p>
+ * @see org.bouncycastle.jce.PrincipalUtil
+ */
 public class X509Principal
     extends X509Name
     implements Principal
@@ -134,18 +142,13 @@ public class X509Principal
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(this);
+            return this.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
             throw new RuntimeException(e.toString());
         }
-
-        return bOut.toByteArray();
     }
 }

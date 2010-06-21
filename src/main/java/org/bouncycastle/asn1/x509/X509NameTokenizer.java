@@ -58,14 +58,6 @@ public class X509NameTokenizer
                 }
                 else
                 {
-                    buf.append(c);
-                }
-                escaped = false;
-            }
-            else
-            {
-                if (escaped || quoted)
-                {
                     // BEGIN android-added
                     // copied from a newer version of BouncyCastle
                     if (c == '#' && buf.charAt(buf.length() - 1) == '=')
@@ -77,6 +69,22 @@ public class X509NameTokenizer
                         buf.append('\\');
                     }
                     // END android-added
+                    buf.append(c);
+                }
+                escaped = false;
+            }
+            else
+            {
+                if (escaped || quoted)
+                {
+                    if (c == '#' && buf.charAt(buf.length() - 1) == '=')
+                    {
+                        buf.append('\\');
+                    }
+                    else if (c == '+' && seperator != '+')
+                    {
+                        buf.append('\\');
+                    }
                     buf.append(c);
                     escaped = false;
                 }

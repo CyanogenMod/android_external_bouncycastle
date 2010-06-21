@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.AlgorithmParameterSpec;
-
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
@@ -17,21 +8,27 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 // END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.SignatureSpi;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+
 public class JDKISOSignature
-    extends Signature
+    extends SignatureSpi
 {
     private ISO9796d2Signer         signer;
 
     protected JDKISOSignature(
-        String                  name,
-        Digest                  digest,
-        AsymmetricBlockCipher   cipher)
+        Digest digest,
+        AsymmetricBlockCipher cipher)
     {
-        super(name);
-
         signer = new ISO9796d2Signer(cipher, digest, true);
     }
 
@@ -123,7 +120,7 @@ public class JDKISOSignature
     {
         public SHA1WithRSAEncryption()
         {
-            super("SHA1withRSA/ISO9796-2", new SHA1Digest(), new RSAEngine());
+            super(new SHA1Digest(), new RSABlindedEngine());
         }
     }
 
@@ -132,18 +129,18 @@ public class JDKISOSignature
     {
         public MD5WithRSAEncryption()
         {
-            super("MD5withRSA/ISO9796-2", new MD5Digest(), new RSAEngine());
+            super(new MD5Digest(), new RSABlindedEngine());
         }
     }
 
-// BEGIN android-removed
-//    static public class RIPEMD160WithRSAEncryption
-//        extends JDKISOSignature
-//    {
-//        public RIPEMD160WithRSAEncryption()
-//        {
-//            super("RIPEMD160withRSA/ISO9796-2", new RIPEMD160Digest(), new RSAEngine());
-//        }
-//    }
-// END android-removed
+    // BEGIN android-removed
+    // static public class RIPEMD160WithRSAEncryption
+    //     extends JDKISOSignature
+    // {
+    //     public RIPEMD160WithRSAEncryption()
+    //     {
+    //         super(new RIPEMD160Digest(), new RSABlindedEngine());
+    //     }
+    // }
+    // END android-removed
 }

@@ -6,7 +6,7 @@ import java.io.IOException;
  * A NULL object.
  */
 public abstract class ASN1Null
-    extends DERObject
+    extends ASN1Object
 {
     // BEGIN android-changed
     /*package*/ ASN1Null()
@@ -16,13 +16,13 @@ public abstract class ASN1Null
 
     public int hashCode()
     {
-        return 0;
+        return -1;
     }
 
-    public boolean equals(
-        Object o)
+    boolean asn1Equals(
+        DERObject o)
     {
-        if ((o == null) || !(o instanceof ASN1Null))
+        if (!(o instanceof ASN1Null))
         {
             return false;
         }
@@ -35,6 +35,6 @@ public abstract class ASN1Null
 
     public String toString()
     {
-      return "NULL";
+         return "NULL";
     }
 }

@@ -1,19 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.interfaces.DHPrivateKey;
-
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
@@ -31,6 +17,22 @@ import org.bouncycastle.crypto.params.IESParameters;
 // END android-removed
 import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.spec.IESParameterSpec;
+// BEGIN android-removed
+// import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
+// END android-removed
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.interfaces.DHPrivateKey;
+import java.io.ByteArrayOutputStream;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEIESCipher extends WrapCipherSpi
 {
@@ -67,6 +69,11 @@ public class JCEIESCipher extends WrapCipherSpi
     protected int engineGetKeySize(
         Key     key) 
     {
+        if (!(key instanceof IESKey))
+        {
+            throw new IllegalArgumentException("must be passed IE key");
+        }
+
         IESKey   ieKey = (IESKey)key;
 
         if (ieKey.getPrivate() instanceof DHPrivateKey)
@@ -149,7 +156,7 @@ public class JCEIESCipher extends WrapCipherSpi
     {
         if (!(key instanceof IESKey))
         {
-            throw new InvalidKeyException("must be passed IE key");
+            throw new InvalidKeyException("must be passed IES key");
         }
 
         if (params == null && (opmode == Cipher.ENCRYPT_MODE || opmode == Cipher.WRAP_MODE))

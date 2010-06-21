@@ -1,26 +1,64 @@
 package org.bouncycastle.asn1.util;
 
+import java.io.IOException;
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERApplicationSpecific;
+import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BERConstructedSequence;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DERApplicationSpecific;
+import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERBoolean;
+import org.bouncycastle.asn1.DERConstructedSequence;
+import org.bouncycastle.asn1.DERConstructedSet;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DEREnumerated;
+import org.bouncycastle.asn1.DERExternal;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERT61String;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.DERUnknownTag;
+import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.util.encoders.Hex;
 
 public class ASN1Dump
 {
-    private static String  TAB = "    ";
+    private static final String  TAB = "    ";
+    private static final int SAMPLE_SIZE = 32;
 
     /**
      * dump a DER object as a formatted string with indentation
      *
      * @param obj the DERObject to be dumped out.
      */
-    static String _dumpAsString(
+    static void _dumpAsString(
         String      indent,
-        DERObject   obj)
+        boolean     verbose,
+        DERObject   obj,
+        StringBuffer    buf)
     {
+        String nl = System.getProperty("line.separator");
         if (obj instanceof ASN1Sequence)
         {
-            StringBuffer    buf = new StringBuffer();
             Enumeration     e = ((ASN1Sequence)obj).getObjects();
             String          tab = indent + TAB;
 
@@ -46,34 +84,32 @@ public class ASN1Dump
                 buf.append("Sequence");
             }
 
-            buf.append(System.getProperty("line.separator"));
+            buf.append(nl);
 
             while (e.hasMoreElements())
             {
                 Object  o = e.nextElement();
 
                 // BEGIN android-changed
-                if (o == null || o.equals(DERNull.THE_ONE))
+                if (o == null || o.equals(DERNull.INSTANCE))
+                // END android-changed
                 {
                     buf.append(tab);
                     buf.append("NULL");
-                    buf.append(System.getProperty("line.separator"));
+                    buf.append(nl);
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    _dumpAsString(tab, verbose, (DERObject)o, buf);
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
                 }
-                // END android-changed
             }
-            return buf.toString();
         }
         else if (obj instanceof DERTaggedObject)
         {
-            StringBuffer    buf = new StringBuffer();
             String          tab = indent + TAB;
 
             buf.append(indent);
@@ -96,30 +132,27 @@ public class ASN1Dump
                 buf.append(" IMPLICIT ");
             }
 
-            buf.append(System.getProperty("line.separator"));
+            buf.append(nl);
 
             if (o.isEmpty())
             {
                 buf.append(tab);
                 buf.append("EMPTY");
-                buf.append(System.getProperty("line.separator"));
+                buf.append(nl);
             }
             else
             {
-                buf.append(_dumpAsString(tab, o.getObject()));
+                _dumpAsString(tab, verbose, o.getObject(), buf);
             }
-
-            return buf.toString();
         }
         else if (obj instanceof DERConstructedSet)
         {
-            StringBuffer    buf = new StringBuffer();
             Enumeration     e = ((ASN1Set)obj).getObjects();
             String          tab = indent + TAB;
 
             buf.append(indent);
             buf.append("ConstructedSet");
-            buf.append(System.getProperty("line.separator"));
+            buf.append(nl);
 
             while (e.hasMoreElements())
             {
@@ -129,28 +162,26 @@ public class ASN1Dump
                 {
                     buf.append(tab);
                     buf.append("NULL");
-                    buf.append(System.getProperty("line.separator"));
+                    buf.append(nl);
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    _dumpAsString(tab, verbose, (DERObject)o, buf);
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
                 }
             }
-            return buf.toString();
         }
         else if (obj instanceof BERSet)
         {
-            StringBuffer    buf = new StringBuffer();
             Enumeration     e = ((ASN1Set)obj).getObjects();
             String          tab = indent + TAB;
 
             buf.append(indent);
             buf.append("BER Set");
-            buf.append(System.getProperty("line.separator"));
+            buf.append(nl);
 
             while (e.hasMoreElements())
             {
@@ -160,28 +191,26 @@ public class ASN1Dump
                 {
                     buf.append(tab);
                     buf.append("NULL");
-                    buf.append(System.getProperty("line.separator"));
+                    buf.append(nl);
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    _dumpAsString(tab, verbose, (DERObject)o, buf);
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
                 }
             }
-            return buf.toString();
         }
         else if (obj instanceof DERSet)
         {
-            StringBuffer    buf = new StringBuffer();
             Enumeration     e = ((ASN1Set)obj).getObjects();
             String          tab = indent + TAB;
 
             buf.append(indent);
             buf.append("DER Set");
-            buf.append(System.getProperty("line.separator"));
+            buf.append(nl);
 
             while (e.hasMoreElements())
             {
@@ -191,102 +220,255 @@ public class ASN1Dump
                 {
                     buf.append(tab);
                     buf.append("NULL");
-                    buf.append(System.getProperty("line.separator"));
+                    buf.append(nl);
                 }
                 else if (o instanceof DERObject)
                 {
-                    buf.append(_dumpAsString(tab, (DERObject)o));
+                    _dumpAsString(tab, verbose, (DERObject)o, buf);
                 }
                 else
                 {
-                    buf.append(_dumpAsString(tab, ((DEREncodable)o).getDERObject()));
+                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
                 }
             }
-            return buf.toString();
         }
         else if (obj instanceof DERObjectIdentifier)
         {
-            return indent + "ObjectIdentifier(" + ((DERObjectIdentifier)obj).getId() + ")" + System.getProperty("line.separator");
+            buf.append(indent + "ObjectIdentifier(" + ((DERObjectIdentifier)obj).getId() + ")" + nl);
         }
         else if (obj instanceof DERBoolean)
         {
-            return indent + "Boolean(" + ((DERBoolean)obj).isTrue() + ")" + System.getProperty("line.separator");
+            buf.append(indent + "Boolean(" + ((DERBoolean)obj).isTrue() + ")" + nl);
         }
         else if (obj instanceof DERInteger)
         {
-            return indent + "Integer(" + ((DERInteger)obj).getValue() + ")" + System.getProperty("line.separator");
+            buf.append(indent + "Integer(" + ((DERInteger)obj).getValue() + ")" + nl);
         }
         else if (obj instanceof BERConstructedOctetString)
         {
-            return indent + "BER Constructed Octet String" + "[" + ((ASN1OctetString)obj).getOctets().length + "] " + System.getProperty("line.separator");
+            ASN1OctetString oct = (ASN1OctetString)obj;
+            buf.append(indent + "BER Constructed Octet String" + "[" + oct.getOctets().length + "] ");
+            if (verbose)
+            {
+                buf.append(dumpBinaryDataAsString(indent, oct.getOctets()));
+            }
+            else{
+                buf.append(nl);
+            }
         }
         else if (obj instanceof DEROctetString)
         {
-            return indent + "DER Octet String" + "[" + ((ASN1OctetString)obj).getOctets().length + "] " + System.getProperty("line.separator");
+            ASN1OctetString oct = (ASN1OctetString)obj;
+            buf.append(indent + "DER Octet String" + "[" + oct.getOctets().length + "] ");
+            if (verbose)
+            {
+                buf.append(dumpBinaryDataAsString(indent, oct.getOctets()));
+            }
+            else{
+                buf.append(nl);
+            }
         }
         else if (obj instanceof DERBitString)
         {
-            return indent + "DER Bit String" + "[" + ((DERBitString)obj).getBytes().length + ", " + ((DERBitString)obj).getPadBits() + "] " + System.getProperty("line.separator");
+            DERBitString bt = (DERBitString)obj;
+            buf.append(indent + "DER Bit String" + "[" + bt.getBytes().length + ", " + bt.getPadBits() + "] ");
+            if (verbose)
+            {
+                buf.append(dumpBinaryDataAsString(indent, bt.getBytes()));
+            }
+            else{
+                buf.append(nl);
+            }
         }
         else if (obj instanceof DERIA5String)
         {
-            return indent + "IA5String(" + ((DERIA5String)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "IA5String(" + ((DERIA5String)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERUTF8String)
         {
-            return indent + "UTF8String(" + ((DERUTF8String)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "UTF8String(" + ((DERUTF8String)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERPrintableString)
         {
-            return indent + "PrintableString(" + ((DERPrintableString)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "PrintableString(" + ((DERPrintableString)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERVisibleString)
         {
-            return indent + "VisibleString(" + ((DERVisibleString)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "VisibleString(" + ((DERVisibleString)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERBMPString)
         {
-            return indent + "BMPString(" + ((DERBMPString)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "BMPString(" + ((DERBMPString)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERT61String)
         {
-            return indent + "T61String(" + ((DERT61String)obj).getString() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "T61String(" + ((DERT61String)obj).getString() + ") " + nl);
         }
         else if (obj instanceof DERUTCTime)
         {
-            return indent + "UTCTime(" + ((DERUTCTime)obj).getTime() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "UTCTime(" + ((DERUTCTime)obj).getTime() + ") " + nl);
         }
         else if (obj instanceof DERGeneralizedTime)
         {
-            return indent + "GeneralizedTime(" + ((DERGeneralizedTime)obj).getTime() + ") " + System.getProperty("line.separator");
+            buf.append(indent + "GeneralizedTime(" + ((DERGeneralizedTime)obj).getTime() + ") " + nl);
         }
         else if (obj instanceof DERUnknownTag)
         {
-            return indent + "Unknown " + Integer.toString(((DERUnknownTag)obj).getTag(), 16) + " " + new String(Hex.encode(((DERUnknownTag)obj).getData())) + System.getProperty("line.separator");
+            buf.append(indent + "Unknown " + Integer.toString(((DERUnknownTag)obj).getTag(), 16) + " " + new String(Hex.encode(((DERUnknownTag)obj).getData())) + nl);
+        }
+        else if (obj instanceof BERApplicationSpecific)
+        {
+            buf.append(outputApplicationSpecific("BER", indent, verbose, obj, nl));
+        }
+        else if (obj instanceof DERApplicationSpecific)
+        {
+            buf.append(outputApplicationSpecific("DER", indent, verbose, obj, nl));
+        }
+        else if (obj instanceof DEREnumerated)
+        {
+            DEREnumerated en = (DEREnumerated) obj;
+            buf.append(indent + "DER Enumerated(" + en.getValue() + ")" + nl);
+        }
+        else if (obj instanceof DERExternal)
+        {
+            DERExternal ext = (DERExternal) obj;
+            buf.append(indent + "External " + nl);
+            String          tab = indent + TAB;
+            if (ext.getDirectReference() != null)
+            {
+                buf.append(tab + "Direct Reference: " + ext.getDirectReference().getId() + nl);
+            }
+            if (ext.getIndirectReference() != null)
+            {
+                buf.append(tab + "Indirect Reference: " + ext.getIndirectReference().toString() + nl);
+            }
+            if (ext.getDataValueDescriptor() != null)
+            {
+                _dumpAsString(tab, verbose, ext.getDataValueDescriptor(), buf);
+            }
+            buf.append(tab + "Encoding: " + ext.getEncoding() + nl);
+            _dumpAsString(tab, verbose, ext.getExternalContent(), buf);
         }
         else
         {
-            return indent + obj.toString() + System.getProperty("line.separator");
+            buf.append(indent + obj.toString() + nl);
         }
+    }
+    
+    private static String outputApplicationSpecific(String type, String indent, boolean verbose, DERObject obj, String nl)
+    {
+        DERApplicationSpecific app = (DERApplicationSpecific)obj;
+        StringBuffer buf = new StringBuffer();
+
+        if (app.isConstructed())
+        {
+            try
+            {
+                ASN1Sequence s = ASN1Sequence.getInstance(app.getObject(DERTags.SEQUENCE));
+                buf.append(indent + type + " ApplicationSpecific[" + app.getApplicationTag() + "]" + nl);
+                for (Enumeration e = s.getObjects(); e.hasMoreElements();)
+                {
+                    _dumpAsString(indent + TAB, verbose, (DERObject)e.nextElement(), buf);
+                }
+            }
+            catch (IOException e)
+            {
+                buf.append(e);
+            }
+            return buf.toString();
+        }
+
+        return indent + type + " ApplicationSpecific[" + app.getApplicationTag() + "] (" + new String(Hex.encode(app.getContents())) + ")" + nl;
     }
 
     /**
-     * dump out a DER object as a formatted string
+     * dump out a DER object as a formatted string, in non-verbose mode.
      *
      * @param obj the DERObject to be dumped out.
+     * @return  the resulting string.
      */
     public static String dumpAsString(
         Object   obj)
     {
+        return dumpAsString(obj, false);
+    }
+
+    /**
+     * Dump out the object as a string.
+     *
+     * @param obj  the object to be dumped
+     * @param verbose  if true, dump out the contents of octet and bit strings.
+     * @return  the resulting string.
+     */
+    public static String dumpAsString(
+        Object   obj,
+        boolean  verbose)
+    {
+        StringBuffer buf = new StringBuffer();
+
         if (obj instanceof DERObject)
         {
-            return _dumpAsString("", (DERObject)obj);
+            _dumpAsString("", verbose, (DERObject)obj, buf);
         }
         else if (obj instanceof DEREncodable)
         {
-            return _dumpAsString("", ((DEREncodable)obj).getDERObject());
+            _dumpAsString("", verbose, ((DEREncodable)obj).getDERObject(), buf);
+        }
+        else
+        {
+            return "unknown object type " + obj.toString();
         }
 
-        return "unknown object type " + obj.toString();
+        return buf.toString();
+    }
+
+    private static String dumpBinaryDataAsString(String indent, byte[] bytes)
+    {
+        String nl = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+
+        indent += TAB;
+        
+        buf.append(nl);
+        for (int i = 0; i < bytes.length; i += SAMPLE_SIZE)
+        {
+            if (bytes.length - i > SAMPLE_SIZE)
+            {
+                buf.append(indent);
+                buf.append(new String(Hex.encode(bytes, i, SAMPLE_SIZE)));
+                buf.append(TAB);
+                buf.append(calculateAscString(bytes, i, SAMPLE_SIZE));
+                buf.append(nl);
+            }
+            else
+            {
+                buf.append(indent);
+                buf.append(new String(Hex.encode(bytes, i, bytes.length - i)));
+                for (int j = bytes.length - i; j != SAMPLE_SIZE; j++)
+                {
+                    buf.append("  ");
+                }
+                buf.append(TAB);
+                buf.append(calculateAscString(bytes, i, bytes.length - i));
+                buf.append(nl);
+            }
+        }
+        
+        return buf.toString();
+    }
+
+    private static String calculateAscString(byte[] bytes, int off, int len)
+    {
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = off; i != off + len; i++)
+        {
+            if (bytes[i] >= ' ' && bytes[i] <= '~')
+            {
+                buf.append((char)bytes[i]);
+            }
+        }
+
+        return buf.toString();
     }
 }

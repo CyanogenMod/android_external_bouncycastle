@@ -321,6 +321,30 @@ public class JCESecretKeyFactory
         }
     }
     
+    /**
+     * PBEWithMD2AndDES
+     */
+    static public class PBEWithMD2AndDES
+        extends DESPBEKeyFactory
+    {
+        public PBEWithMD2AndDES()
+        {
+            super("PBEwithMD2andDES", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, true, PKCS5S1, MD2, 64, 64);
+        }
+    }
+
+    /**
+     * PBEWithMD2AndRC2
+     */
+    static public class PBEWithMD2AndRC2
+        extends PBEKeyFactory
+    {
+        public PBEWithMD2AndRC2()
+        {
+            super("PBEwithMD2andRC2", PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, true, PKCS5S1, MD2, 64, 64);
+        }
+    }
+
    /**
     * PBEWithMD5AndDES
     */
@@ -329,7 +353,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithMD5AndDES()
        {
-           super("PBEwithMD5andDES", null, true, PKCS5S1, MD5, 64, 64);
+           super("PBEwithMD5andDES", PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, true, PKCS5S1, MD5, 64, 64);
        }
    }
 
@@ -341,7 +365,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithMD5AndRC2()
        {
-           super("PBEwithMD5andRC2", null, true, PKCS5S1, MD5, 64, 64);
+           super("PBEwithMD5andRC2", PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, true, PKCS5S1, MD5, 64, 64);
        }
    }
 
@@ -353,7 +377,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithSHA1AndDES()
        {
-           super("PBEwithSHA1andDES", null, true, PKCS5S1, SHA1, 64, 64);
+           super("PBEwithSHA1andDES", PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, true, PKCS5S1, SHA1, 64, 64);
        }
    }
 
@@ -365,7 +389,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithSHA1AndRC2()
        {
-           super("PBEwithSHA1andRC2", null, true, PKCS5S1, SHA1, 64, 64);
+           super("PBEwithSHA1andRC2", PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, true, PKCS5S1, SHA1, 64, 64);
        }
    }
 
@@ -418,67 +442,55 @@ public class JCESecretKeyFactory
        }
    }
 
-// BEGIN android-removed
-//   /**
-//    * PBEWithSHAAndTwofish-CBC
-//    */
-//   static public class PBEWithSHAAndTwofish
-//       extends PBEKeyFactory
-//   {
-//       public PBEWithSHAAndTwofish()
-//       {
-//           super("PBEwithSHAandTwofish-CBC", null, true, PKCS12, SHA1, 256, 128);
-//       }
-//   }
-//
-//   /**
-//    * PBEWithSHAAndIDEA-CBC
-//    */
-//   static public class PBEWithSHAAndIDEA
-//       extends PBEKeyFactory
-//   {
-//       public PBEWithSHAAndIDEA()
-//       {
-//           super("PBEwithSHAandIDEA-CBC", null, true, PKCS12, SHA1, 128, 64);
-//       }
-//   }
-//
-//   /**
-//    * PBEWithSHAAnd128BitRC4
-//    */
-//   static public class PBEWithSHAAnd128BitRC4
-//       extends PBEKeyFactory
-//   {
-//       public PBEWithSHAAnd128BitRC4()
-//       {
-//           super("PBEWithSHAAnd128BitRC4", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, true, PKCS12, SHA1, 128, 0);
-//       }
-//   }
-//
-//   /**
-//    * PBEWithSHAAnd40BitRC4
-//    */
-//   static public class PBEWithSHAAnd40BitRC4
-//       extends PBEKeyFactory
-//   {
-//       public PBEWithSHAAnd40BitRC4()
-//       {
-//           super("PBEWithSHAAnd128BitRC4", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, true, PKCS12, SHA1, 40, 0);
-//       }
-//   }
-//   
-//   /**
-//    * PBEWithHmacRIPEMD160
-//    */
-//   public static class PBEWithRIPEMD160
-//       extends PBEKeyFactory
-//   {
-//       public PBEWithRIPEMD160()
-//       {
-//           super("PBEwithHmacRIPEMD160", null, false, PKCS12, RIPEMD160, 160, 0);
-//       }
-//   }
-// END android-removed
+   // BEGIN android-removed
+   // /**
+   //  * PBEWithSHAAndTwofish-CBC
+   //  */
+   // static public class PBEWithSHAAndTwofish
+   //     extends PBEKeyFactory
+   // {
+   //     public PBEWithSHAAndTwofish()
+   //     {
+   //         super("PBEwithSHAandTwofish-CBC", null, true, PKCS12, SHA1, 256, 128);
+   //     }
+   // }
+   //
+   // /**
+   //  * PBEWithSHAAnd128BitRC4
+   //  */
+   // static public class PBEWithSHAAnd128BitRC4
+   //     extends PBEKeyFactory
+   // {
+   //     public PBEWithSHAAnd128BitRC4()
+   //     {
+   //         super("PBEWithSHAAnd128BitRC4", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, true, PKCS12, SHA1, 128, 0);
+   //     }
+   // }
+   //
+   // /**
+   //  * PBEWithSHAAnd40BitRC4
+   //  */
+   // static public class PBEWithSHAAnd40BitRC4
+   //     extends PBEKeyFactory
+   // {
+   //     public PBEWithSHAAnd40BitRC4()
+   //     {
+   //         super("PBEWithSHAAnd128BitRC4", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, true, PKCS12, SHA1, 40, 0);
+   //     }
+   // }
+   //
+   // /**
+   //  * PBEWithHmacRIPEMD160
+   //  */
+   // public static class PBEWithRIPEMD160
+   //     extends PBEKeyFactory
+   // {
+   //     public PBEWithRIPEMD160()
+   //     {
+   //         super("PBEwithHmacRIPEMD160", null, false, PKCS12, RIPEMD160, 160, 0);
+   //     }
+   // }
+   // END android-removed
 
    /**
     * PBEWithHmacSHA

@@ -1,7 +1,5 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
-
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
@@ -9,13 +7,15 @@ import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
+import java.math.BigInteger;
+
 /**
  * an RSA key pair generator.
  */
 public class RSAKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private static BigInteger ONE = BigInteger.valueOf(1);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
 
     private RSAKeyGenerationParameters param;
 
@@ -32,10 +32,15 @@ public class RSAKeyPairGenerator
         //
         // p and q values should have a length of half the strength in bits
         //
-        int pbitlength = (param.getStrength() + 1) / 2;
-        int qbitlength = (param.getStrength() - pbitlength);
+        int strength = param.getStrength();
+        int pbitlength = (strength + 1) / 2;
+        int qbitlength = strength - pbitlength;
+        int mindiffbits = strength / 3;
 
         e = param.getPublicExponent();
+
+        // TODO Consider generating safe primes for p, q (see DHParametersHelper.generateSafePrimes)
+        // (then p-1 and q-1 will not consist of only small factors - see "Pollard's algorithm")
 
         //
         // generate p, prime and (p-1) relatively prime to e
@@ -71,8 +76,8 @@ public class RSAKeyPairGenerator
             for (;;)
             {
                 q = new BigInteger(qbitlength, 1, param.getRandom());
-                
-                if (q.equals(p))
+
+                if (q.subtract(p).abs().bitLength() < mindiffbits)
                 {
                     continue;
                 }

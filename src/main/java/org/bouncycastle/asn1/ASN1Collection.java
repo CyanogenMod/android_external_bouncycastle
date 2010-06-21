@@ -20,7 +20,7 @@ import java.util.ConcurrentModificationException;
  * stored.
  */
 public abstract class ASN1Collection
-    extends DERObject
+    extends ASN1Object
 {
     /** &gt;= 0; size of the collection */
     private int size;
@@ -46,7 +46,7 @@ public abstract class ASN1Collection
      * @param index the index (starting at zero) of the object
      * @return the object at the postion indicated by index
      */
-    public final DEREncodable getObjectAt(int index) {
+    public DEREncodable getObjectAt(int index) {
         if ((index < 0) || (index >= size)) {
             throw new IndexOutOfBoundsException(Integer.toString(index));
         }
@@ -65,7 +65,7 @@ public abstract class ASN1Collection
      *
      * @return the number of objects in this instance
      */
-    public final int size() {
+    public int size() {
         return size;
     }
 
@@ -155,7 +155,7 @@ public abstract class ASN1Collection
      * 
      * @return non-null; the enumeration
      */
-    public final Enumeration getObjects() {
+    public Enumeration getObjects() {
         return new ASN1CollectionEnumeration();
     }
 

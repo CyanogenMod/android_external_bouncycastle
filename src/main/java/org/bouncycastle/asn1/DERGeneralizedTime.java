@@ -5,12 +5,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 /**
  * Generalized time object.
  */
 public class DERGeneralizedTime
-    extends DERObject
+    extends ASN1Object
 {
     String      time;
 
@@ -52,17 +53,26 @@ public class DERGeneralizedTime
     }
     
     /**
-     * The correct format for this is YYYYMMDDHHMMSSZ, or without the Z
+     * The correct format for this is YYYYMMDDHHMMSS[.f]Z, or without the Z
      * for local time, or Z+-HHMM on the end, for difference between local
-     * time and UTC time.
-     * <p>
+     * time and UTC time. The fractional second amount f must consist of at
+     * least one number with trailing zeroes removed.
      *
      * @param time the time string.
+     * @exception IllegalArgumentException if String is an illegal format.
      */
     public DERGeneralizedTime(
         String  time)
     {
         this.time = time;
+        try
+        {
+            this.getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalArgumentException("invalid date string: " + e.getMessage());
+        }
     }
 
     /**
@@ -94,6 +104,15 @@ public class DERGeneralizedTime
         this.time = new String(dateC);
     }
 
+    /**
+     * Return the time.
+     * @return The time string as it appeared in the encoded object.
+     */
+    public String getTimeString()
+    {
+        return time;
+    }
+    
     /**
      * return the time - always in the form of 
      *  YYYYMMDDhhmmssGMT(+hh:mm|-hh:mm).
@@ -140,29 +159,122 @@ public class DERGeneralizedTime
                 }
             }
         }            
-
-        return time;
+        return time + calculateGMTOffset();
     }
 
-    public Date getDate() 
+    private String calculateGMTOffset()
+    {
+        String sign = "+";
+        TimeZone timeZone = TimeZone.getDefault();
+        int offset = timeZone.getRawOffset();
+        if (offset < 0)
+        {
+            sign = "-";
+            offset = -offset;
+        }
+        int hours = offset / (60 * 60 * 1000);
+        int minutes = (offset - (hours * 60 * 60 * 1000)) / (60 * 1000);
+
+        try
+        {
+            if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate()))
+            {
+                hours += sign.equals("+") ? 1 : -1;
+            }
+        }
+        catch (ParseException e)
+        {
+            // we'll do our best and ignore daylight savings
+        }
+
+        return "GMT" + sign + convert(hours) + ":" + convert(minutes);
+    }
+
+    private String convert(int time)
+    {
+        if (time < 10)
+        {
+            return "0" + time;
+        }
+
+        return Integer.toString(time);
+    }
+
+    public Date getDate()
         throws ParseException
     {
         SimpleDateFormat dateF;
+        String d = time;
 
-        if (time.indexOf('.') == 14)
+        if (time.endsWith("Z"))
         {
-            dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
+        }
+        else if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
+        {
+            d = this.getTime();
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
         }
         else
         {
-            dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+            if (hasFractionalSeconds())
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS");
+            }
+            else
+            {
+                dateF = new SimpleDateFormat("yyyyMMddHHmmss");
+            }
+
+            dateF.setTimeZone(new SimpleTimeZone(0, TimeZone.getDefault().getID()));
         }
-        
-        dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
-        
-        return dateF.parse(time);
+
+        if (hasFractionalSeconds())
+        {
+            // java misinterprets extra digits as being milliseconds...
+            String frac = d.substring(14);
+            int    index;
+            for (index = 1; index < frac.length(); index++)
+            {
+                char ch = frac.charAt(index);
+                if (!('0' <= ch && ch <= '9'))
+                {
+                    break;        
+                }
+            }
+            if (index - 1 > 3)
+            {
+                frac = frac.substring(0, 4) + frac.substring(index);
+                d = d.substring(0, 14) + frac;
+            }
+        }
+
+        return dateF.parse(d);
     }
-    
+
+    private boolean hasFractionalSeconds()
+    {
+        return time.indexOf('.') == 14;
+    }
+
     private byte[] getOctets()
     {
         char[]  cs = time.toCharArray();
@@ -184,10 +296,10 @@ public class DERGeneralizedTime
         out.writeEncoded(GENERALIZED_TIME, this.getOctets());
     }
     
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERGeneralizedTime))
+        if (!(o instanceof DERGeneralizedTime))
         {
             return false;
         }

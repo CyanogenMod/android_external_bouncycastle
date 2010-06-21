@@ -1,6 +1,15 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,24 +17,18 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
 public class JCERSAPrivateKey
     implements RSAPrivateKey, PKCS12BagAttributeCarrier
 {
+    static final long serialVersionUID = 5110188922551353628L;
+
+    private static BigInteger ZERO = BigInteger.valueOf(0);
+
     protected BigInteger modulus;
     protected BigInteger privateExponent;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JCERSAPrivateKey()
     {
@@ -69,12 +72,16 @@ public class JCERSAPrivateKey
 
     public String getFormat()
     {
-        return "NULL";
+        return "PKCS#8";
     }
 
     public byte[] getEncoded()
     {
-        return null;
+        // BEGIN android-changed
+        PrivateKeyInfo info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPrivateKeyStructure(getModulus(), ZERO, getPrivateExponent(), ZERO, ZERO, ZERO, ZERO, ZERO).getDERObject// END android-changed
+());
+
+        return info.getDEREncoded();
     }
 
     public boolean equals(Object o)
@@ -104,19 +111,18 @@ public class JCERSAPrivateKey
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 
     private void readObject(
@@ -124,28 +130,9 @@ public class JCERSAPrivateKey
         throws IOException, ClassNotFoundException
     {
         this.modulus = (BigInteger)in.readObject();
-
-        Object  obj = in.readObject();
-
-        if (obj instanceof Hashtable)
-        {
-            this.pkcs12Attributes = (Hashtable)obj;
-            this.pkcs12Ordering = (Vector)in.readObject();
-        }
-        else
-        {
-            this.pkcs12Attributes = new Hashtable();
-            this.pkcs12Ordering = new Vector();
-
-            ASN1InputStream         aIn = new ASN1InputStream((byte[])obj);
-
-            DERObjectIdentifier    oid;
-
-            while ((oid = (DERObjectIdentifier)aIn.readObject()) != null)
-            {
-                this.setBagAttribute(oid, aIn.readObject());
-            }
-        }
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+        
+        attrCarrier.readObject(in);
 
         this.privateExponent = (BigInteger)in.readObject();
     }
@@ -156,28 +143,7 @@ public class JCERSAPrivateKey
     {
         out.writeObject(modulus);
 
-        if (pkcs12Ordering.size() == 0)
-        {
-            out.writeObject(pkcs12Attributes);
-            out.writeObject(pkcs12Ordering);
-        }
-        else
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-            Enumeration             e = this.getBagAttributeKeys();
-
-            while (e.hasMoreElements())
-            {
-                DEREncodable    oid = (DEREncodable)e.nextElement();
-
-                aOut.writeObject(oid);
-                aOut.writeObject(pkcs12Attributes.get(oid));
-            }
-
-            out.writeObject(bOut.toByteArray());
-        }
+        attrCarrier.writeObject(out);
 
         out.writeObject(privateExponent);
     }

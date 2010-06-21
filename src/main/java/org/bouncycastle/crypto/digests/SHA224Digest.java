@@ -2,6 +2,7 @@ package org.bouncycastle.crypto.digests;
 
 
 import org.bouncycastle.crypto.digests.GeneralDigest;
+import org.bouncycastle.crypto.util.Pack;
 
 
 /**
@@ -68,24 +69,18 @@ public class SHA224Digest
         byte[]  in,
         int     inOff)
     {
-        X[xOff++] = ((in[inOff] & 0xff) << 24) | ((in[inOff + 1] & 0xff) << 16)
-                    | ((in[inOff + 2] & 0xff) << 8) | ((in[inOff + 3] & 0xff)); 
+        // Note: Inlined for performance
+//        X[xOff] = Pack.bigEndianToInt(in, inOff);
+        int n = in[  inOff] << 24;
+        n |= (in[++inOff] & 0xff) << 16;
+        n |= (in[++inOff] & 0xff) << 8;
+        n |= (in[++inOff] & 0xff);
+        X[xOff] = n;
 
-        if (xOff == 16)
+        if (++xOff == 16)
         {
             processBlock();
         }
-    }
-
-    private void unpackWord(
-        int     word,
-        byte[]  out,
-        int     outOff)
-    {
-        out[outOff]     = (byte)(word >>> 24);
-        out[outOff + 1] = (byte)(word >>> 16);
-        out[outOff + 2] = (byte)(word >>> 8);
-        out[outOff + 3] = (byte)word;
     }
 
     protected void processLength(
@@ -106,13 +101,13 @@ public class SHA224Digest
     {
         finish();
 
-        unpackWord(H1, out, outOff);
-        unpackWord(H2, out, outOff + 4);
-        unpackWord(H3, out, outOff + 8);
-        unpackWord(H4, out, outOff + 12);
-        unpackWord(H5, out, outOff + 16);
-        unpackWord(H6, out, outOff + 20);
-        unpackWord(H7, out, outOff + 24);
+        Pack.intToBigEndian(H1, out, outOff);
+        Pack.intToBigEndian(H2, out, outOff + 4);
+        Pack.intToBigEndian(H3, out, outOff + 8);
+        Pack.intToBigEndian(H4, out, outOff + 12);
+        Pack.intToBigEndian(H5, out, outOff + 16);
+        Pack.intToBigEndian(H6, out, outOff + 20);
+        Pack.intToBigEndian(H7, out, outOff + 24);
 
         reset();
 
@@ -172,44 +167,52 @@ public class SHA224Digest
         for(int i = 0; i < 8; i ++)
         {
             // t = 8 * i
-            h += Sum1(e) + Ch(e, f, g) + K[t] + X[t++];
+            h += Sum1(e) + Ch(e, f, g) + K[t] + X[t];
             d += h;
             h += Sum0(a) + Maj(a, b, c);
+            ++t;
 
             // t = 8 * i + 1
-            g += Sum1(d) + Ch(d, e, f) + K[t] + X[t++];
+            g += Sum1(d) + Ch(d, e, f) + K[t] + X[t];
             c += g;
             g += Sum0(h) + Maj(h, a, b);
+            ++t;
 
             // t = 8 * i + 2
-            f += Sum1(c) + Ch(c, d, e) + K[t] + X[t++];
+            f += Sum1(c) + Ch(c, d, e) + K[t] + X[t];
             b += f;
             f += Sum0(g) + Maj(g, h, a);
+            ++t;
 
             // t = 8 * i + 3
-            e += Sum1(b) + Ch(b, c, d) + K[t] + X[t++];
+            e += Sum1(b) + Ch(b, c, d) + K[t] + X[t];
             a += e;
             e += Sum0(f) + Maj(f, g, h);
+            ++t;
 
             // t = 8 * i + 4
-            d += Sum1(a) + Ch(a, b, c) + K[t] + X[t++];
+            d += Sum1(a) + Ch(a, b, c) + K[t] + X[t];
             h += d;
             d += Sum0(e) + Maj(e, f, g);
+            ++t;
 
             // t = 8 * i + 5
-            c += Sum1(h) + Ch(h, a, b) + K[t] + X[t++];
+            c += Sum1(h) + Ch(h, a, b) + K[t] + X[t];
             g += c;
             c += Sum0(d) + Maj(d, e, f);
+            ++t;
 
             // t = 8 * i + 6
-            b += Sum1(g) + Ch(g, h, a) + K[t] + X[t++];
+            b += Sum1(g) + Ch(g, h, a) + K[t] + X[t];
             f += b;
             b += Sum0(c) + Maj(c, d, e);
+            ++t;
 
             // t = 8 * i + 7
-            a += Sum1(f) + Ch(f, g, h) + K[t] + X[t++];
+            a += Sum1(f) + Ch(f, g, h) + K[t] + X[t];
             e += a;
             a += Sum0(b) + Maj(b, c, d);
+            ++t;
         }
 
         H1 += a;

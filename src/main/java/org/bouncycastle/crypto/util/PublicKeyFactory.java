@@ -1,20 +1,26 @@
 package org.bouncycastle.crypto.util;
 
-import java.io.IOException;
-
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 // BEGIN android-removed
+// import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.sec.SECNamedCurves;
+// import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
+// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
@@ -40,12 +46,48 @@ import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 // END android-removed
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+
 /**
  * Factory to create asymmetric public key parameters for asymmetric ciphers
  * from range of ASN.1 encoded SubjectPublicKeyInfo objects.
  */
 public class PublicKeyFactory
 {
+    /**
+     * Create a public key from a SubjectPublicKeyInfo encoding
+     * 
+     * @param keyInfoData the SubjectPublicKeyInfo encoding
+     * @return the appropriate key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        byte[] keyInfoData)
+        throws IOException
+    {
+        return createKey(
+            SubjectPublicKeyInfo.getInstance(
+                ASN1Object.fromByteArray(keyInfoData)));
+    }
+
+    /**
+     * Create a public key from a SubjectPublicKeyInfo encoding read from a stream
+     * 
+     * @param inStr the stream to read the SubjectPublicKeyInfo encoding from
+     * @return the appropriate key parameter
+     * @throws IOException on an error decoding the key
+     */
+    public static AsymmetricKeyParameter createKey(
+        InputStream inStr)
+        throws IOException
+    {
+        return createKey(
+            SubjectPublicKeyInfo.getInstance(
+                new ASN1InputStream(inStr).readObject()));
+    }
+
     /**
      * Create a public key from the passed in SubjectPublicKeyInfo
      * 
@@ -72,7 +114,11 @@ public class PublicKeyFactory
             DHParameter params = new DHParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
             DERInteger  derY = (DERInteger)keyInfo.getPublicKey();
             
-            return new DHPublicKeyParameters(derY.getValue(), new DHParameters(params.getP(), params.getG()));
+            BigInteger lVal = params.getL();
+            int l = lVal == null ? 0 : lVal.intValue();
+            DHParameters dhParams = new DHParameters(params.getP(), params.getG(), null, l);
+
+            return new DHPublicKeyParameters(derY.getValue(), dhParams);
         }
         // BEGIN android-removed
         // else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
@@ -86,21 +132,43 @@ public class PublicKeyFactory
         else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa)
                  || algId.getObjectId().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
-            DSAParameter    params = new DSAParameter((ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger      derY = (DERInteger)keyInfo.getPublicKey();
+            DERInteger derY = (DERInteger)keyInfo.getPublicKey();
+            DEREncodable de = keyInfo.getAlgorithmId().getParameters();
 
-            return new DSAPublicKeyParameters(derY.getValue(), new DSAParameters(params.getP(), params.getQ(), params.getG()));
+            DSAParameters parameters = null;
+            if (de != null)
+            {
+                DSAParameter params = DSAParameter.getInstance(de.getDERObject());
+                parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
+            }
+
+            return new DSAPublicKeyParameters(derY.getValue(), parameters);
         }
         // BEGIN android-removed
         // else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
         // {
         //     X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
         //     ECDomainParameters  dParams = null;
-        //     
+        //
         //     if (params.isNamedCurve())
         //     {
         //         DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
         //         X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+        //
+        //         if (ecP == null)
+        //         {
+        //             ecP = SECNamedCurves.getByOID(oid);
+        //
+        //             if (ecP == null)
+        //             {
+        //                 ecP = NISTNamedCurves.getByOID(oid);
+        //
+        //                 if (ecP == null)
+        //                 {
+        //                     ecP = TeleTrusTNamedCurves.getByOID(oid);
+        //                 }
+        //             }
+        //         }
         //
         //         dParams = new ECDomainParameters(
         //                                     ecP.getCurve(),
@@ -126,10 +194,10 @@ public class PublicKeyFactory
         //     ASN1OctetString key = new DEROctetString(data);
         //
         //     X9ECPoint       derQ = new X9ECPoint(dParams.getCurve(), key);
-        //    
+        //
         //     return new ECPublicKeyParameters(derQ.getPoint(), dParams);
         // }
-        // BEGIN android-removed
+        // END android-removed
         else
         {
             throw new RuntimeException("algorithm identifier in key not recognised");

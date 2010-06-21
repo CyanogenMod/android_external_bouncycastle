@@ -3,7 +3,7 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public class DERGeneralString 
-    extends DERObject implements DERString
+    extends ASN1Object implements DERString
 {
     private String string;
 
@@ -52,7 +52,12 @@ public class DERGeneralString
     {
         return string;
     }
-    
+
+    public String toString()
+    {
+        return string;
+    }
+
     public byte[] getOctets() 
     {
         char[] cs = string.toCharArray();
@@ -75,7 +80,7 @@ public class DERGeneralString
         return this.getString().hashCode();
     }
     
-    public boolean equals(Object o) 
+    boolean asn1Equals(DERObject o)
     {
         if (!(o instanceof DERGeneralString)) 
         {

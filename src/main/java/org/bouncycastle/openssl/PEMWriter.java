@@ -1,8 +1,6 @@
 package org.bouncycastle.openssl;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -15,18 +13,13 @@ import java.security.cert.CRLException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
@@ -34,10 +27,8 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.DSAParameter;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -49,6 +40,7 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 public class PEMWriter
     extends BufferedWriter
 {
+    private String provider;
 
     /**
      * Base constructor.
@@ -57,9 +49,18 @@ public class PEMWriter
      */
     public PEMWriter(Writer out)
     {
-        super(out);
+        this(out, "BC");
     }
-    
+
+    public PEMWriter(
+        Writer  out,
+        String  provider)
+    {
+        super(out);
+
+        this.provider = provider;
+    }
+
     private void writeHexEncoded(byte[] bytes)
         throws IOException
     {
@@ -134,18 +135,14 @@ public class PEMWriter
         }
         else if (o instanceof PrivateKey)
         {
-            ByteArrayInputStream    bIn = new ByteArrayInputStream(((Key)o).getEncoded());
-            ASN1InputStream         aIn = new ASN1InputStream(bIn);
-            
-            PrivateKeyInfo          info = new PrivateKeyInfo((ASN1Sequence)aIn.readObject());
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-            
+            PrivateKeyInfo info = new PrivateKeyInfo(
+                (ASN1Sequence) ASN1Object.fromByteArray(((Key)o).getEncoded()));
+
             if (o instanceof RSAPrivateKey)
             {
                 type = "RSA PRIVATE KEY";
-                
-                aOut.writeObject(info.getPrivateKey());
+
+                encoding = info.getPrivateKey().getEncoded();
             }
             else if (o instanceof DSAPrivateKey)
             {
@@ -164,15 +161,19 @@ public class PEMWriter
                 
                 v.add(new DERInteger(y));
                 v.add(new DERInteger(x));
-                
-                aOut.writeObject(new DERSequence(v));
+
+                encoding = new DERSequence(v).getEncoded();
+            }
+            else if (((PrivateKey)o).getAlgorithm().equals("ECDSA"))
+            {
+                type = "EC PRIVATE KEY";
+
+                encoding = info.getPrivateKey().getEncoded();
             }
             else
             {
                 throw new IOException("Cannot identify private key");
             }
-            
-            encoding = bOut.toByteArray();
         }
         else if (o instanceof PublicKey)
         {
@@ -199,50 +200,33 @@ public class PEMWriter
         {
             throw new IOException("unknown object passed - can't encode.");
         }
-        
-        this.write("-----BEGIN " + type + "-----");
-        this.newLine();
-        
+
+        writeHeader(type);
         writeEncoded(encoding);
-        
-        this.write("-----END " + type + "-----");
-        this.newLine();
+        writeFooter(type);
     }
-    
+
     public void writeObject(
-        Object       o,
+        Object       obj,
         String       algorithm,
         char[]       password,
         SecureRandom random)
         throws IOException
     {
-        byte[] salt = new byte[8];
-        
-        random.nextBytes(salt);
-       
-        OpenSSLPBEParametersGenerator pGen = new OpenSSLPBEParametersGenerator();
-        
-        pGen.init(PBEParametersGenerator.PKCS5PasswordToBytes(password), salt);
-        
-        SecretKey secretKey = null;
-        
-        if (algorithm.equalsIgnoreCase("DESEDE"))
+        if (obj instanceof KeyPair)
         {
-            // generate key
-            int keyLength = 24;
+            writeObject(((KeyPair)obj).getPrivate());
+            return;
+        }
 
-            secretKey = new SecretKeySpec(((KeyParameter)pGen.generateDerivedParameters(keyLength * 8)).getKey(), algorithm);
-        }
-        else
-        {
-            throw new IOException("unknown algorithm in writeObject");
-        }
-        
+        String type = null;
         byte[] keyData = null;
-        
-        if (o instanceof RSAPrivateCrtKey)
+
+        if (obj instanceof RSAPrivateCrtKey)
         {
-            RSAPrivateCrtKey k = (RSAPrivateCrtKey)o;
+            type = "RSA PRIVATE KEY";
+
+            RSAPrivateCrtKey k = (RSAPrivateCrtKey)obj;
 
             RSAPrivateKeyStructure keyStruct = new RSAPrivateKeyStructure(
                 k.getModulus(),
@@ -253,43 +237,88 @@ public class PEMWriter
                 k.getPrimeExponentP(),
                 k.getPrimeExponentQ(),
                 k.getCrtCoefficient());
-       
+
             // convert to bytearray
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
-            
-            aOut.writeObject(keyStruct);
-            aOut.close();
-            
-            keyData = bOut.toByteArray();
+            keyData = keyStruct.getEncoded();
         }
-       
-        byte[]  encData = null;
-        
-        // cipher  
-        try
+        else if (obj instanceof DSAPrivateKey)
         {
-            Cipher  c = Cipher.getInstance("DESede/CBC/PKCS5Padding", "BC");
-            c.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(salt));
-        
-            encData = c.doFinal(keyData);
+            type = "DSA PRIVATE KEY";
+
+            DSAPrivateKey       k = (DSAPrivateKey)obj;
+            DSAParams           p = k.getParams();
+            ASN1EncodableVector v = new ASN1EncodableVector();
+
+            v.add(new DERInteger(0));
+            v.add(new DERInteger(p.getP()));
+            v.add(new DERInteger(p.getQ()));
+            v.add(new DERInteger(p.getG()));
+
+            BigInteger x = k.getX();
+            BigInteger y = p.getG().modPow(x, p.getP());
+
+            v.add(new DERInteger(y));
+            v.add(new DERInteger(x));
+
+            keyData = new DERSequence(v).getEncoded();
         }
-        catch (Exception e)
+        else if (obj instanceof PrivateKey && "ECDSA".equals(((PrivateKey)obj).getAlgorithm()))
         {
-            throw new IOException("exception using cipher: " + e.toString());
+            type = "EC PRIVATE KEY";
+
+            PrivateKeyInfo      privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(((PrivateKey)obj).getEncoded()));
+
+            keyData = privInfo.getPrivateKey().getEncoded();
         }
-       
+
+        if (type == null || keyData == null)
+        {
+            // TODO Support other types?
+            throw new IllegalArgumentException("Object type not supported: " + obj.getClass().getName());
+        }
+
+
+        String dekAlgName = Strings.toUpperCase(algorithm);
+
+        // Note: For backward compatibility
+        if (dekAlgName.equals("DESEDE"))
+        {
+            dekAlgName = "DES-EDE3-CBC";
+        }
+
+        int ivLength = dekAlgName.startsWith("AES-") ? 16 : 8;
+
+        byte[] iv = new byte[ivLength];
+        random.nextBytes(iv);
+
+        byte[] encData = PEMUtilities.crypt(true, provider, keyData, password, dekAlgName, iv);
+
+
         // write the data
-        this.write("-----BEGIN RSA PRIVATE KEY-----");
-        this.newLine();
+        writeHeader(type);
         this.write("Proc-Type: 4,ENCRYPTED");
         this.newLine();
-        this.write("DEK-Info: DES-EDE3-CBC,");
-        this.writeHexEncoded(salt);
+        this.write("DEK-Info: " + dekAlgName + ",");
+        this.writeHexEncoded(iv);
         this.newLine();
         this.newLine();
-        
         this.writeEncoded(encData);
-        this.write("-----END RSA PRIVATE KEY-----");   
+        writeFooter(type);
+    }
+
+    private void writeHeader(
+        String type)
+        throws IOException
+    {
+        this.write("-----BEGIN " + type + "-----");
+        this.newLine();
+    }
+
+    private void writeFooter(
+        String type)
+        throws IOException
+    {
+        this.write("-----END " + type + "-----");
+        this.newLine();
     }
 }

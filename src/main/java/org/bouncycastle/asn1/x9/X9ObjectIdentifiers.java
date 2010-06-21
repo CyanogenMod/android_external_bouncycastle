@@ -79,7 +79,7 @@ public interface X9ObjectIdentifiers
     static final DERObjectIdentifier    c2onb239v4 = new DERObjectIdentifier(cTwoCurve + ".14");
     static final DERObjectIdentifier    c2onb239v5 = new DERObjectIdentifier(cTwoCurve + ".15");
     static final DERObjectIdentifier    c2pnb272w1 = new DERObjectIdentifier(cTwoCurve + ".16");
-    static final DERObjectIdentifier    c2png304v1 = new DERObjectIdentifier(cTwoCurve + ".17");
+    static final DERObjectIdentifier    c2pnb304w1 = new DERObjectIdentifier(cTwoCurve + ".17");
     static final DERObjectIdentifier    c2tnb359v1 = new DERObjectIdentifier(cTwoCurve + ".18");
     static final DERObjectIdentifier    c2pnb368w1 = new DERObjectIdentifier(cTwoCurve + ".19");
     static final DERObjectIdentifier    c2tnb431r1 = new DERObjectIdentifier(cTwoCurve + ".20");
@@ -117,5 +117,26 @@ public interface X9ObjectIdentifiers
      *         us(840) x9-57 (10040) x9cm(4) 3 }
      */
     public static final DERObjectIdentifier id_dsa_with_sha1 = new DERObjectIdentifier("1.2.840.10040.4.3");
+
+    /**
+     * X9.63
+     */
+    public static final DERObjectIdentifier x9_63_scheme = new DERObjectIdentifier("1.3.133.16.840.63.0");
+    public static final DERObjectIdentifier dhSinglePass_stdDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".2");
+    public static final DERObjectIdentifier dhSinglePass_cofactorDH_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".3");
+    public static final DERObjectIdentifier mqvSinglePass_sha1kdf_scheme = new DERObjectIdentifier(x9_63_scheme + ".16");
+
+    /**
+     * X9.42
+     */
+    public static final DERObjectIdentifier x9_42_schemes = new DERObjectIdentifier("1.2.840.10046.3");
+    public static final DERObjectIdentifier dhStatic = new DERObjectIdentifier(x9_42_schemes + ".1");
+    public static final DERObjectIdentifier dhEphem = new DERObjectIdentifier(x9_42_schemes + ".2");
+    public static final DERObjectIdentifier dhOneFlow = new DERObjectIdentifier(x9_42_schemes + ".3");
+    public static final DERObjectIdentifier dhHybrid1 = new DERObjectIdentifier(x9_42_schemes + ".4");
+    public static final DERObjectIdentifier dhHybrid2 = new DERObjectIdentifier(x9_42_schemes + ".5");
+    public static final DERObjectIdentifier dhHybridOneFlow = new DERObjectIdentifier(x9_42_schemes + ".6");
+    public static final DERObjectIdentifier mqv2 = new DERObjectIdentifier(x9_42_schemes + ".7");
+    public static final DERObjectIdentifier mqv1 = new DERObjectIdentifier(x9_42_schemes + ".8");
 }
 

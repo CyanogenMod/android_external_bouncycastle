@@ -2,25 +2,42 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+
 /**
  * We insert one of these when we find a tag we don't recognise.
  */
 public class DERUnknownTag
     extends DERObject
 {
-    int         tag;
-    byte[]      data;
+    private boolean   isConstructed;
+    private int       tag;
+    private byte[]    data;
 
     /**
      * @param tag the tag value.
-     * @param data the octets making up the time.
+     * @param data the contents octets.
      */
     public DERUnknownTag(
         int     tag,
         byte[]  data)
     {
+        this(false, tag, data);
+    }
+
+    public DERUnknownTag(
+        boolean isConstructed,
+        int     tag,
+        byte[]  data)
+    {
+        this.isConstructed = isConstructed;
         this.tag = tag;
         this.data = data;
+    }
+
+    public boolean isConstructed()
+    {
+        return isConstructed;
     }
 
     public int getTag()
@@ -37,50 +54,26 @@ public class DERUnknownTag
         DEROutputStream  out)
         throws IOException
     {
-        out.writeEncoded(tag, data);
+        out.writeEncoded(isConstructed ? DERTags.CONSTRUCTED : 0, tag, data);
     }
     
     public boolean equals(
         Object o)
     {
-        if ((o == null) || !(o instanceof DERUnknownTag))
+        if (!(o instanceof DERUnknownTag))
         {
             return false;
         }
         
         DERUnknownTag other = (DERUnknownTag)o;
-        
-        if (tag != other.tag)
-        {
-            return false;
-        }
-        
-        if (data.length != other.data.length)
-        {
-            return false;
-        }
-        
-        for (int i = 0; i < data.length; i++) 
-        {
-            if(data[i] != other.data[i])
-            {
-                return false;
-            }
-        }
-        
-        return true;
+
+        return isConstructed == other.isConstructed
+            && tag == other.tag
+            && Arrays.areEqual(data, other.data);
     }
     
     public int hashCode()
     {
-        byte[]  b = this.getData();
-        int     value = 0;
-
-        for (int i = 0; i != b.length; i++)
-        {
-            value ^= (b[i] & 0xff) << (i % 4);
-        }
-
-        return value ^ this.getTag();
+        return (isConstructed ? ~0 : 0) ^ tag ^ Arrays.hashCode(data);
     }
 }

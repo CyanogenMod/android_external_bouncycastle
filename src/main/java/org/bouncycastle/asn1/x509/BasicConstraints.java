@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.x509;
 
-import java.math.BigInteger;
-
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+
+import java.math.BigInteger;
 
 public class BasicConstraints
     extends ASN1Encodable
@@ -33,12 +33,18 @@ public class BasicConstraints
         {
             return (BasicConstraints)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+
+        if (obj instanceof ASN1Sequence)
         {
             return new BasicConstraints((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        if (obj instanceof X509Extension)
+        {
+            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
+        }
+
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     public BasicConstraints(
@@ -51,10 +57,25 @@ public class BasicConstraints
         }
         else
         {
-            this.cA = DERBoolean.getInstance(seq.getObjectAt(0));
+            if (seq.getObjectAt(0) instanceof DERBoolean)
+            {
+                this.cA = DERBoolean.getInstance(seq.getObjectAt(0));
+            }
+            else
+            {
+                this.cA = null;
+                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(0));
+            }
             if (seq.size() > 1)
             {
-                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                if (this.cA != null)
+                {
+                    this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                }
+                else
+                {
+                    throw new IllegalArgumentException("wrong sequence in constructor");
+                }
             }
         }
     }
@@ -143,11 +164,11 @@ public class BasicConstraints
         if (cA != null)
         {
             v.add(cA);
-    
-            if (pathLenConstraint != null)
-            {
-                v.add(pathLenConstraint);
-            }
+        }
+
+        if (pathLenConstraint != null)  // yes some people actually do this when cA is false...
+        {
+            v.add(pathLenConstraint);
         }
 
         return new DERSequence(v);

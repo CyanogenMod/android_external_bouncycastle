@@ -1,7 +1,7 @@
 package org.bouncycastle.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.util.Vector;
 
 public final class Strings
 {
@@ -44,7 +44,7 @@ public final class Strings
 
             if ((bytes[i] & 0xf0) == 0xf0)
             {
-                int codePoint = ((bytes[i] & 0x0F) << 18) | ((bytes[i+1] & 0x3F) << 12) | ((bytes[i+2] & 0x3F) << 6) | (bytes[i+3] & 0x3F);
+                int codePoint = ((bytes[i] & 0x03) << 18) | ((bytes[i+1] & 0x3F) << 12) | ((bytes[i+2] & 0x3F) << 6) | (bytes[i+3] & 0x3F);
                 int U = codePoint - 0x10000;
                 char W1 = (char)(0xD800 | (U >> 10));
                 char W2 = (char)(0xDC00 | (U & 0x3FF));
@@ -54,13 +54,18 @@ public final class Strings
             }
             else if ((bytes[i] & 0xe0) == 0xe0)
             {
-                ch = (char)(((bytes[i] & 0x1f) << 12)
+                ch = (char)(((bytes[i] & 0x0f) << 12)
                         | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f));
                 i += 3;
             }
+            else if ((bytes[i] & 0xd0) == 0xd0)
+            {
+                ch = (char)(((bytes[i] & 0x1f) << 6) | (bytes[i + 1] & 0x3f));
+                i += 2;
+            }
             else if ((bytes[i] & 0xc0) == 0xc0)
             {
-                ch = (char)(((bytes[i] & 0x3f) << 6) | (bytes[i + 1] & 0x3f));
+                ch = (char)(((bytes[i] & 0x1f) << 6) | (bytes[i + 1] & 0x3f));
                 i += 2;
             }
             else
@@ -77,8 +82,13 @@ public final class Strings
     
     public static byte[] toUTF8ByteArray(String string)
     {
+        return toUTF8ByteArray(string.toCharArray());
+    }
+
+    public static byte[] toUTF8ByteArray(char[] string)
+    {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        char[] c = string.toCharArray();
+        char[] c = string;
         int i = 0;
 
         while (i < c.length)
@@ -187,5 +197,50 @@ public final class Strings
         }
         
         return string;
+    }
+
+    public static byte[] toByteArray(String string)
+    {
+        byte[] bytes = new byte[string.length()];
+
+        for (int i = 0; i != bytes.length; i++)
+        {
+            char ch = string.charAt(i);
+
+            bytes[i] = (byte)ch;
+        }
+
+        return bytes;
+    }
+
+    public static String[] split(String input, char delimiter)
+    {
+        Vector           v = new Vector();
+        boolean moreTokens = true;
+        String subString;
+
+        while (moreTokens)
+        {
+            int tokenLocation = input.indexOf(delimiter);
+            if (tokenLocation > 0)
+            {
+                subString = input.substring(0, tokenLocation);
+                v.addElement(subString);
+                input = input.substring(tokenLocation + 1);
+            }
+            else
+            {
+                moreTokens = false;
+                v.addElement(input);
+            }
+        }
+
+        String[] res = new String[v.size()];
+
+        for (int i = 0; i != res.length; i++)
+        {
+            res[i] = (String)v.elementAt(i);
+        }
+        return res;
     }
 }
