@@ -145,19 +145,19 @@ public class JCEKeyGenerator
         }
     }
     
-    /**
-     * generate a desEDE key in the a-b-c format.
-     */
-    public static class DESede3
-        extends JCEKeyGenerator
-    {
-        public DESede3()
-        {
-            super("DESede3", 192, new DESedeKeyGenerator());
-        }
-    }
-
     // BEGIN android-removed
+    // /**
+    //  * generate a desEDE key in the a-b-c format.
+    //  */
+    // public static class DESede3
+    //     extends JCEKeyGenerator
+    // {
+    //     public DESede3()
+    //     {
+    //         super("DESede3", 192, new DESedeKeyGenerator());
+    //     }
+    // }
+    //
     // /**
     //  * SKIPJACK
     //  */
@@ -205,45 +205,43 @@ public class JCEKeyGenerator
     //         super("RC2", 128, new CipherKeyGenerator());
     //     }
     // }
-    // END android-removed
-
-    /**
-     * RC4
-     */
-    public static class RC4
-        extends JCEKeyGenerator
-    {
-        public RC4()
-        {
-            super("RC4", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC5
-     */
-    public static class RC5
-        extends JCEKeyGenerator
-    {
-        public RC5()
-        {
-            super("RC5", 128, new CipherKeyGenerator());
-        }
-    }
-
-    /**
-     * RC5
-     */
-    public static class RC564
-        extends JCEKeyGenerator
-    {
-        public RC564()
-        {
-            super("RC5-64", 256, new CipherKeyGenerator());
-        }
-    }
-
-    // BEGIN android-removed
+    //
+    // /**
+    //  * RC4
+    //  */
+    // public static class RC4
+    //     extends JCEKeyGenerator
+    // {
+    //     public RC4()
+    //     {
+    //         super("RC4", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * RC5
+    //  */
+    // public static class RC5
+    //     extends JCEKeyGenerator
+    // {
+    //     public RC5()
+    //     {
+    //         super("RC5", 128, new CipherKeyGenerator());
+    //     }
+    // }
+    //
+    // /**
+    //  * RC5
+    //  */
+    // public static class RC564
+    //     extends JCEKeyGenerator
+    // {
+    //     public RC564()
+    //     {
+    //         super("RC5-64", 256, new CipherKeyGenerator());
+    //     }
+    // }
+    //
     // /**
     //  * RC6
     //  */
@@ -405,20 +403,20 @@ public class JCEKeyGenerator
     //         super("HMACMD2", 128, new CipherKeyGenerator());
     //     }
     // }
+    //
+    //
+    // /**
+    //  * MD4HMAC
+    //  */
+    // public static class MD4HMAC
+    //     extends JCEKeyGenerator
+    // {
+    //     public MD4HMAC()
+    //     {
+    //         super("HMACMD4", 128, new CipherKeyGenerator());
+    //     }
+    // }
     // END android-removed
-
-
-    /**
-     * MD4HMAC
-     */
-    public static class MD4HMAC
-        extends JCEKeyGenerator
-    {
-        public MD4HMAC()
-        {
-            super("HMACMD4", 128, new CipherKeyGenerator());
-        }
-    }
 
     /**
      * MD5HMAC
@@ -470,17 +468,19 @@ public class JCEKeyGenerator
         }
     }
 
-    /**
-     * HMACSHA224
-     */
-    public static class HMACSHA224
-        extends JCEKeyGenerator
-    {
-        public HMACSHA224()
-        {
-            super("HMACSHA224", 224, new CipherKeyGenerator());
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * HMACSHA224
+    //  */
+    // public static class HMACSHA224
+    //     extends JCEKeyGenerator
+    // {
+    //     public HMACSHA224()
+    //     {
+    //         super("HMACSHA224", 224, new CipherKeyGenerator());
+    //     }
+    // }
+    // END android-removed
     
     /**
      * HMACSHA256

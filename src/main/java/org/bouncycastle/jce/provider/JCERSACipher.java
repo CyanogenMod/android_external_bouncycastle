@@ -534,48 +534,50 @@ public class JCERSACipher extends WrapCipherSpi
         }
     }
 
-    static public class PKCS1v1_5Padding
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding()
-        {
-            super(new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PrivateOnly
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding_PrivateOnly()
-        {
-            super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PublicOnly
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding_PublicOnly()
-        {
-            super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class OAEPPadding
-        extends JCERSACipher
-    {
-        public OAEPPadding()
-        {
-            super(OAEPParameterSpec.DEFAULT);
-        }
-    }
-    
-    static public class ISO9796d1Padding
-        extends JCERSACipher
-    {
-        public ISO9796d1Padding()
-        {
-            super(new ISO9796d1Encoding(new RSABlindedEngine()));
-        }
-    }
+    // BEGIN android-removed
+    // static public class PKCS1v1_5Padding
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding()
+    //     {
+    //         super(new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PrivateOnly
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding_PrivateOnly()
+    //     {
+    //         super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PublicOnly
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding_PublicOnly()
+    //     {
+    //         super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class OAEPPadding
+    //     extends JCERSACipher
+    // {
+    //     public OAEPPadding()
+    //     {
+    //         super(OAEPParameterSpec.DEFAULT);
+    //     }
+    // }
+    //
+    // static public class ISO9796d1Padding
+    //     extends JCERSACipher
+    // {
+    //     public ISO9796d1Padding()
+    //     {
+    //         super(new ISO9796d1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    // END android-removed
 }

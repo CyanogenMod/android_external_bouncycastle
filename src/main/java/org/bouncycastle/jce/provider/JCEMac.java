@@ -12,7 +12,9 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 // END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -27,14 +29,14 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 // import org.bouncycastle.crypto.engines.SkipjackEngine;
 // END android-removed
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
-import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 // import org.bouncycastle.crypto.macs.GOST28147Mac;
 // END android-removed
 import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
-import org.bouncycastle.crypto.macs.OldHMac;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
+// import org.bouncycastle.crypto.macs.OldHMac;
 // import org.bouncycastle.crypto.macs.VMPCMac;
 // END android-removed
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
@@ -158,31 +160,31 @@ public class JCEMac
      * the classes that extend directly off us.
      */
 
-    /**
-     * DES
-     */
-    public static class DES
-        extends JCEMac
-    {
-        public DES()
-        {
-            super(new CBCBlockCipherMac(new DESEngine()));
-        }
-    }
-
-    /**
-     * DESede
-     */
-    public static class DESede
-        extends JCEMac
-    {
-        public DESede()
-        {
-            super(new CBCBlockCipherMac(new DESedeEngine()));
-        }
-    }
-
     // BEGIN android-removed
+    // /**
+    //  * DES
+    //  */
+    // public static class DES
+    //     extends JCEMac
+    // {
+    //     public DES()
+    //     {
+    //         super(new CBCBlockCipherMac(new DESEngine()));
+    //     }
+    // }
+    //
+    // /**
+    //  * DESede
+    //  */
+    // public static class DESede
+    //     extends JCEMac
+    // {
+    //     public DESede()
+    //     {
+    //         super(new CBCBlockCipherMac(new DESedeEngine()));
+    //     }
+    // }
+    //
     // /**
     //  * SKIPJACK
     //  */
@@ -194,9 +196,7 @@ public class JCEMac
     //         super(new CBCBlockCipherMac(new SkipjackEngine()));
     //     }
     // }
-    // END android-removed
-
-    // BEGIN android-removed
+    //
     // /**
     //  * RC2
     //  */
@@ -208,9 +208,7 @@ public class JCEMac
     //         super(new CBCBlockCipherMac(new RC2Engine()));
     //     }
     // }
-    // END android-removed
-
-    // BEGIN android-removed
+    //
     // /**
     //  * RC5
     //  */
@@ -222,9 +220,7 @@ public class JCEMac
     //         super(new CBCBlockCipherMac(new RC532Engine()));
     //     }
     // }
-    // END android-removed
-
-    // BEGIN android-removed
+    //
     // /**
     //  * GOST28147
     //  */
@@ -248,33 +244,31 @@ public class JCEMac
     //         super(new VMPCMac());
     //     }
     // }
-    // END android-removed
-
-    /**
-     * DES
-     */
-    public static class DESCFB8
-        extends JCEMac
-    {
-        public DESCFB8()
-        {
-            super(new CFBBlockCipherMac(new DESEngine()));
-        }
-    }
-
-    /**
-     * DESede
-     */
-    public static class DESedeCFB8
-        extends JCEMac
-    {
-        public DESedeCFB8()
-        {
-            super(new CFBBlockCipherMac(new DESedeEngine()));
-        }
-    }
-
-    // BEGIN android-removed
+    //
+    // /**
+    //  * DES
+    //  */
+    // public static class DESCFB8
+    //     extends JCEMac
+    // {
+    //     public DESCFB8()
+    //     {
+    //         super(new CFBBlockCipherMac(new DESEngine()));
+    //     }
+    // }
+    //
+    // /**
+    //  * DESede
+    //  */
+    // public static class DESedeCFB8
+    //     extends JCEMac
+    // {
+    //     public DESedeCFB8()
+    //     {
+    //         super(new CFBBlockCipherMac(new DESedeEngine()));
+    //     }
+    // }
+    //
     // /**
     //  * SKIPJACK
     //  */
@@ -286,9 +280,7 @@ public class JCEMac
     //         super(new CFBBlockCipherMac(new SkipjackEngine()));
     //     }
     // }
-    // END android-removed
-
-    // BEGIN android-removed
+    //
     // /**
     //  * RC2CFB8
     //  */
@@ -300,9 +292,7 @@ public class JCEMac
     //         super(new CFBBlockCipherMac(new RC2Engine()));
     //     }
     // }
-    // END android-removed
-
-    // BEGIN android-removed
+    //
     // /**
     //  * RC5CFB8
     //  */
@@ -314,22 +304,20 @@ public class JCEMac
     //         super(new CFBBlockCipherMac(new RC532Engine()));
     //     }
     // }
-    // END android-removed
-    
-    
-    /**
-     * DESede64
-     */
-    public static class DESede64
-        extends JCEMac
-    {
-        public DESede64()
-        {
-            super(new CBCBlockCipherMac(new DESedeEngine(), 64));
-        }
-    }
-
-    // BEGIN android-removed
+    //
+    //
+    // /**
+    //  * DESede64
+    //  */
+    // public static class DESede64
+    //     extends JCEMac
+    // {
+    //     public DESede64()
+    //     {
+    //         super(new CBCBlockCipherMac(new DESedeEngine(), 64));
+    //     }
+    // }
+    //
     // /**
     //  * DESede64with7816-4Padding
     //  */
@@ -353,24 +341,22 @@ public class JCEMac
     //         super(new ISO9797Alg3Mac(new DESEngine(), new ISO7816d4Padding()));
     //     }
     // }
-    // END android-removed
-
-    /**
-     * DES9797Alg3
-     */
-    public static class DES9797Alg3
-        extends JCEMac
-    {
-        public DES9797Alg3()
-        {
-            super(new ISO9797Alg3Mac(new DESEngine()));
-        }
-    }
-
-    /**
-     * MD2 HMac
-     */
-    // BEGIN android-removed
+    //
+    // /**
+    //  * DES9797Alg3
+    //  */
+    // public static class DES9797Alg3
+    //     extends JCEMac
+    // {
+    //     public DES9797Alg3()
+    //     {
+    //         super(new ISO9797Alg3Mac(new DESEngine()));
+    //     }
+    // }
+    //
+    // /**
+    //  * MD2 HMac
+    //  */
     // public static class MD2
     //     extends JCEMac
     // {
@@ -379,12 +365,10 @@ public class JCEMac
     //         super(new HMac(new MD2Digest()));
     //     }
     // }
-    // END android-removed
-
-    /**
-     * MD4 HMac
-     */
-    // BEGIN android-removed
+    //
+    // /**
+    //  * MD4 HMac
+    //  */
     // public static class MD4
     //     extends JCEMac
     // {
@@ -394,7 +378,7 @@ public class JCEMac
     //     }
     // }
     // END android-removed
-
+    
     /**
      * MD5 HMac
      */
@@ -406,7 +390,7 @@ public class JCEMac
             super(new HMac(new MD5Digest()));
         }
     }
-
+    
     /**
      * SHA1 HMac
      */
@@ -418,18 +402,20 @@ public class JCEMac
             super(new HMac(new SHA1Digest()));
         }
     }
-
-    /**
-     * SHA-224 HMac
-     */
-    public static class SHA224
-        extends JCEMac
-    {
-        public SHA224()
-        {
-            super(new HMac(new SHA224Digest()));
-        }
-    }
+    
+    // BEGIN android-removed
+    // /**
+    //  * SHA-224 HMac
+    //  */
+    // public static class SHA224
+    //     extends JCEMac
+    // {
+    //     public SHA224()
+    //     {
+    //         super(new HMac(new SHA224Digest()));
+    //     }
+    // }
+    // END android-removed
     
     /**
      * SHA-256 HMac
@@ -442,7 +428,7 @@ public class JCEMac
             super(new HMac(new SHA256Digest()));
         }
     }
-
+    
     /**
      * SHA-384 HMac
      */
@@ -454,15 +440,17 @@ public class JCEMac
             super(new HMac(new SHA384Digest()));
         }
     }
-
-    public static class OldSHA384
-        extends JCEMac
-    {
-        public OldSHA384()
-        {
-            super(new OldHMac(new SHA384Digest()));
-        }
-    }
+    
+    // BEGIN android-removed
+    // public static class OldSHA384
+    //     extends JCEMac
+    // {
+    //     public OldSHA384()
+    //     {
+    //         super(new OldHMac(new SHA384Digest()));
+    //     }
+    // }
+    // END android-removed
     
     /**
      * SHA-512 HMac
@@ -475,98 +463,96 @@ public class JCEMac
             super(new HMac(new SHA512Digest()));
         }
     }
-
-    /**
-     * SHA-512 HMac
-     */
-    public static class OldSHA512
-        extends JCEMac
-    {
-        public OldSHA512()
-        {
-            super(new OldHMac(new SHA512Digest()));
-        }
-    }
     
-// BEGIN android-removed
-//    /**
-//     * RIPEMD128 HMac
-//     */
-//    public static class RIPEMD128
-//        extends JCEMac
-//    {
-//        public RIPEMD128()
-//        {
-//           super(new HMac(new RIPEMD128Digest()));
-//        }
-//    }
-//
-//    /**
-//     * RIPEMD160 HMac
-//     */
-//    public static class RIPEMD160
-//        extends JCEMac
-//    {
-//        public RIPEMD160()
-//        {
-//           super(new HMac(new RIPEMD160Digest()));
-//        }
-//    }
-//
-//    /**
-//     * Tiger HMac
-//     */
-//    public static class Tiger
-//        extends JCEMac
-//    {
-//        public Tiger()
-//        {
-//            super(new HMac(new TigerDigest()));
-//        }
-//    }
-//
-//    //
-//    // PKCS12 states that the same algorithm should be used
-//    // for the key generation as is used in the HMAC, so that
-//    // is what we do here.
-//    //
-//
-//    /**
-//     * PBEWithHmacRIPEMD160
-//     */
-//    public static class PBEWithRIPEMD160
-//        extends JCEMac
-//    {
-//        public PBEWithRIPEMD160()
-//        {
-//            super(new HMac(new RIPEMD160Digest()), PKCS12, RIPEMD160, 160);
-//        }
-//    }
-// END android-removed
-
-    /**
-     * PBEWithHmacSHA
-     */
-    public static class PBEWithSHA
-        extends JCEMac
-    {
-        public PBEWithSHA()
-        {
-            super(new HMac(new SHA1Digest()), PKCS12, SHA1, 160);
-        }
-    }
-
-    /**
-     * PBEWithHmacTiger
-     */
-// BEGIN android-removed
-//    public static class PBEWithTiger
-//        extends JCEMac
-//    {
-//        public PBEWithTiger()
-//        {
-//            super(new HMac(new TigerDigest()), PKCS12, TIGER, 192);
-//        }
-//    }
-// END android-removed
+    // BEGIN android-removed
+    // /**
+    //  * SHA-512 HMac
+    //  */
+    // public static class OldSHA512
+    //     extends JCEMac
+    // {
+    //     public OldSHA512()
+    //     {
+    //         super(new OldHMac(new SHA512Digest()));
+    //     }
+    // }
+    //
+    // /**
+    //  * RIPEMD128 HMac
+    //  */
+    // public static class RIPEMD128
+    //     extends JCEMac
+    // {
+    //     public RIPEMD128()
+    //     {
+    //        super(new HMac(new RIPEMD128Digest()));
+    //     }
+    // }
+    //
+    // /**
+    //  * RIPEMD160 HMac
+    //  */
+    // public static class RIPEMD160
+    //     extends JCEMac
+    // {
+    //     public RIPEMD160()
+    //     {
+    //        super(new HMac(new RIPEMD160Digest()));
+    //     }
+    // }
+    //
+    // /**
+    //  * Tiger HMac
+    //  */
+    // public static class Tiger
+    //     extends JCEMac
+    // {
+    //     public Tiger()
+    //     {
+    //         super(new HMac(new TigerDigest()));
+    //     }
+    // }
+    //
+    // //
+    // // PKCS12 states that the same algorithm should be used
+    // // for the key generation as is used in the HMAC, so that
+    // // is what we do here.
+    // //
+    //
+    // /**
+    //  * PBEWithHmacRIPEMD160
+    //  */
+    // public static class PBEWithRIPEMD160
+    //     extends JCEMac
+    // {
+    //     public PBEWithRIPEMD160()
+    //     {
+    //         super(new HMac(new RIPEMD160Digest()), PKCS12, RIPEMD160, 160);
+    //     }
+    // }
+    //
+    //  /**
+    //   * PBEWithHmacSHA
+    //   */
+    //  public static class PBEWithSHA
+    //      extends JCEMac
+    //  {
+    //      public PBEWithSHA()
+    //      {
+    //          super(new HMac(new SHA1Digest()), PKCS12, SHA1, 160);
+    //      }
+    //  }
+    //
+    //  /**
+    //   * PBEWithHmacTiger
+    //   */
+    // public static class PBEWithTiger
+    //     extends JCEMac
+    // {
+    //     public PBEWithTiger()
+    //     {
+    //         super(new HMac(new TigerDigest()), PKCS12, TIGER, 192);
+    //     }
+    // }
+    // END android-removed
 }

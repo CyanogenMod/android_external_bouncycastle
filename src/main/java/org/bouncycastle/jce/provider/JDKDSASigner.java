@@ -22,7 +22,9 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -234,50 +236,52 @@ public class JDKDSASigner
         };
     }
 
-    static public class stdDSA
-        extends JDKDSASigner
-    {
-        public stdDSA()
-        {
-            super(new SHA1Digest(), new DSASigner());
-        }
-    }
-
-    static public class dsa224
-        extends JDKDSASigner
-    {
-        public dsa224()
-        {
-            super(new SHA224Digest(), new DSASigner());
-        }
-    }
-    
-    static public class dsa256
-        extends JDKDSASigner
-    {
-        public dsa256()
-        {
-            super(new SHA256Digest(), new DSASigner());
-        }
-    }
-    
-    static public class dsa384
-        extends JDKDSASigner
-    {
-        public dsa384()
-        {
-            super(new SHA384Digest(), new DSASigner());
-        }
-    }
-    
-    static public class dsa512
-        extends JDKDSASigner
-    {
-        public dsa512()
-        {
-            super(new SHA512Digest(), new DSASigner());
-        }
-    }
+    // BEGIN android-removed
+    // static public class stdDSA
+    //     extends JDKDSASigner
+    // {
+    //     public stdDSA()
+    //     {
+    //         super(new SHA1Digest(), new DSASigner());
+    //     }
+    // }
+    //
+    // static public class dsa224
+    //     extends JDKDSASigner
+    // {
+    //     public dsa224()
+    //     {
+    //         super(new SHA224Digest(), new DSASigner());
+    //     }
+    // }
+    //
+    // static public class dsa256
+    //     extends JDKDSASigner
+    // {
+    //     public dsa256()
+    //     {
+    //         super(new SHA256Digest(), new DSASigner());
+    //     }
+    // }
+    //
+    // static public class dsa384
+    //     extends JDKDSASigner
+    // {
+    //     public dsa384()
+    //     {
+    //         super(new SHA384Digest(), new DSASigner());
+    //     }
+    // }
+    //
+    // static public class dsa512
+    //     extends JDKDSASigner
+    // {
+    //     public dsa512()
+    //     {
+    //         super(new SHA512Digest(), new DSASigner());
+    //     }
+    // }
+    // END android-removed
 
     static public class noneDSA
         extends JDKDSASigner

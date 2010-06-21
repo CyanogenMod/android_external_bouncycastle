@@ -34,7 +34,9 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD256Digest;
 // END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -269,14 +271,16 @@ public class JDKDigestSignature
         }
     }
 
-    static public class SHA224WithRSAEncryption
-        extends JDKDigestSignature
-    {
-        public SHA224WithRSAEncryption()
-        {
-            super(NISTObjectIdentifiers.id_sha224, new SHA224Digest(), new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
+    // BEGIN android-removed
+    // static public class SHA224WithRSAEncryption
+    //     extends JDKDigestSignature
+    // {
+    //     public SHA224WithRSAEncryption()
+    //     {
+    //         super(NISTObjectIdentifiers.id_sha224, new SHA224Digest(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    // END android-removed
 
     static public class SHA256WithRSAEncryption
         extends JDKDigestSignature
@@ -314,16 +318,16 @@ public class JDKDigestSignature
     //         super(PKCSObjectIdentifiers.md2, new MD2Digest(), new PKCS1Encoding(new RSABlindedEngine()));
     //     }
     // }
+    //
+    // static public class MD4WithRSAEncryption
+    //     extends JDKDigestSignature
+    // {
+    //     public MD4WithRSAEncryption()
+    //     {
+    //         super(PKCSObjectIdentifiers.md4, new MD4Digest(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
     // END android-removed
-
-    static public class MD4WithRSAEncryption
-        extends JDKDigestSignature
-    {
-        public MD4WithRSAEncryption()
-        {
-            super(PKCSObjectIdentifiers.md4, new MD4Digest(), new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
 
     static public class MD5WithRSAEncryption
         extends JDKDigestSignature

@@ -1495,18 +1495,16 @@ public class JDKPKCS12KeyStore
     //         super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
     //     }
     // }
-    // END android-removed
-
-    public static class DefPKCS12KeyStore
-        extends JDKPKCS12KeyStore
-    {
-        public DefPKCS12KeyStore()
-        {
-            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
-        }
-    }
-
-    // BEGIN android-removed
+    //
+    // public static class DefPKCS12KeyStore
+    //     extends JDKPKCS12KeyStore
+    // {
+    //     public DefPKCS12KeyStore()
+    //     {
+    //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+    //     }
+    // }
+    //
     // public static class DefPKCS12KeyStore3DES
     //     extends JDKPKCS12KeyStore
     // {

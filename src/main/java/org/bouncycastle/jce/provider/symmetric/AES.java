@@ -38,32 +38,34 @@ public final class AES
         }
     }
 
-    public static class CBC
-       extends JCEBlockCipher
-    {
-        public CBC()
-        {
-            super(new CBCBlockCipher(new AESFastEngine()), 128);
-        }
-    }
-
-    static public class CFB
-        extends JCEBlockCipher
-    {
-        public CFB()
-        {
-            super(new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), 128);
-        }
-    }
-
-    static public class OFB
-        extends JCEBlockCipher
-    {
-        public OFB()
-        {
-            super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
-        }
-    }
+    // BEGIN android-removed
+    // public static class CBC
+    //    extends JCEBlockCipher
+    // {
+    //     public CBC()
+    //     {
+    //         super(new CBCBlockCipher(new AESFastEngine()), 128);
+    //     }
+    // }
+    //
+    // static public class CFB
+    //     extends JCEBlockCipher
+    // {
+    //     public CFB()
+    //     {
+    //         super(new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), 128);
+    //     }
+    // }
+    //
+    // static public class OFB
+    //     extends JCEBlockCipher
+    // {
+    //     public OFB()
+    //     {
+    //         super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
+    //     }
+    // }
+    // END android-removed
 
     static public class Wrap
         extends WrapCipherSpi
@@ -99,70 +101,72 @@ public final class AES
         }
     }
 
-    public static class KeyGen128
-        extends KeyGen
-    {
-        public KeyGen128()
-        {
-            super(128);
-        }
-    }
-
-    public static class KeyGen192
-        extends KeyGen
-    {
-        public KeyGen192()
-        {
-            super(192);
-        }
-    }
-
-    public static class KeyGen256
-        extends KeyGen
-    {
-        public KeyGen256()
-        {
-            super(256);
-        }
-    }
-
-    public static class AlgParamGen
-        extends JDKAlgorithmParameterGenerator
-    {
-        protected void engineInit(
-            AlgorithmParameterSpec genParamSpec,
-            SecureRandom random)
-            throws InvalidAlgorithmParameterException
-        {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
-        }
-
-        protected AlgorithmParameters engineGenerateParameters()
-        {
-            byte[]  iv = new byte[16];
-
-            if (random == null)
-            {
-                random = new SecureRandom();
-            }
-
-            random.nextBytes(iv);
-
-            AlgorithmParameters params;
-
-            try
-            {
-                params = AlgorithmParameters.getInstance("AES", "BC");
-                params.init(new IvParameterSpec(iv));
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e.getMessage());
-            }
-
-            return params;
-        }
-    }
+    // BEGIN android-removed
+    // public static class KeyGen128
+    //     extends KeyGen
+    // {
+    //     public KeyGen128()
+    //     {
+    //         super(128);
+    //     }
+    // }
+    //
+    // public static class KeyGen192
+    //     extends KeyGen
+    // {
+    //     public KeyGen192()
+    //     {
+    //         super(192);
+    //     }
+    // }
+    //
+    // public static class KeyGen256
+    //     extends KeyGen
+    // {
+    //     public KeyGen256()
+    //     {
+    //         super(256);
+    //     }
+    // }
+    //
+    // public static class AlgParamGen
+    //     extends JDKAlgorithmParameterGenerator
+    // {
+    //     protected void engineInit(
+    //         AlgorithmParameterSpec genParamSpec,
+    //         SecureRandom random)
+    //         throws InvalidAlgorithmParameterException
+    //     {
+    //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+    //     }
+    //
+    //     protected AlgorithmParameters engineGenerateParameters()
+    //     {
+    //         byte[]  iv = new byte[16];
+    //
+    //         if (random == null)
+    //         {
+    //             random = new SecureRandom();
+    //         }
+    //
+    //         random.nextBytes(iv);
+    //
+    //         AlgorithmParameters params;
+    //
+    //         try
+    //         {
+    //             params = AlgorithmParameters.getInstance("AES", "BC");
+    //             params.init(new IvParameterSpec(iv));
+    //         }
+    //         catch (Exception e)
+    //         {
+    //             throw new RuntimeException(e.getMessage());
+    //         }
+    //
+    //         return params;
+    //     }
+    // }
+    // END android-removed
 
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters

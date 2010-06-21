@@ -148,198 +148,198 @@ public abstract class JDKAlgorithmParameterGenerator
         }
     }
 
-// BEGIN android-removed
-//    public static class GOST3410
-//        extends JDKAlgorithmParameterGenerator
-//    {
-//        protected void engineInit(
-//                AlgorithmParameterSpec  genParamSpec,
-//                SecureRandom            random)
-//        throws InvalidAlgorithmParameterException
-//        {
-//            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for GOST3410 parameter generation.");
-//        }
-//        
-//        protected AlgorithmParameters engineGenerateParameters()
-//        {
-//            GOST3410ParametersGenerator pGen = new GOST3410ParametersGenerator();
-//            
-//            if (random != null)
-//            {
-//                pGen.init(strength, 2, random);
-//            }
-//            else
-//            {
-//                pGen.init(strength, 2, new SecureRandom());
-//            }
-//            
-//            GOST3410Parameters p = pGen.generateParameters();
-//            
-//            AlgorithmParameters params;
-//            
-//            try
-//            {
-//                params = AlgorithmParameters.getInstance("GOST3410", "BC");
-//                params.init(new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec(p.getP(), p.getQ(), p.getA())));
-//            }
-//            catch (Exception e)
-//            {
-//                throw new RuntimeException(e.getMessage());
-//            }
-//            
-//            return params;
-//        }
-//    }
-//    
-//    public static class ElGamal
-//        extends JDKAlgorithmParameterGenerator
-//    {
-//        private int l = 0;
-//        
-//        protected void engineInit(
-//            AlgorithmParameterSpec  genParamSpec,
-//            SecureRandom            random)
-//            throws InvalidAlgorithmParameterException
-//        {
-//            if (!(genParamSpec instanceof DHGenParameterSpec))
-//            {
-//                throw new InvalidAlgorithmParameterException("DH parameter generator requires a DHGenParameterSpec for initialisation");
-//            }
-//            DHGenParameterSpec  spec = (DHGenParameterSpec)genParamSpec;
-//
-//            this.strength = spec.getPrimeSize();
-//            this.l = spec.getExponentSize();
-//            this.random = random;
-//        }
-//
-//        protected AlgorithmParameters engineGenerateParameters()
-//        {
-//            ElGamalParametersGenerator pGen = new ElGamalParametersGenerator();
-//
-//            if (random != null)
-//            {
-//                pGen.init(strength, 20, random);
-//            }
-//            else
-//            {
-//                pGen.init(strength, 20, new SecureRandom());
-//            }
-//
-//            ElGamalParameters p = pGen.generateParameters();
-//
-//            AlgorithmParameters params;
-//
-//            try
-//            {
-//                params = AlgorithmParameters.getInstance("ElGamal", "BC");
-//                params.init(new DHParameterSpec(p.getP(), p.getG(), l));
-//            }
-//            catch (Exception e)
-//            {
-//                throw new RuntimeException(e.getMessage());
-//            }
-//
-//            return params;
-//        }
-//    }
-// END android-removed
-
-    public static class DES
-        extends JDKAlgorithmParameterGenerator
-    {
-        protected void engineInit(
-            AlgorithmParameterSpec  genParamSpec,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
-        }
-
-        protected AlgorithmParameters engineGenerateParameters()
-        {
-            byte[]  iv = new byte[8];
-
-            if (random == null)
-            {
-                random = new SecureRandom();
-            }
-
-            random.nextBytes(iv);
-
-            AlgorithmParameters params;
-
-            try
-            {
-                params = AlgorithmParameters.getInstance("DES", "BC");
-                params.init(new IvParameterSpec(iv));
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e.getMessage());
-            }
-
-            return params;
-        }
-    }
-
-    public static class RC2
-        extends JDKAlgorithmParameterGenerator
-    {
-        RC2ParameterSpec    spec = null;
-
-        protected void engineInit(
-            AlgorithmParameterSpec  genParamSpec,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            if (genParamSpec instanceof RC2ParameterSpec)
-            {
-                spec = (RC2ParameterSpec)genParamSpec;
-                return;
-            }
-
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for RC2 parameter generation.");
-        }
-
-        protected AlgorithmParameters engineGenerateParameters()
-        {
-            AlgorithmParameters params;
-
-            if (spec == null)
-            {
-                byte[]  iv = new byte[8];
-
-                if (random == null)
-                {
-                    random = new SecureRandom();
-                }
-
-                random.nextBytes(iv);
-
-                try
-                {
-                    params = AlgorithmParameters.getInstance("RC2", "BC");
-                    params.init(new IvParameterSpec(iv));
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-            else
-            {
-                try
-                {
-                    params = AlgorithmParameters.getInstance("RC2", "BC");
-                    params.init(spec);
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-
-            return params;
-        }
-    }
+   // BEGIN android-removed
+   // public static class GOST3410
+   //     extends JDKAlgorithmParameterGenerator
+   // {
+   //     protected void engineInit(
+   //             AlgorithmParameterSpec  genParamSpec,
+   //             SecureRandom            random)
+   //     throws InvalidAlgorithmParameterException
+   //     {
+   //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for GOST3410 parameter generation.");
+   //     }
+   //       
+   //     protected AlgorithmParameters engineGenerateParameters()
+   //     {
+   //         GOST3410ParametersGenerator pGen = new GOST3410ParametersGenerator();
+   //           
+   //         if (random != null)
+   //         {
+   //             pGen.init(strength, 2, random);
+   //         }
+   //         else
+   //         {
+   //             pGen.init(strength, 2, new SecureRandom());
+   //         }
+   //           
+   //         GOST3410Parameters p = pGen.generateParameters();
+   //           
+   //         AlgorithmParameters params;
+   //           
+   //         try
+   //         {
+   //             params = AlgorithmParameters.getInstance("GOST3410", "BC");
+   //             params.init(new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec(p.getP(), p.getQ(), p.getA())));
+   //         }
+   //         catch (Exception e)
+   //         {
+   //             throw new RuntimeException(e.getMessage());
+   //         }
+   //           
+   //         return params;
+   //     }
+   // }
+   //   
+   // public static class ElGamal
+   //     extends JDKAlgorithmParameterGenerator
+   // {
+   //     private int l = 0;
+   //       
+   //     protected void engineInit(
+   //         AlgorithmParameterSpec  genParamSpec,
+   //         SecureRandom            random)
+   //         throws InvalidAlgorithmParameterException
+   //     {
+   //         if (!(genParamSpec instanceof DHGenParameterSpec))
+   //         {
+   //             throw new InvalidAlgorithmParameterException("DH parameter generator requires a DHGenParameterSpec for initialisation");
+   //         }
+   //         DHGenParameterSpec  spec = (DHGenParameterSpec)genParamSpec;
+   //
+   //         this.strength = spec.getPrimeSize();
+   //         this.l = spec.getExponentSize();
+   //         this.random = random;
+   //     }
+   //
+   //     protected AlgorithmParameters engineGenerateParameters()
+   //     {
+   //         ElGamalParametersGenerator pGen = new ElGamalParametersGenerator();
+   //
+   //         if (random != null)
+   //         {
+   //             pGen.init(strength, 20, random);
+   //         }
+   //         else
+   //         {
+   //             pGen.init(strength, 20, new SecureRandom());
+   //         }
+   //
+   //         ElGamalParameters p = pGen.generateParameters();
+   //
+   //         AlgorithmParameters params;
+   //
+   //         try
+   //         {
+   //             params = AlgorithmParameters.getInstance("ElGamal", "BC");
+   //             params.init(new DHParameterSpec(p.getP(), p.getG(), l));
+   //         }
+   //         catch (Exception e)
+   //         {
+   //             throw new RuntimeException(e.getMessage());
+   //         }
+   //
+   //         return params;
+   //     }
+   // }
+   //
+   //  public static class DES
+   //      extends JDKAlgorithmParameterGenerator
+   //  {
+   //      protected void engineInit(
+   //          AlgorithmParameterSpec  genParamSpec,
+   //          SecureRandom            random)
+   //          throws InvalidAlgorithmParameterException
+   //      {
+   //          throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
+   //      }
+   //
+   //      protected AlgorithmParameters engineGenerateParameters()
+   //      {
+   //          byte[]  iv = new byte[8];
+   //
+   //          if (random == null)
+   //          {
+   //              random = new SecureRandom();
+   //          }
+   //
+   //          random.nextBytes(iv);
+   //
+   //          AlgorithmParameters params;
+   //
+   //          try
+   //          {
+   //              params = AlgorithmParameters.getInstance("DES", "BC");
+   //              params.init(new IvParameterSpec(iv));
+   //          }
+   //          catch (Exception e)
+   //          {
+   //              throw new RuntimeException(e.getMessage());
+   //          }
+   //
+   //          return params;
+   //      }
+   //  }
+   //
+   //  public static class RC2
+   //      extends JDKAlgorithmParameterGenerator
+   //  {
+   //      RC2ParameterSpec    spec = null;
+   //
+   //      protected void engineInit(
+   //          AlgorithmParameterSpec  genParamSpec,
+   //          SecureRandom            random)
+   //          throws InvalidAlgorithmParameterException
+   //      {
+   //          if (genParamSpec instanceof RC2ParameterSpec)
+   //          {
+   //              spec = (RC2ParameterSpec)genParamSpec;
+   //              return;
+   //          }
+   //
+   //          throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for RC2 parameter generation.");
+   //      }
+   //
+   //      protected AlgorithmParameters engineGenerateParameters()
+   //      {
+   //          AlgorithmParameters params;
+   //
+   //          if (spec == null)
+   //          {
+   //              byte[]  iv = new byte[8];
+   //
+   //              if (random == null)
+   //              {
+   //                  random = new SecureRandom();
+   //              }
+   //
+   //              random.nextBytes(iv);
+   //
+   //              try
+   //              {
+   //                  params = AlgorithmParameters.getInstance("RC2", "BC");
+   //                  params.init(new IvParameterSpec(iv));
+   //              }
+   //              catch (Exception e)
+   //              {
+   //                  throw new RuntimeException(e.getMessage());
+   //              }
+   //          }
+   //          else
+   //          {
+   //              try
+   //              {
+   //                  params = AlgorithmParameters.getInstance("RC2", "BC");
+   //                  params.init(spec);
+   //              }
+   //              catch (Exception e)
+   //              {
+   //                  throw new RuntimeException(e.getMessage());
+   //              }
+   //          }
+   //
+   //          return params;
+   //      }
+   //  }
+   // END android-removed
 }

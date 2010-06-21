@@ -68,12 +68,14 @@ class X509SignatureUtil
         
         if (params != null && !derNull.equals(params))
         {
-            if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
-            {
-                RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
-            }
+            // BEGIN android-removed
+            // if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            // {
+            //     RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
+            //
+            //     return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+            // }
+            // END android-removed
             if (sigAlgId.getObjectId().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
@@ -100,10 +102,12 @@ class X509SignatureUtil
         {
             return "SHA1";
         }
-        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
+        // BEGIN android-removed
+        // else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        // {
+        //     return "SHA224";
+        // }
+        // END android-removed
         else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
         {
             return "SHA256";
@@ -116,22 +120,24 @@ class X509SignatureUtil
         {
             return "SHA512";
         }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
+        // BEGIN android-removed
+        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD128";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD160";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD256";
+        // }
+        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        // {
+        //     return "GOST3411";
+        // }
+        // END android-removed
         else
         {
             return digestAlgOID.getId();            
