@@ -36,6 +36,10 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+// BEGIN android-added
+import org.apache.harmony.xnet.provider.jsse.IndexedPKIXParameters;
+
+// END android-added
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -166,8 +170,12 @@ public class CertPathValidatorUtilities
         // BEGIN android-changed
         // If we have a trust anchor index, use it.
         if (params instanceof IndexedPKIXParameters) {
-            IndexedPKIXParameters indexed = (IndexedPKIXParameters) params;
-            return indexed.findTrustAnchor(cert);
+            try {
+                IndexedPKIXParameters indexed = (IndexedPKIXParameters) params;
+                return indexed.findTrustAnchor(cert);
+            } catch (CertPathValidatorException e) {
+                throw new AnnotatedException(e.getMessage(), e);
+            }
         }
         // END android-changed
         TrustAnchor trust = null;
