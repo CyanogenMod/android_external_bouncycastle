@@ -397,14 +397,16 @@ public final class BouncyCastleProvider extends Provider
         // put("Cipher.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");
         // END android-removed
 
-        put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
+        // BEGIN android-changed
+        put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
+        // put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
+        // put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "PBEWITHSHAAND128BITRC2-CBC");
+        // put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "PBEWITHSHAAND40BITRC2-CBC");
+        // put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "PBEWITHSHAAND128BITRC4");
+        // put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "PBEWITHSHAAND40BITRC4");
+        // END android-changed
+
         // BEGIN android-removed
-        // put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
-        // put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "Cipher.PBEWITHSHAAND128BITRC2-CBC");
-        // put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "Cipher.PBEWITHSHAAND40BITRC2-CBC");
-        // put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "Cipher.PBEWITHSHAAND128BITRC4");
-        // put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "Cipher.PBEWITHSHAAND40BITRC4");
-        //
         // put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
         // put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
         // put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes256_cbc.getId(), "PBEWITHSHAAND256BITAES-CBC-BC");
@@ -914,7 +916,9 @@ public final class BouncyCastleProvider extends Provider
         // END android-removed
         put("Signature.MD5WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD5WithRSAEncryption");
         put("Signature.SHA1WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA1WithRSAEncryption");
+        // BEGIN android-removed
         // put("Signature.SHA224WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA224WithRSAEncryption");
+        // END android-removed
         put("Signature.SHA256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA256WithRSAEncryption");
         put("Signature.SHA384WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA384WithRSAEncryption");
         put("Signature.SHA512WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA512WithRSAEncryption");
@@ -922,8 +926,10 @@ public final class BouncyCastleProvider extends Provider
         // put("Signature.RIPEMD160WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD160WithRSAEncryption");
         // put("Signature.RIPEMD128WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD128WithRSAEncryption");
         // put("Signature.RIPEMD256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
-        // put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
         // END android-removed
+        // BEGIN android-changed
+        put("Signature.SHA1withDSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
+        // END android-changed
         put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
         // BEGIN android-removed
         // put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
@@ -947,29 +953,26 @@ public final class BouncyCastleProvider extends Provider
         // BEGIN android-removed
         // put("Alg.Alias.Signature.RAWRSA", "RSA");
         // put("Alg.Alias.Signature.NONEWITHRSA", "RSA");
-        // END android-removed
-        put("Alg.Alias.Signature.RAWRSAPSS", "RAWRSASSA-PSS");
-        put("Alg.Alias.Signature.NONEWITHRSAPSS", "RAWRSASSA-PSS");
-        put("Alg.Alias.Signature.NONEWITHRSASSA-PSS", "RAWRSASSA-PSS");
-
-        put("Alg.Alias.Signature.RSAPSS", "RSASSA-PSS");
-
-        put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
-        // BEGIN android-removed
+        // put("Alg.Alias.Signature.RAWRSAPSS", "RAWRSASSA-PSS");
+        // put("Alg.Alias.Signature.NONEWITHRSAPSS", "RAWRSASSA-PSS");
+        // put("Alg.Alias.Signature.NONEWITHRSASSA-PSS", "RAWRSASSA-PSS");
+        //
+        // put("Alg.Alias.Signature.RSAPSS", "RSASSA-PSS");
+        //
+        // put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
         // put("Alg.Alias.Signature.SHA224withRSAandMGF1", "SHA224withRSA/PSS");
-        // END android-removed
-        put("Alg.Alias.Signature.SHA256withRSAandMGF1", "SHA256withRSA/PSS");
-        put("Alg.Alias.Signature.SHA384withRSAandMGF1", "SHA384withRSA/PSS");
-        put("Alg.Alias.Signature.SHA512withRSAandMGF1", "SHA512withRSA/PSS");
-        
-        // BEGIN android-removed
-        // Dropping MD2
+        // put("Alg.Alias.Signature.SHA256withRSAandMGF1", "SHA256withRSA/PSS");
+        // put("Alg.Alias.Signature.SHA384withRSAandMGF1", "SHA384withRSA/PSS");
+        // put("Alg.Alias.Signature.SHA512withRSAandMGF1", "SHA512withRSA/PSS");
+        //
         // put("Alg.Alias.Signature.MD2withRSAEncryption", "MD2WithRSAEncryption");
         // put("Alg.Alias.Signature.MD4withRSAEncryption", "MD4WithRSAEncryption");
         // END android-removed
         put("Alg.Alias.Signature.MD5withRSAEncryption", "MD5WithRSAEncryption");
         put("Alg.Alias.Signature.SHA1withRSAEncryption", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA224withRSAEncryption", "SHA224WithRSAEncryption");
+        // BEGIN android-removed
+        // put("Alg.Alias.Signature.SHA224withRSAEncryption", "SHA224WithRSAEncryption");
+        // END android-removed
 
         put("Alg.Alias.Signature.SHA256withRSAEncryption", "SHA256WithRSAEncryption");
         put("Alg.Alias.Signature.SHA384withRSAEncryption", "SHA384WithRSAEncryption");
@@ -1016,7 +1019,9 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.SHA1/RSA", "SHA1WithRSAEncryption");
         put("Alg.Alias.Signature.SHA-1/RSA", "SHA1WithRSAEncryption");
         put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WithRSAEncryption");
+        // BEGIN android-removed
+        // put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WithRSAEncryption");
+        // END android-removed
         put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WithRSAEncryption");
         put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WithRSAEncryption");
         put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512WithRSAEncryption");
@@ -1063,16 +1068,18 @@ public final class BouncyCastleProvider extends Provider
         // addSignatureAlgorithm("SHA512", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
         // END android-removed
 
-        put("Alg.Alias.Signature.SHA/DSA", "DSA");
-        put("Alg.Alias.Signature.SHA1withDSA", "DSA");
-        put("Alg.Alias.Signature.SHA1WITHDSA", "DSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.1", "DSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.3", "DSA");
-        put("Alg.Alias.Signature.DSAwithSHA1", "DSA");
-        put("Alg.Alias.Signature.DSAWITHSHA1", "DSA");
-        put("Alg.Alias.Signature.SHA1WithDSA", "DSA");
-        put("Alg.Alias.Signature.DSAWithSHA1", "DSA");
-        put("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
+        // BEGIN android-changed
+        put("Alg.Alias.Signature.SHA/DSA", "SHA1withDSA");
+        put("Alg.Alias.Signature.DSA", "SHA1withDSA");
+        put("Alg.Alias.Signature.SHA1WITHDSA", "SHA1withDSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.1", "SHA1withDSA");
+        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.3", "SHA1withDSA");
+        put("Alg.Alias.Signature.DSAwithSHA1", "SHA1withDSA");
+        put("Alg.Alias.Signature.DSAWITHSHA1", "SHA1withDSA");
+        put("Alg.Alias.Signature.SHA1WithDSA", "SHA1withDSA");
+        put("Alg.Alias.Signature.DSAWithSHA1", "SHA1withDSA");
+        put("Alg.Alias.Signature.1.2.840.10040.4.3", "SHA1withDSA");
+        // END android-changed
         // BEGIN android-removed
         // put("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
         // put("Alg.Alias.Signature.SHA1WithRSA/ISO9796-2", "SHA1withRSA/ISO9796-2");

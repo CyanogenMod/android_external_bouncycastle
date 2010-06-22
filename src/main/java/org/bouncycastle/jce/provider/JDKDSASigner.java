@@ -236,16 +236,16 @@ public class JDKDSASigner
         };
     }
 
+    static public class stdDSA
+        extends JDKDSASigner
+    {
+        public stdDSA()
+        {
+            super(new SHA1Digest(), new DSASigner());
+        }
+    }
+    
     // BEGIN android-removed
-    // static public class stdDSA
-    //     extends JDKDSASigner
-    // {
-    //     public stdDSA()
-    //     {
-    //         super(new SHA1Digest(), new DSASigner());
-    //     }
-    // }
-    //
     // static public class dsa224
     //     extends JDKDSASigner
     // {
