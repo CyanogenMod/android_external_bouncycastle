@@ -25,8 +25,8 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.MD2Digest;
+// import org.bouncycastle.crypto.digests.MD4Digest;
 // END android-removed
-import org.bouncycastle.crypto.digests.MD4Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.RIPEMD128Digest;

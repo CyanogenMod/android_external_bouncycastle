@@ -860,18 +860,18 @@ public final class BouncyCastleProvider extends Provider
     //
     private void addMessageDigestAlgorithms()
     {
+        put("MessageDigest.SHA-1", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA1");
+        put("Alg.Alias.MessageDigest.SHA1", "SHA-1");
+        put("Alg.Alias.MessageDigest.SHA", "SHA-1");
+        put("Alg.Alias.MessageDigest." + OIWObjectIdentifiers.idSHA1, "SHA-1");
         // BEGIN android-removed
-        // put("MessageDigest.SHA-1", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA1");
-        // put("Alg.Alias.MessageDigest.SHA1", "SHA-1");
-        // put("Alg.Alias.MessageDigest.SHA", "SHA-1");
-        // put("Alg.Alias.MessageDigest." + OIWObjectIdentifiers.idSHA1, "SHA-1");
         // put("MessageDigest.SHA-224", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA224");
         // put("Alg.Alias.MessageDigest.SHA224", "SHA-224");
         // put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha224, "SHA-224");
-        // put("MessageDigest.SHA-256", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA256");
-        // put("Alg.Alias.MessageDigest.SHA256", "SHA-256");
-        // put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
         // END android-removed
+        put("MessageDigest.SHA-256", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA256");
+        put("Alg.Alias.MessageDigest.SHA256", "SHA-256");
+        put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
         put("MessageDigest.SHA-384", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA384");
         put("Alg.Alias.MessageDigest.SHA384", "SHA-384");
         put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha384, "SHA-384");
@@ -884,8 +884,10 @@ public final class BouncyCastleProvider extends Provider
         // put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md2, "MD2");
         // put("MessageDigest.MD4", "org.bouncycastle.jce.provider.JDKMessageDigest$MD4");
         // put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md4, "MD4");
-        // put("MessageDigest.MD5", "org.bouncycastle.jce.provider.JDKMessageDigest$MD5");
-        // put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md5, "MD5");
+        // END android-removed
+        put("MessageDigest.MD5", "org.bouncycastle.jce.provider.JDKMessageDigest$MD5");
+        put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md5, "MD5");
+        // BEGIN android-removed
         // put("MessageDigest.RIPEMD128", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD128");
         // put("Alg.Alias.MessageDigest." + TeleTrusTObjectIdentifiers.ripemd128, "RIPEMD128");
         // put("MessageDigest.RIPEMD160", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD160");

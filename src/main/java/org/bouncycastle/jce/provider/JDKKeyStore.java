@@ -36,13 +36,12 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-// BEGIN android-added
-import org.apache.harmony.xnet.provider.jsse.OpenSSLMessageDigest;
-
-// END android-added
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
+// BEGIN android-added
+import org.bouncycastle.crypto.digests.OpenSSLDigest;
+// END android-added
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.SHA1Digest;
 // END android-removed
@@ -817,14 +816,14 @@ public class JDKKeyStore
         // we only do an integrity check if the password is provided.
         //
         // BEGIN android-changed
-        HMac hMac = new HMac(OpenSSLMessageDigest.getInstance("SHA-1"));
+        HMac hMac = new HMac(new OpenSSLDigest.SHA1());
         // END android-changed
         if (password != null && password.length != 0)
         {
             byte[] passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
             // BEGIN android-changed
-            PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(OpenSSLMessageDigest.getInstance("SHA-1"));
+            PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
             // END android-changed
             pbeGen.init(passKey, salt, iterationCount);
             CipherParameters macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
@@ -877,9 +876,9 @@ public class JDKKeyStore
         dOut.writeInt(iterationCount);
 
         // BEGIN android-changed
-        HMac                    hMac = new HMac(OpenSSLMessageDigest.getInstance("SHA-1"));
+        HMac                    hMac = new HMac(new OpenSSLDigest.SHA1());
         MacOutputStream         mOut = new MacOutputStream(dOut, hMac);
-        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(OpenSSLMessageDigest.getInstance("SHA-1"));
+        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
         // END android-changed
         byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
@@ -969,7 +968,7 @@ public class JDKKeyStore
             CipherInputStream cIn = new CipherInputStream(dIn, cipher);
 
             // BEGIN android-changed
-            Digest dig = OpenSSLMessageDigest.getInstance("SHA-1");
+            Digest dig = new OpenSSLDigest.SHA1();
             // END android-changed
             DigestInputStream  dgIn = new DigestInputStream(cIn, dig);
     
@@ -1011,7 +1010,7 @@ public class JDKKeyStore
     
             CipherOutputStream  cOut = new CipherOutputStream(dOut, cipher);
             // BEGIN android-changed
-            DigestOutputStream  dgOut = new DigestOutputStream(cOut, OpenSSLMessageDigest.getInstance("SHA-1"));
+            DigestOutputStream  dgOut = new DigestOutputStream(cOut, new OpenSSLDigest.SHA1());
             // END android-changed
             this.saveStore(dgOut);
     

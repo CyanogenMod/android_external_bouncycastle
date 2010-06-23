@@ -15,13 +15,13 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-# This builds bouncycastle as a static library for running through proguard.
-# bouncycastle for the device itself is built from these sources by a libcore makefile.
 include $(CLEAR_VARS)
 LOCAL_MODULE := bouncycastle
 LOCAL_SRC_FILES := $(call all-java-files-under,src/main/java)
 LOCAL_JAVACFLAGS := -encoding UTF-8
-include $(BUILD_STATIC_JAVA_LIBRARY)
+LOCAL_JAVA_LIBRARIES := core
+LOCAL_NO_STANDARD_LIBRARIES := true
+include $(BUILD_JAVA_LIBRARY)
 
 # Based on "Finding dead code" example in ProGuard manual at http://proguard.sourceforge.net/
 .PHONY: bouncycastle-proguard-deadcode

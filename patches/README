@@ -28,3 +28,4 @@ Other performance (both speed and memory) changes:
 - CertPathValidatorUtilities.findTrustAnchor fast path compares encoded certs similar to PKIXCertPathValidatorSpi
 - Added ASN1Collection for use as new parent for ASN1Collection and ASN1Set to reduce small Vector allocation
 - removed references to SecretKeyFactory.PBE/PKCS5 SecretKeyFactory.PBE/PKCS12
+- OpenSSLDigest uses NativeCrypto JNI API
