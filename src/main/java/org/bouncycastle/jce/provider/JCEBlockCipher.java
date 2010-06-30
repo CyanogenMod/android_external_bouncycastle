@@ -1157,21 +1157,19 @@ public class JCEBlockCipher extends WrapCipherSpi
     //         super(new CBCBlockCipher(new DESedeEngine()));
     //     }
     // }
-    // END android-removed
-    
-    /**
-     * PBEWithAES-CBC
-     */
-    static public class PBEWithAESCBC
-        extends JCEBlockCipher
-    {
-        public PBEWithAESCBC()
-        {
-            super(new CBCBlockCipher(new AESFastEngine()));
-        }
-    }
-    
-    // BEGIN android-removed
+    //
+    // /**
+    //  * PBEWithAES-CBC
+    //  */
+    // static public class PBEWithAESCBC
+    //     extends JCEBlockCipher
+    // {
+    //     public PBEWithAESCBC()
+    //     {
+    //         super(new CBCBlockCipher(new AESFastEngine()));
+    //     }
+    // }
+    //
     // /**
     //  * PBEWITHSHAAND40BITRC2-CBC
     //  */
