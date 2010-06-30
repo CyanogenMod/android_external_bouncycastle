@@ -1,13 +1,17 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.Arrays;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
-import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
-    extends DERObject
+    extends ASN1Object
+    implements ASN1OctetStringParser
 {
     byte[]  string;
 
@@ -68,6 +72,10 @@ public abstract class ASN1OctetString
     public ASN1OctetString(
         byte[]  string)
     {
+        if (string == null)
+        {
+            throw new NullPointerException("string cannot be null");
+        }
         this.string = string;
     }
 
@@ -76,18 +84,22 @@ public abstract class ASN1OctetString
     {
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(obj);
-            dOut.close();
-
-            this.string = bOut.toByteArray();
+            this.string = obj.getDERObject().getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
             throw new IllegalArgumentException("Error processing object : " + e.toString());
         }
+    }
+
+    public InputStream getOctetStream()
+    {
+        return new ByteArrayInputStream(string);
+    }
+
+    public ASN1OctetStringParser parser()
+    {
+        return this;
     }
 
     public byte[] getOctets()
@@ -97,44 +109,20 @@ public abstract class ASN1OctetString
 
     public int hashCode()
     {
-        byte[]  b = this.getOctets();
-        int     value = 0;
-
-        for (int i = 0; i != b.length; i++)
-        {
-            value ^= (b[i] & 0xff) << (i % 4);
-        }
-
-        return value;
+        return Arrays.hashCode(this.getOctets());
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if (!(o instanceof DEROctetString))
+        if (!(o instanceof ASN1OctetString))
         {
             return false;
         }
 
-        DEROctetString  other = (DEROctetString)o;
+        ASN1OctetString  other = (ASN1OctetString)o;
 
-        byte[] b1 = other.getOctets();
-        byte[] b2 = this.getOctets();
-
-        if (b1.length != b2.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != b1.length; i++)
-        {
-            if (b1[i] != b2[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(string, other.string);
     }
 
     abstract void encode(DEROutputStream out)

@@ -54,7 +54,9 @@ public final class OrderedTable {
     // Note: Default public constructor.
 
     /**
-     * Adds an element.
+     * Adds an element assuming no duplicate key.
+     * 
+     * @see #put
      * 
      * @param key non-null; the key
      * @param value non-null; the value
@@ -145,6 +147,38 @@ public final class OrderedTable {
     }
     
     /**
+     * Replace a key if present, otherwise add
+     * 
+     * @see #add
+     * 
+     * @param key non-null; the key
+     * @param value non-null; the value
+     */
+    public void put(DERObjectIdentifier key, Object value) {
+        if (key == null) {
+            throw new NullPointerException("key == null");
+        }
+
+        if (value == null) {
+            throw new NullPointerException("value == null");
+        }
+
+        int keyHash = key.hashCode();
+        int sz = size;
+
+        for (int i = 0; i < size; i++) {
+            DERObjectIdentifier probe = getKey(i);
+            if ((probe.hashCode() == keyHash) &&
+                    probe.equals(key)) {
+                setValue(i, value);
+                return;
+            }
+        }
+
+        add(key, value);
+    }
+    
+    /**
      * Gets the nth key.
      * 
      * @param n index
@@ -181,6 +215,29 @@ public final class OrderedTable {
             case 2: return value2;
             case 3: return value3;
             default: return rest[((n - 4) * 2) + 1];
+        }
+    }
+
+    /**
+     * Sets the nth value.
+     * 
+     * @param n index
+     * @param value non-null object
+     */
+    public void setValue(int n, Object value) {
+        if ((n < 0) || (n >= size)) {
+            throw new IndexOutOfBoundsException(Integer.toString(n));
+        }
+        if (value == null) {
+            throw new NullPointerException("value == null");
+        }
+
+        switch (n) {
+            case 0: value0 = value; return;
+            case 1: value1 = value; return;
+            case 2: value2 = value; return;
+            case 3: value3 = value; return;
+            default: rest[((n - 4) * 2) + 1] = value; return;
         }
     }
 

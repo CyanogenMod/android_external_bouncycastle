@@ -12,7 +12,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -22,7 +24,9 @@ class JCEDigestUtil
 {
     private static Set md5 = new HashSet();
     private static Set sha1 = new HashSet();
-    private static Set sha224 = new HashSet();
+    // BEGIN android-removed
+    // private static Set sha224 = new HashSet();
+    // END android-removed
     private static Set sha256 = new HashSet();
     private static Set sha384 = new HashSet();
     private static Set sha512 = new HashSet();
@@ -38,9 +42,11 @@ class JCEDigestUtil
         sha1.add("SHA-1");
         sha1.add(OIWObjectIdentifiers.idSHA1.getId());
         
-        sha224.add("SHA224");
-        sha224.add("SHA-224");
-        sha224.add(NISTObjectIdentifiers.id_sha224.getId());
+        // BEGIN android-removed
+        // sha224.add("SHA224");
+        // sha224.add("SHA-224");
+        // sha224.add(NISTObjectIdentifiers.id_sha224.getId());
+        // END android-removed
         
         sha256.add("SHA256");
         sha256.add("SHA-256");
@@ -61,9 +67,11 @@ class JCEDigestUtil
         oids.put("SHA-1", OIWObjectIdentifiers.idSHA1);
         oids.put(OIWObjectIdentifiers.idSHA1.getId(), OIWObjectIdentifiers.idSHA1);
         
-        oids.put("SHA224", NISTObjectIdentifiers.id_sha224);
-        oids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
-        oids.put(NISTObjectIdentifiers.id_sha224.getId(), NISTObjectIdentifiers.id_sha224);
+        // BEGIN android-removed
+        // oids.put("SHA224", NISTObjectIdentifiers.id_sha224);
+        // oids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
+        // oids.put(NISTObjectIdentifiers.id_sha224.getId(), NISTObjectIdentifiers.id_sha224);
+        // END android-removed
         
         oids.put("SHA256", NISTObjectIdentifiers.id_sha256);
         oids.put("SHA-256", NISTObjectIdentifiers.id_sha256);
@@ -91,10 +99,12 @@ class JCEDigestUtil
         {
             return new MD5Digest();
         }
-        if (sha224.contains(digestName))
-        {
-            return new SHA224Digest();
-        }
+        // BEGIN android-removed
+        // if (sha224.contains(digestName))
+        // {
+        //     return new SHA224Digest();
+        // }
+        // END android-removed
         if (sha256.contains(digestName))
         {
             return new SHA256Digest();
@@ -116,7 +126,9 @@ class JCEDigestUtil
         String digest2)
     {
         return (sha1.contains(digest1) && sha1.contains(digest2))
-            || (sha224.contains(digest1) && sha224.contains(digest2))
+            // BEGIN android-removed
+            // || (sha224.contains(digest1) && sha224.contains(digest2))
+            // END android-removed
             || (sha256.contains(digest1) && sha256.contains(digest2))
             || (sha384.contains(digest1) && sha384.contains(digest2))
             || (sha512.contains(digest1) && sha512.contains(digest2))

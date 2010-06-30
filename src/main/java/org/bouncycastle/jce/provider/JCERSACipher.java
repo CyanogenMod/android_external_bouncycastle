@@ -1,5 +1,23 @@
 package org.bouncycastle.jce.provider;
 
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
+import org.bouncycastle.crypto.encodings.OAEPEncoding;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.util.Strings;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -13,25 +31,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.MGF1ParameterSpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
-
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
-import org.bouncycastle.crypto.encodings.OAEPEncoding;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.util.Strings;
 
 public class JCERSACipher extends WrapCipherSpi
 {
@@ -83,7 +82,7 @@ public class JCERSACipher extends WrapCipherSpi
             throw new NoSuchPaddingException("no match on OAEP constructor for digest algorithm: "+ mgfParams.getDigestAlgorithm());
         }
 
-        cipher = new OAEPEncoding(new RSAEngine(), digest, ((PSource.PSpecified)pSpec.getPSource()).getValue());        
+        cipher = new OAEPEncoding(new RSABlindedEngine(), digest, ((PSource.PSpecified)pSpec.getPSource()).getValue());
         paramSpec = pSpec;
     }
     
@@ -192,15 +191,15 @@ public class JCERSACipher extends WrapCipherSpi
 
         if (pad.equals("NOPADDING"))
         {
-            cipher = new RSAEngine();
+            cipher = new RSABlindedEngine();
         }
         else if (pad.equals("PKCS1PADDING"))
         {
-            cipher = new PKCS1Encoding(new RSAEngine());
+            cipher = new PKCS1Encoding(new RSABlindedEngine());
         }
         else if (pad.equals("ISO9796-1PADDING"))
         {
-            cipher = new ISO9796d1Encoding(new RSAEngine());
+            cipher = new ISO9796d1Encoding(new RSABlindedEngine());
         }
         else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
         {
@@ -210,23 +209,23 @@ public class JCERSACipher extends WrapCipherSpi
         {
             initFromSpec(OAEPParameterSpec.DEFAULT);
         }
-        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-1ANDMGF1PADDING"))
         {
             initFromSpec(OAEPParameterSpec.DEFAULT);
         }
-        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-224ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-224", "MGF1", new MGF1ParameterSpec("SHA-224"), PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-256ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-384ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, PSource.PSpecified.DEFAULT));
         }
-        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-512ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT));
         }
@@ -287,22 +286,23 @@ public class JCERSACipher extends WrapCipherSpi
                 {
                     throw new InvalidAlgorithmParameterException("unkown MGF parameters");
                 }
-                
-                MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)spec.getMGFParameters();
-                
-                if (!JCEDigestUtil.isSameDigest(mgfParams.getDigestAlgorithm(), spec.getDigestAlgorithm()))
-                {
-                    throw new InvalidAlgorithmParameterException("digest algorithm for MGF should be the same as for OAEP parameters.");
-                }
-                
-                Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
-                
+    
+                Digest digest = JCEDigestUtil.getDigest(spec.getDigestAlgorithm());
+
                 if (digest == null)
+                {
+                    throw new InvalidAlgorithmParameterException("no match on digest algorithm: "+ spec.getDigestAlgorithm());
+                }
+
+                MGF1ParameterSpec mgfParams = (MGF1ParameterSpec)spec.getMGFParameters();
+                Digest mgfDigest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+                
+                if (mgfDigest == null)
                 {
                     throw new InvalidAlgorithmParameterException("no match on MGF digest algorithm: "+ mgfParams.getDigestAlgorithm());
                 }
                 
-                cipher = new OAEPEncoding(new RSAEngine(), digest, ((PSource.PSpecified)spec.getPSource()).getValue());
+                cipher = new OAEPEncoding(new RSABlindedEngine(), digest, mgfDigest, ((PSource.PSpecified)spec.getPSource()).getValue());
             }
         }
         else
@@ -310,7 +310,7 @@ public class JCERSACipher extends WrapCipherSpi
             throw new IllegalArgumentException("unknown parameter type.");
         }
 
-        if (!(cipher instanceof RSAEngine))
+        if (!(cipher instanceof RSABlindedEngine))
         {
             if (random != null)
             {
@@ -386,7 +386,7 @@ public class JCERSACipher extends WrapCipherSpi
     {
         bOut.write(input, inputOffset, inputLen);
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -413,7 +413,7 @@ public class JCERSACipher extends WrapCipherSpi
     {
         bOut.write(input, inputOffset, inputLen);
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -442,7 +442,7 @@ public class JCERSACipher extends WrapCipherSpi
             bOut.write(input, inputOffset, inputLen);
         }
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -484,7 +484,7 @@ public class JCERSACipher extends WrapCipherSpi
             bOut.write(input, inputOffset, inputLen);
         }
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -530,52 +530,54 @@ public class JCERSACipher extends WrapCipherSpi
     {
         public NoPadding()
         {
-            super(new RSAEngine());
+            super(new RSABlindedEngine());
         }
     }
 
-    static public class PKCS1v1_5Padding
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding()
-        {
-            super(new PKCS1Encoding(new RSAEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PrivateOnly
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding_PrivateOnly()
-        {
-            super(false, true, new PKCS1Encoding(new RSAEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PublicOnly
-        extends JCERSACipher
-    {
-        public PKCS1v1_5Padding_PublicOnly()
-        {
-            super(true, false, new PKCS1Encoding(new RSAEngine()));
-        }
-    }
-
-    static public class OAEPPadding
-        extends JCERSACipher
-    {
-        public OAEPPadding()
-        {
-            super(OAEPParameterSpec.DEFAULT);
-        }
-    }
-    
-    static public class ISO9796d1Padding
-        extends JCERSACipher
-    {
-        public ISO9796d1Padding()
-        {
-            super(new ISO9796d1Encoding(new RSAEngine()));
-        }
-    }
+    // BEGIN android-removed
+    // static public class PKCS1v1_5Padding
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding()
+    //     {
+    //         super(new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PrivateOnly
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding_PrivateOnly()
+    //     {
+    //         super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PublicOnly
+    //     extends JCERSACipher
+    // {
+    //     public PKCS1v1_5Padding_PublicOnly()
+    //     {
+    //         super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class OAEPPadding
+    //     extends JCERSACipher
+    // {
+    //     public OAEPPadding()
+    //     {
+    //         super(OAEPParameterSpec.DEFAULT);
+    //     }
+    // }
+    //
+    // static public class ISO9796d1Padding
+    //     extends JCERSACipher
+    // {
+    //     public ISO9796d1Padding()
+    //     {
+    //         super(new ISO9796d1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    // END android-removed
 }

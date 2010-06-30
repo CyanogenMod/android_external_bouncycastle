@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.params;
 
+import org.bouncycastle.util.Arrays;
+
 public class DSAValidationParameters
 {
     private byte[]  seed;
@@ -23,6 +25,11 @@ public class DSAValidationParameters
         return seed;
     }
 
+    public int hashCode()
+    {
+        return counter ^ Arrays.hashCode(seed);
+    }
+    
     public boolean equals(
         Object o)
     {
@@ -38,19 +45,6 @@ public class DSAValidationParameters
             return false;
         }
 
-        if (other.seed.length != this.seed.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != other.seed.length; i++)
-        {
-            if (other.seed[i] != this.seed[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.areEqual(this.seed, other.seed);
     }
 }

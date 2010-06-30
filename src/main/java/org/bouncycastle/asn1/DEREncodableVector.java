@@ -9,8 +9,16 @@ import java.util.Vector;
  */
 public class DEREncodableVector
 {
-    private Vector  v = new Vector();
+    Vector v = new Vector();
 
+    /**
+     * @deprecated use ASN1EncodableVector instead.
+     */
+    public DEREncodableVector()
+    {
+
+    }
+    
     public void add(
         DEREncodable   obj)
     {

@@ -62,7 +62,7 @@ public class DERInputStream
             
             if (length < 0)
             {
-                throw new IOException("corrupted steam - negative length found");
+                throw new IOException("corrupted stream - negative length found");
             }
         }
 
@@ -198,7 +198,7 @@ public class DERInputStream
                     if ((tag & CONSTRUCTED) == 0)
                     {
                         // BEGIN android-changed
-                        return new DERTaggedObject(false, tag & 0x1f, DERNull.THE_ONE);
+                        return new DERTaggedObject(false, tag & 0x1f, DERNull.INSTANCE);
                         // END android-changed
                     }
                     else

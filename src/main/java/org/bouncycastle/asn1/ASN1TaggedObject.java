@@ -3,12 +3,13 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 /**
- * ASN.1 TaggedObject - in ASN.1 nottation this is any object proceeded by
- * a [n] where n is some number - these are assume to follow the construction
+ * ASN.1 TaggedObject - in ASN.1 notation this is any object preceded by
+ * a [n] where n is some number - these are assumed to follow the construction
  * rules (as with sequences).
  */
 public abstract class ASN1TaggedObject
-    extends DERObject
+    extends ASN1Object
+    implements ASN1TaggedObjectParser
 {
     int             tagNo;
     boolean         empty = false;
@@ -35,7 +36,7 @@ public abstract class ASN1TaggedObject
                 return (ASN1TaggedObject)obj;
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance");
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
     /**
@@ -81,8 +82,8 @@ public abstract class ASN1TaggedObject
         this.obj = obj;
     }
     
-    public boolean equals(
-        Object o)
+    boolean asn1Equals(
+        DERObject o)
     {
         if (!(o instanceof ASN1TaggedObject))
         {
@@ -98,14 +99,14 @@ public abstract class ASN1TaggedObject
         
         if(obj == null)
         {
-            if(other.obj != null)
+            if (other.obj != null)
             {
                 return false;
             }
         }
         else
         {
-            if(!(obj.equals(other.obj)))
+            if (!(obj.getDERObject().equals(other.obj.getDERObject())))
             {
                 return false;
             }
@@ -118,6 +119,11 @@ public abstract class ASN1TaggedObject
     {
         int code = tagNo;
 
+        // TODO: actually this is wrong - the problem is that a re-encoded
+        // object may end up with a different hashCode due to implicit
+        // tagging. As implicit tagging is ambiguous if a sequence is involved
+        // it seems the only correct method for both equals and hashCode is to
+        // compare the encodings...
         if (obj != null)
         {
             code ^= obj.hashCode();
@@ -165,6 +171,33 @@ public abstract class ASN1TaggedObject
         }
 
         return null;
+    }
+
+    /**
+     * Return the object held in this tagged object as a parser assuming it has
+     * the type of the passed in tag. If the object doesn't have a parser
+     * associated with it, the base object is returned.
+     */
+    public DEREncodable getObjectParser(
+        int     tag,
+        boolean isExplicit)
+    {
+        switch (tag)
+        {
+        case DERTags.SET:
+            return ASN1Set.getInstance(this, isExplicit).parser();
+        case DERTags.SEQUENCE:
+            return ASN1Sequence.getInstance(this, isExplicit).parser();
+        case DERTags.OCTET_STRING:
+            return ASN1OctetString.getInstance(this, isExplicit).parser();
+        }
+
+        if (isExplicit)
+        {
+            return getObject();
+        }
+
+        throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
     }
 
     abstract void encode(DEROutputStream  out)

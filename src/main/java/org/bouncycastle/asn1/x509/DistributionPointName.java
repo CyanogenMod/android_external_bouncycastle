@@ -46,7 +46,7 @@ public class DistributionPointName
             return new DistributionPointName((ASN1TaggedObject)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /*
@@ -67,7 +67,13 @@ public class DistributionPointName
         this.type = type;
         this.name = name;
     }
-    
+
+    public DistributionPointName(
+        GeneralNames name)
+    {
+        this(FULL_NAME, name);
+    }
+
     /**
      * Return the tag number applying to the underlying choice.
      * 
@@ -106,5 +112,38 @@ public class DistributionPointName
     public DERObject toASN1Object()
     {
         return new DERTaggedObject(false, type, name);
+    }
+
+    public String toString()
+    {
+        String       sep = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+        buf.append("DistributionPointName: [");
+        buf.append(sep);
+        if (type == FULL_NAME)
+        {
+            appendObject(buf, sep, "fullName", name.toString());
+        }
+        else
+        {
+            appendObject(buf, sep, "nameRelativeToCRLIssuer", name.toString());
+        }
+        buf.append("]");
+        buf.append(sep);
+        return buf.toString();
+    }
+
+    private void appendObject(StringBuffer buf, String sep, String name, String value)
+    {
+        String       indent = "    ";
+
+        buf.append(indent);
+        buf.append(name);
+        buf.append(":");
+        buf.append(sep);
+        buf.append(indent);
+        buf.append(indent);
+        buf.append(value);
+        buf.append(sep);
     }
 }

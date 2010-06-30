@@ -7,7 +7,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyStoreException;
+import java.security.KeyStoreSpi;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -27,12 +36,12 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-// BEGIN android-added
-import org.apache.harmony.xnet.provider.jsse.OpenSSLMessageDigest;
-
-// END android-added
+import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
+// BEGIN android-added
+import org.bouncycastle.crypto.digests.OpenSSLDigest;
+// END android-added
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.SHA1Digest;
 // END android-removed
@@ -43,6 +52,8 @@ import org.bouncycastle.crypto.io.MacInputStream;
 import org.bouncycastle.crypto.io.MacOutputStream;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.io.Streams;
 
 public class JDKKeyStore
     extends KeyStoreSpi
@@ -98,17 +109,6 @@ public class JDKKeyStore
             this.alias = alias;
             this.obj = obj;
             this.certChain = null;
-        }
-
-        StoreEntry(
-            String          alias,
-            Key             obj,
-            Certificate[]   certChain)
-        {
-            this.type = KEY;
-            this.alias = alias;
-            this.obj = obj;
-            this.certChain = certChain;
         }
 
         StoreEntry(
@@ -639,7 +639,7 @@ public class JDKKeyStore
 
         if (entry != null && entry.getType() != CERTIFICATE)
         {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
+            throw new KeyStoreException("key store already has a key entry with alias " + alias);
         }
 
         table.put(alias, new StoreEntry(alias, cert));
@@ -651,13 +651,6 @@ public class JDKKeyStore
         Certificate[] chain) 
         throws KeyStoreException
     {
-        StoreEntry  entry = (StoreEntry)table.get(alias);
-
-        if (entry != null)
-        {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
-        }
-
         table.put(alias, new StoreEntry(alias, key, chain));
     }
 
@@ -673,13 +666,6 @@ public class JDKKeyStore
             throw new KeyStoreException("no certificate chain for private key");
         }
 
-        StoreEntry  entry = (StoreEntry)table.get(alias);
-
-        if (entry != null && entry.getType() == CERTIFICATE)
-        {
-            throw new KeyStoreException("key store already has an entry with alias " + alias);
-        }
-
         try
         {
             table.put(alias, new StoreEntry(alias, key, password, chain));
@@ -693,26 +679,6 @@ public class JDKKeyStore
     public int engineSize() 
     {
         return table.size();
-    }
-
-    protected boolean isSameAs(
-        byte[]  one,
-        byte[]  two)
-    {
-        if (one.length != two.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != one.length; i++)
-        {
-            if (one[i] != two[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     protected void loadStore(
@@ -846,46 +812,51 @@ public class JDKKeyStore
 
         int         iterationCount = dIn.readInt();
 
-// BEGIN android-removed
-//         HMac                    hMac = new HMac(new SHA1Digest());
-//         MacInputStream          mIn = new MacInputStream(dIn, hMac);
-//         PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
-// END android-removed
-// BEGIN android-added
-        HMac                    hMac = new HMac(OpenSSLMessageDigest.getInstance("SHA-1"));        
-        MacInputStream          mIn = new MacInputStream(dIn, hMac);
-        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(OpenSSLMessageDigest.getInstance("SHA-1"));
-// END android-added
-        byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
-
-        pbeGen.init(passKey, salt, iterationCount);
-
-        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
-
-        for (int i = 0; i != passKey.length; i++)
-        {
-            passKey[i] = 0;
-        }
-
-        loadStore(mIn);
-
-        byte[]  mac = new byte[hMac.getMacSize()];
-        byte[]  oldMac = new byte[hMac.getMacSize()];
-
-        hMac.doFinal(mac, 0);
-
-        for (int i = 0; i != oldMac.length; i++)
-        {
-            oldMac[i] = (byte)dIn.read();
-        }
-
         //
         // we only do an integrity check if the password is provided.
         //
-        if ((password != null && password.length != 0) && !isSameAs(mac, oldMac))
+        // BEGIN android-changed
+        HMac hMac = new HMac(new OpenSSLDigest.SHA1());
+        // END android-changed
+        if (password != null && password.length != 0)
         {
-            table.clear();
-            throw new IOException("KeyStore integrity check failed.");
+            byte[] passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
+
+            // BEGIN android-changed
+            PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
+            // END android-changed
+            pbeGen.init(passKey, salt, iterationCount);
+            CipherParameters macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+            Arrays.fill(passKey, (byte)0);
+
+            hMac.init(macParams);
+            MacInputStream mIn = new MacInputStream(dIn, hMac);
+
+            loadStore(mIn);
+
+            // Finalise our mac calculation
+            byte[] mac = new byte[hMac.getMacSize()];
+            hMac.doFinal(mac, 0);
+
+            // TODO Should this actually be reading the remainder of the stream?
+            // Read the original mac from the stream
+            byte[] oldMac = new byte[hMac.getMacSize()];
+            dIn.readFully(oldMac);
+
+            if (!Arrays.constantTimeAreEqual(mac, oldMac))
+            {
+                table.clear();
+                throw new IOException("KeyStore integrity check failed.");
+            }
+        }
+        else
+        {
+            loadStore(dIn);
+
+            // TODO Should this actually be reading the remainder of the stream?
+            // Parse the original mac from the stream too
+            byte[] oldMac = new byte[hMac.getMacSize()];
+            dIn.readFully(oldMac);
         }
     }
 
@@ -904,16 +875,11 @@ public class JDKKeyStore
         dOut.write(salt);
         dOut.writeInt(iterationCount);
 
-// BEGIN android-removed
-//        HMac                    hMac = new HMac(new SHA1Digest());
-//        MacOutputStream         mOut = new MacOutputStream(dOut, hMac);
-//        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
-// END android-removed
-// BEGIN android-added
-        HMac                    hMac = new HMac(OpenSSLMessageDigest.getInstance("SHA-1"));
+        // BEGIN android-changed
+        HMac                    hMac = new HMac(new OpenSSLDigest.SHA1());
         MacOutputStream         mOut = new MacOutputStream(dOut, hMac);
-        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(OpenSSLMessageDigest.getInstance("SHA-1"));
-// END android-added
+        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
+        // END android-changed
         byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
         pbeGen.init(passKey, salt, iterationCount);
@@ -961,7 +927,6 @@ public class JDKKeyStore
                 return;
             }
     
-            Cipher              cipher;
             DataInputStream     dIn = new DataInputStream(stream);
             int                 version = dIn.readInt();
     
@@ -989,39 +954,36 @@ public class JDKKeyStore
                 throw new IOException("Key store corrupted.");
             }
     
+            String cipherAlg;
             if (version == 0)
             {
-                cipher = this.makePBECipher("Old" + STORE_CIPHER, Cipher.DECRYPT_MODE, password, salt, iterationCount);
+                cipherAlg = "Old" + STORE_CIPHER;
             }
             else
             {
-                cipher = this.makePBECipher(STORE_CIPHER, Cipher.DECRYPT_MODE, password, salt, iterationCount);
+                cipherAlg = STORE_CIPHER;
             }
-    
-            CipherInputStream  cIn = new CipherInputStream(dIn, cipher);
 
-// BEGIN android-removed
-//            DigestInputStream  dgIn = new DigestInputStream(cIn, new SHA1Digest());
-// END android-removed
-// BEGIN android-added
-            DigestInputStream  dgIn = new DigestInputStream(cIn, OpenSSLMessageDigest.getInstance("SHA-1"));
-// END android-added
-            
+            Cipher cipher = this.makePBECipher(cipherAlg, Cipher.DECRYPT_MODE, password, salt, iterationCount);
+            CipherInputStream cIn = new CipherInputStream(dIn, cipher);
+
+            // BEGIN android-changed
+            Digest dig = new OpenSSLDigest.SHA1();
+            // END android-changed
+            DigestInputStream  dgIn = new DigestInputStream(cIn, dig);
+    
             this.loadStore(dgIn);
-    
-            Digest  dig = dgIn.getDigest();
-            int     digSize = dig.getDigestSize();
-            byte[]  hash = new byte[digSize];
-            byte[]  oldHash = new byte[digSize];
-    
+
+            // Finalise our digest calculation
+            byte[] hash = new byte[dig.getDigestSize()];
             dig.doFinal(hash, 0);
-    
-            for (int i = 0; i != digSize; i++)
-            {
-                oldHash[i] = (byte)cIn.read();
-            }
-    
-            if (!this.isSameAs(hash, oldHash))
+
+            // TODO Should this actually be reading the remainder of the stream?
+            // Read the original digest from the stream
+            byte[] oldHash = new byte[dig.getDigestSize()];
+            Streams.readFully(cIn, oldHash);
+
+            if (!Arrays.constantTimeAreEqual(hash, oldHash))
             {
                 table.clear();
                 throw new IOException("KeyStore integrity check failed.");
@@ -1047,12 +1009,9 @@ public class JDKKeyStore
             cipher = this.makePBECipher(STORE_CIPHER, Cipher.ENCRYPT_MODE, password, salt, iterationCount);
     
             CipherOutputStream  cOut = new CipherOutputStream(dOut, cipher);
-// BEGIN android-removed            
-//            DigestOutputStream  dgOut = new DigestOutputStream(cOut, new SHA1Digest());
-// END android-removed    
-// BEGIN android-added            
-            DigestOutputStream  dgOut = new DigestOutputStream(cOut, OpenSSLMessageDigest.getInstance("SHA-1"));
-//END android-added   
+            // BEGIN android-changed
+            DigestOutputStream  dgOut = new DigestOutputStream(cOut, new OpenSSLDigest.SHA1());
+            // END android-changed
             this.saveStore(dgOut);
     
             Digest  dig = dgOut.getDigest();

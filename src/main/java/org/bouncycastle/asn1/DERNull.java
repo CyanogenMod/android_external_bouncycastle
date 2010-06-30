@@ -8,39 +8,22 @@ import java.io.IOException;
 public class DERNull
     extends ASN1Null
 {
-    // BEGIN android-added
-    /** non-null; unique instance of this class */
-    static public final DERNull THE_ONE = new DERNull();
-    // END android-added
+    public static final DERNull INSTANCE = new DERNull();
 
     // BEGIN android-changed
     private static final byte[]  zeroBytes = new byte[0];
+    // END android-changed
 
-    /*package*/ DERNull()
+    // BEGIN android-changed
+    protected DERNull()
+    // END android-changed
     {
     }
-    // END android-changed
 
     void encode(
         DEROutputStream  out)
         throws IOException
     {
         out.writeEncoded(NULL, zeroBytes);
-    }
-    
-    public boolean equals(
-        Object o)
-    {
-        if ((o == null) || !(o instanceof DERNull))
-        {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    public int hashCode()
-    {
-        return 0;
     }
 }

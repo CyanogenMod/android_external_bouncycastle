@@ -49,7 +49,9 @@ public interface PKCSObjectIdentifiers
 
     static final DERObjectIdentifier    id_PBES2                = new DERObjectIdentifier(pkcs_5 + ".13");
 
-    static final DERObjectIdentifier    id_PBKDF2               = new DERObjectIdentifier(pkcs_5 + ".12");
+    // BEGIN android-removed
+    // static final DERObjectIdentifier    id_PBKDF2               = new DERObjectIdentifier(pkcs_5 + ".12");
+    // END android-removed
 
     //
     // encryptionAlgorithm OBJECT IDENTIFIER ::= {
@@ -126,7 +128,15 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    pkcs_9_at_friendlyName  = new DERObjectIdentifier(pkcs_9 + ".20");
     static final DERObjectIdentifier    pkcs_9_at_localKeyId    = new DERObjectIdentifier(pkcs_9 + ".21");
 
+    /** @deprecated use x509Certificate instead */
     static final DERObjectIdentifier    x509certType            = new DERObjectIdentifier(pkcs_9 + ".22.1");
+
+    static final String                 certTypes               = pkcs_9 + ".22";
+    static final DERObjectIdentifier    x509Certificate         = new DERObjectIdentifier(certTypes + ".1");
+    static final DERObjectIdentifier    sdsiCertificate         = new DERObjectIdentifier(certTypes + ".2");
+
+    static final String                 crlTypes                = pkcs_9 + ".23";
+    static final DERObjectIdentifier    x509Crl                 = new DERObjectIdentifier(crlTypes + ".1");
 
     static final DERObjectIdentifier    id_alg_PWRI_KEK    = new DERObjectIdentifier(pkcs_9 + ".16.3.9");
 
@@ -138,19 +148,16 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    sMIMECapabilitiesVersions = new DERObjectIdentifier(pkcs_9 + ".15.3");
 
     //
-    // other SMIME attributes
-    //
-    static final DERObjectIdentifier    id_aa_receiptRequest    = new DERObjectIdentifier(pkcs_9 + ".16.2.1");
-
-    //
     // id-ct OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) ct(1)}
     //
     static String id_ct = "1.2.840.113549.1.9.16.1";
-    
+
+    static final DERObjectIdentifier    id_ct_authData          = new DERObjectIdentifier(id_ct + ".2");
     static final DERObjectIdentifier    id_ct_TSTInfo           = new DERObjectIdentifier(id_ct + ".4");
     static final DERObjectIdentifier    id_ct_compressedData    = new DERObjectIdentifier(id_ct + ".9");
-    
+    static final DERObjectIdentifier    id_ct_authEnvelopedData = new DERObjectIdentifier(id_ct + ".23");
+
     //
     // id-cti OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) cti(6)}
@@ -169,20 +176,57 @@ public interface PKCSObjectIdentifiers
     // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) attributes(2)}
     //
     static String id_aa = "1.2.840.113549.1.9.16.2";
+
+    static final DERObjectIdentifier id_aa_receiptRequest = new DERObjectIdentifier(id_aa + ".1");
     
+    static final DERObjectIdentifier id_aa_contentHint = new DERObjectIdentifier(id_aa + ".4"); // See RFC 2634
     /*
      * id-aa-encrypKeyPref OBJECT IDENTIFIER ::= {id-aa 11}
      * 
      */
-    static DERObjectIdentifier id_aa_encrypKeyPref = new DERObjectIdentifier(id_aa + ".11");
-    static DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
+    static final DERObjectIdentifier id_aa_encrypKeyPref = new DERObjectIdentifier(id_aa + ".11");
+    static final DERObjectIdentifier id_aa_signingCertificate = new DERObjectIdentifier(id_aa + ".12");
+    static final DERObjectIdentifier id_aa_signingCertificateV2 = new DERObjectIdentifier(id_aa + ".47");
 
     static final DERObjectIdentifier id_aa_contentIdentifier = new DERObjectIdentifier(id_aa + ".7"); // See RFC 2634
-    static final DERObjectIdentifier id_aa_signatureTimeStampToken = new DERObjectIdentifier(id_aa + ".14"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_sigPolicyId = new DERObjectIdentifier(id_aa + ".15"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_commitmentType = new DERObjectIdentifier(id_aa + ".16"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_signerLocation = new DERObjectIdentifier(id_aa + ".17"); // See RFC 3126
-    static final DERObjectIdentifier id_aa_otherSigCert = new DERObjectIdentifier(id_aa + ".19"); // See RFC 3126
+
+    /*
+     * RFC 3126
+     */
+    static final DERObjectIdentifier id_aa_signatureTimeStampToken = new DERObjectIdentifier(id_aa + ".14");
+    
+    static final DERObjectIdentifier id_aa_ets_sigPolicyId = new DERObjectIdentifier(id_aa + ".15");
+    static final DERObjectIdentifier id_aa_ets_commitmentType = new DERObjectIdentifier(id_aa + ".16");
+    static final DERObjectIdentifier id_aa_ets_signerLocation = new DERObjectIdentifier(id_aa + ".17");
+    static final DERObjectIdentifier id_aa_ets_signerAttr = new DERObjectIdentifier(id_aa + ".18");
+    static final DERObjectIdentifier id_aa_ets_otherSigCert = new DERObjectIdentifier(id_aa + ".19");
+    static final DERObjectIdentifier id_aa_ets_contentTimestamp = new DERObjectIdentifier(id_aa + ".20");
+    static final DERObjectIdentifier id_aa_ets_certificateRefs = new DERObjectIdentifier(id_aa + ".21");
+    static final DERObjectIdentifier id_aa_ets_revocationRefs = new DERObjectIdentifier(id_aa + ".22");
+    static final DERObjectIdentifier id_aa_ets_certValues = new DERObjectIdentifier(id_aa + ".23");
+    static final DERObjectIdentifier id_aa_ets_revocationValues = new DERObjectIdentifier(id_aa + ".24");
+    static final DERObjectIdentifier id_aa_ets_escTimeStamp = new DERObjectIdentifier(id_aa + ".25");
+    static final DERObjectIdentifier id_aa_ets_certCRLTimestamp = new DERObjectIdentifier(id_aa + ".26");
+    static final DERObjectIdentifier id_aa_ets_archiveTimestamp = new DERObjectIdentifier(id_aa + ".27");
+
+    /** @deprecated use id_aa_ets_sigPolicyId instead */
+    static final DERObjectIdentifier id_aa_sigPolicyId = id_aa_ets_sigPolicyId;
+    /** @deprecated use id_aa_ets_commitmentType instead */
+    static final DERObjectIdentifier id_aa_commitmentType = id_aa_ets_commitmentType;
+    /** @deprecated use id_aa_ets_signerLocation instead */
+    static final DERObjectIdentifier id_aa_signerLocation = id_aa_ets_signerLocation;
+    /** @deprecated use id_aa_ets_otherSigCert instead */
+    static final DERObjectIdentifier id_aa_otherSigCert = id_aa_ets_otherSigCert;
+    
+    //
+    // id-spq OBJECT IDENTIFIER ::= {iso(1) member-body(2) usa(840)
+    // rsadsi(113549) pkcs(1) pkcs-9(9) smime(16) id-spq(5)}
+    //
+    final String id_spq = "1.2.840.113549.1.9.16.5";
+
+    static final DERObjectIdentifier id_spq_ets_uri = new DERObjectIdentifier(id_spq + ".1");
+    static final DERObjectIdentifier id_spq_ets_unotice = new DERObjectIdentifier(id_spq + ".2");
+
     //
     // pkcs-12 OBJECT IDENTIFIER ::= {
     //       iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 12 }
@@ -206,5 +250,7 @@ public interface PKCSObjectIdentifiers
     static final DERObjectIdentifier    pbeWithSHAAnd128BitRC2_CBC = new DERObjectIdentifier(pkcs_12PbeIds + ".5");
     static final DERObjectIdentifier    pbewithSHAAnd40BitRC2_CBC = new DERObjectIdentifier(pkcs_12PbeIds + ".6");
 
+    static final DERObjectIdentifier    id_alg_CMS3DESwrap = new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6");
+    static final DERObjectIdentifier    id_alg_CMSRC2wrap = new DERObjectIdentifier("1.2.840.113549.1.9.16.3.7");
 }
 

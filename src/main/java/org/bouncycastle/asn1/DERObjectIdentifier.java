@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 
 public class DERObjectIdentifier
-    extends DERObject
+    extends ASN1Object
 {
     String      identifier;
 
@@ -244,10 +244,10 @@ public class DERObjectIdentifier
         return identifier.hashCode();
     }
 
-    public boolean equals(
-        Object  o)
+    boolean asn1Equals(
+        DERObject  o)
     {
-        if ((o == null) || !(o instanceof DERObjectIdentifier))
+        if (!(o instanceof DERObjectIdentifier))
         {
             return false;
         }
@@ -263,8 +263,20 @@ public class DERObjectIdentifier
     private static boolean isValidIdentifier(
         String identifier)
     {
+        if (identifier.length() < 3
+            || identifier.charAt(1) != '.')
+        {
+            return false;
+        }
+
+        char first = identifier.charAt(0);
+        if (first < '0' || first > '2')
+        {
+            return false;
+        }
+
         boolean periodAllowed = false;
-        for (int i = identifier.length() - 1; i >= 0; i--)
+        for (int i = identifier.length() - 1; i >= 2; i--)
         {
             char ch = identifier.charAt(i);
 

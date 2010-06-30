@@ -1,23 +1,23 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPublicKeySpec;
+
 public class JCERSAPublicKey
     implements RSAPublicKey
 {
+    static final long serialVersionUID = 2675817738516720772L;
+    
     private BigInteger modulus;
     private BigInteger publicExponent;
 
@@ -91,22 +91,27 @@ public class JCERSAPublicKey
     public byte[] getEncoded()
     {
         // BEGIN android-changed
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.THE_ONE), new RSAPublicKeyStructure(getModulus(), getPublicExponent()).getDERObject());
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(getModulus(), getPublicExponent()).getDERObject());
         // END android-changed
 
         return info.getDEREncoded();
     }
 
+    public int hashCode()
+    {
+        return this.getModulus().hashCode() ^ this.getPublicExponent().hashCode();
+    }
+
     public boolean equals(Object o)
     {
-        if (!(o instanceof RSAPublicKey))
-        {
-            return false;
-        }
-
         if (o == this)
         {
             return true;
+        }
+
+        if (!(o instanceof RSAPublicKey))
+        {
+            return false;
         }
 
         RSAPublicKey key = (RSAPublicKey)o;

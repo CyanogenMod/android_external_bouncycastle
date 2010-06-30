@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.PSSParameterSpec;
-
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
@@ -18,15 +9,24 @@ import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.PSSParameterSpec;
 
 class X509SignatureUtil
 {
     // BEGIN android-changed
-    private static final ASN1Null       derNull = DERNull.THE_ONE;
+    private static final ASN1Null       derNull = DERNull.INSTANCE;
     // END android-changed
     
     static void setSignatureParameters(
@@ -68,12 +68,14 @@ class X509SignatureUtil
         
         if (params != null && !derNull.equals(params))
         {
-            if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
-            {
-                RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
-            }
+            // BEGIN android-removed
+            // if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            // {
+            //     RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
+            //
+            //     return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+            // }
+            // END android-removed
             if (sigAlgId.getObjectId().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
@@ -100,10 +102,12 @@ class X509SignatureUtil
         {
             return "SHA1";
         }
-        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
-        {
-            return "SHA224";
-        }
+        // BEGIN android-removed
+        // else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        // {
+        //     return "SHA224";
+        // }
+        // END android-removed
         else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
         {
             return "SHA256";
@@ -116,22 +120,24 @@ class X509SignatureUtil
         {
             return "SHA512";
         }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
+        // BEGIN android-removed
+        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD128";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD160";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD256";
+        // }
+        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        // {
+        //     return "GOST3411";
+        // }
+        // END android-removed
         else
         {
             return digestAlgOID.getId();            

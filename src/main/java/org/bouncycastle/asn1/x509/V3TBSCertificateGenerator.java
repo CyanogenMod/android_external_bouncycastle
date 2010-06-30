@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -35,6 +36,10 @@ public class V3TBSCertificateGenerator
     X509Name                subject;
     SubjectPublicKeyInfo    subjectPublicKeyInfo;
     X509Extensions          extensions;
+
+    private boolean altNamePresentAndCritical;
+    private DERBitString issuerUniqueID;
+    private DERBitString subjectUniqueID;
 
     public V3TBSCertificateGenerator()
     {
@@ -88,6 +93,18 @@ public class V3TBSCertificateGenerator
         this.subject = subject;
     }
 
+    public void setIssuerUniqueID(
+        DERBitString uniqueID)
+    {
+        this.issuerUniqueID = uniqueID;
+    }
+
+    public void setSubjectUniqueID(
+        DERBitString uniqueID)
+    {
+        this.subjectUniqueID = uniqueID;
+    }
+
     public void setSubjectPublicKeyInfo(
         SubjectPublicKeyInfo    pubKeyInfo)
     {
@@ -98,13 +115,22 @@ public class V3TBSCertificateGenerator
         X509Extensions    extensions)
     {
         this.extensions = extensions;
+        if (extensions != null)
+        {
+            X509Extension altName = extensions.getExtension(X509Extensions.SubjectAlternativeName);
+
+            if (altName != null && altName.isCritical())
+            {
+                altNamePresentAndCritical = true;
+            }
+        }
     }
 
     public TBSCertificateStructure generateTBSCertificate()
     {
         if ((serialNumber == null) || (signature == null)
             || (issuer == null) || (startDate == null) || (endDate == null)
-            || (subject == null) || (subjectPublicKeyInfo == null))
+            || (subject == null && !altNamePresentAndCritical) || (subjectPublicKeyInfo == null))
         {
             throw new IllegalStateException("not all mandatory fields set in V3 TBScertificate generator");
         }
@@ -126,9 +152,26 @@ public class V3TBSCertificateGenerator
 
         v.add(new DERSequence(validity));
 
-        v.add(subject);
+        if (subject != null)
+        {
+            v.add(subject);
+        }
+        else
+        {
+            v.add(new DERSequence());
+        }
 
         v.add(subjectPublicKeyInfo);
+
+        if (issuerUniqueID != null)
+        {
+            v.add(new DERTaggedObject(false, 1, issuerUniqueID));
+        }
+
+        if (subjectUniqueID != null)
+        {
+            v.add(new DERTaggedObject(false, 2, subjectUniqueID));
+        }
 
         if (extensions != null)
         {

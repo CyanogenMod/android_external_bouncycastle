@@ -1,7 +1,16 @@
 package org.bouncycastle.x509;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.util.Arrays;
+
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -22,17 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-
-/*
+/**
  * An implementation of a version 2 X.509 Attribute Certificate.
  */
 public class X509V2AttributeCertificate
@@ -75,7 +74,7 @@ public class X509V2AttributeCertificate
     
     public int getVersion()
     {
-        return cert.getAcinfo().getVersion().getValue().intValue();
+        return cert.getAcinfo().getVersion().getValue().intValue() + 1;
     }
     
     public BigInteger getSerialNumber()
@@ -197,14 +196,9 @@ public class X509V2AttributeCertificate
 
             if (ext != null)
             {
-                ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
-                DEROutputStream            dOut = new DEROutputStream(bOut);
-                
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {
@@ -293,5 +287,45 @@ public class X509V2AttributeCertificate
         }
         
         return (X509Attribute[])list.toArray(new X509Attribute[list.size()]);
+    }
+
+    public boolean equals(
+        Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+
+        if (!(o instanceof X509AttributeCertificate))
+        {
+            return false;
+        }
+
+        X509AttributeCertificate other = (X509AttributeCertificate)o;
+
+        try
+        {
+            byte[] b1 = this.getEncoded();
+            byte[] b2 = other.getEncoded();
+
+            return Arrays.areEqual(b1, b2);
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
+
+    public int hashCode()
+    {
+        try
+        {
+            return Arrays.hashCode(this.getEncoded());
+        }
+        catch (IOException e)
+        {
+            return 0;
+        }
     }
 }

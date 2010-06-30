@@ -1,14 +1,14 @@
 package org.bouncycastle.asn1;
 
-import java.io.IOException;
-
 import org.bouncycastle.util.Strings;
+
+import java.io.IOException;
 
 /**
  * DER UTF8String object.
  */
 public class DERUTF8String
-    extends DERObject
+    extends ASN1Object
     implements DERString
 {
     String string;
@@ -79,12 +79,17 @@ public class DERUTF8String
         return string;
     }
 
+    public String toString()
+    {
+        return string;
+    }
+
     public int hashCode()
     {
         return this.getString().hashCode();
     }
 
-    public boolean equals(Object o)
+    boolean asn1Equals(DERObject o)
     {
         if (!(o instanceof DERUTF8String))
         {

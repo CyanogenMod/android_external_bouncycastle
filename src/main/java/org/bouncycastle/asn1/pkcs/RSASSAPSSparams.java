@@ -21,7 +21,7 @@ public class RSASSAPSSparams
     private DERInteger          trailerField;
     
     // BEGIN android-changed
-    public final static AlgorithmIdentifier DEFAULT_HASH_ALGORITHM = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.THE_ONE);
+    public final static AlgorithmIdentifier DEFAULT_HASH_ALGORITHM = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
     // END android-changed
     public final static AlgorithmIdentifier DEFAULT_MASK_GEN_FUNCTION = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, DEFAULT_HASH_ALGORITHM);
     public final static DERInteger          DEFAULT_SALT_LENGTH = new DERInteger(20);
@@ -30,7 +30,7 @@ public class RSASSAPSSparams
     public static RSASSAPSSparams getInstance(
         Object  obj)
     {
-        if (obj instanceof RSASSAPSSparams)
+        if (obj == null || obj instanceof RSASSAPSSparams)
         {
             return (RSASSAPSSparams)obj;
         }
@@ -39,7 +39,7 @@ public class RSASSAPSSparams
             return new RSASSAPSSparams((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
     
     /**

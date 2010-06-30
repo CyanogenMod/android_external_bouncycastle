@@ -1,9 +1,5 @@
 package org.bouncycastle.asn1.x509;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -16,6 +12,10 @@ import org.bouncycastle.asn1.DERSequence;
 // BEGIN android-added
 import org.bouncycastle.asn1.OrderedTable;
 // END android-added
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class X509Extensions
     extends ASN1Encodable
@@ -146,6 +146,11 @@ public class X509Extensions
     public static final DERObjectIdentifier SubjectInfoAccess = new DERObjectIdentifier("1.3.6.1.5.5.7.1.11");
     
     /**
+     * Logo Type
+     */
+    public static final DERObjectIdentifier LogoType = new DERObjectIdentifier("1.3.6.1.5.5.7.1.12");
+
+    /**
      * BiometricInfo
      */
     public static final DERObjectIdentifier BiometricInfo = new DERObjectIdentifier("1.3.6.1.5.5.7.1.2");
@@ -155,6 +160,21 @@ public class X509Extensions
      */
     public static final DERObjectIdentifier QCStatements = new DERObjectIdentifier("1.3.6.1.5.5.7.1.3");
 
+    /**
+     * Audit identity extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier AuditIdentity = new DERObjectIdentifier("1.3.6.1.5.5.7.1.4");
+    
+    /**
+     * NoRevAvail extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier NoRevAvail = new DERObjectIdentifier("2.5.29.56");
+
+    /**
+     * TargetInformation extension in attribute certificates.
+     */
+    public static final DERObjectIdentifier TargetInformation = new DERObjectIdentifier("2.5.29.55");
+    
     // BEGIN android-changed
     private OrderedTable table = new OrderedTable();
     // END android-changed
@@ -327,75 +347,58 @@ public class X509Extensions
      */
     public DERObject toASN1Object()
     {
+        ASN1EncodableVector     vec = new ASN1EncodableVector();
         // BEGIN android-changed
         int                     size = table.size();
-        ASN1EncodableVector     vec = new ASN1EncodableVector();
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             DERObjectIdentifier     oid = table.getKey(i);
             X509Extension           ext = (X509Extension)table.getValue(i);
+            // END android-changed
             ASN1EncodableVector     v = new ASN1EncodableVector();
 
             v.add(oid);
 
             if (ext.isCritical())
             {
+                // BEGIN android-changed
                 v.add(DERBoolean.TRUE);
+                // END android-changed
             }
 
             v.add(ext.getValue());
 
             vec.add(new DERSequence(v));
         }
-        // END android-changed
-        
+
         return new DERSequence(vec);
     }
 
-    public int hashCode()
+    public boolean equivalent(
+        X509Extensions other)
     {
         // BEGIN android-changed
-        int             size = table.size();
-        int             hashCode = 0;
-
-        for (int i = 0; i < size; i++) {
-            hashCode ^= table.getKey(i).hashCode();
-            hashCode ^= table.getValue(i).hashCode();
-        }
+        if (table.size() != other.table.size())
         // END android-changed
-
-        return hashCode;
-    }
-
-    public boolean equals(
-        Object o)
-    {
-        if (!(o instanceof X509Extensions))
         {
             return false;
         }
-
-        X509Extensions  other = (X509Extensions)o;
 
         // BEGIN android-changed
         Enumeration     e1 = table.getKeys();
-        Enumeration     e2 = other.table.getKeys();
         // END android-changed
 
-        while (e1.hasMoreElements() && e2.hasMoreElements())
+        while (e1.hasMoreElements())
         {
-            Object  o1 = e1.nextElement();
-            Object  o2 = e2.nextElement();
-            
-            if (!o1.equals(o2))
+            // BEGIN android-changed
+            DERObjectIdentifier  key = (DERObjectIdentifier)e1.nextElement();
+
+            if (!table.get(key).equals(other.table.get(key)))
+            // END android-changed
             {
                 return false;
             }
-        }
-
-        if (e1.hasMoreElements() || e2.hasMoreElements())
-        {
-            return false;
         }
 
         return true;

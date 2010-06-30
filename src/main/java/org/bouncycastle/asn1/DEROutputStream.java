@@ -50,11 +50,64 @@ public class DEROutputStream
         write(bytes);
     }
 
+    void writeTag(int flags, int tagNo)
+        throws IOException
+    {
+        if (tagNo < 31)
+        {
+            write(flags | tagNo);
+        }
+        else
+        {
+            write(flags | 0x1f);
+            if (tagNo < 128)
+            {
+                write(tagNo);
+            }
+            else
+            {
+                byte[] stack = new byte[5];
+                int pos = stack.length;
+
+                stack[--pos] = (byte)(tagNo & 0x7F);
+
+                do
+                {
+                    tagNo >>= 7;
+                    stack[--pos] = (byte)(tagNo & 0x7F | 0x80);
+                }
+                while (tagNo > 127);
+
+                write(stack, pos, stack.length - pos);
+            }
+        }
+    }
+
+    void writeEncoded(int flags, int tagNo, byte[] bytes)
+        throws IOException
+    {
+        writeTag(flags, tagNo);
+        writeLength(bytes.length);
+        write(bytes);
+    }
+
     protected void writeNull()
         throws IOException
     {
         write(NULL);
         write(0x00);
+    }
+
+    public void write(byte[] buf)
+        throws IOException
+    {
+        out.write(buf, 0, buf.length);
+    }
+
+    public void write(byte[] buf, int offSet, int len)
+        throws IOException
+    {
+        out.write(buf, offSet, len);
     }
 
     public void writeObject(

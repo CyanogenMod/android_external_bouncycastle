@@ -1,30 +1,30 @@
 package org.bouncycastle.jce.provider;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.cert.CRL;
-import java.security.cert.CRLException;
-import java.security.cert.CertPath;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactorySpi;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.util.encoders.Base64;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.security.cert.CRL;
+import java.security.cert.CRLException;
+import java.security.cert.CertPath;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactorySpi;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * class for dealing with X509 certificates.
@@ -36,60 +36,20 @@ import org.bouncycastle.util.encoders.Base64;
 public class JDKX509CertificateFactory
     extends CertificateFactorySpi
 {
-    private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
-    
-    private SignedData         sData = null;
+    private static final PEMUtil PEM_CERT_PARSER = new PEMUtil("CERTIFICATE");
+    private static final PEMUtil PEM_CRL_PARSER = new PEMUtil("CRL");
+
+    private ASN1Set            sData = null;
     private int                sDataObjectCount = 0;
     private InputStream        currentStream = null;
     
-    private SignedData         sCrlData = null;
+    private ASN1Set            sCrlData = null;
     private int                sCrlDataObjectCount = 0;
     private InputStream        currentCrlStream = null;
 
-    private int getLimit(InputStream in)
-        throws IOException
-    {
-        if (in instanceof ByteArrayInputStream)
-        {
-            return in.available();
-        }
-        
-        if (MAX_MEMORY > Integer.MAX_VALUE)
-        {
-            return Integer.MAX_VALUE;
-        }
-        
-        return (int)MAX_MEMORY;
-    }
-    
-    private String readLine(
-        InputStream in)
-        throws IOException
-    {
-        int             c;
-        StringBuffer    l = new StringBuffer();
-
-        while (((c = in.read()) != '\n') && (c >= 0))
-        {
-            if (c == '\r')
-            {
-                continue;
-            }
-
-            l.append((char)c);
-        }
-
-        if (c < 0)
-        {
-            return null;
-        }
-
-        return l.toString();
-    }
-
     private Certificate readDERCertificate(
         ASN1InputStream dIn)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
         ASN1Sequence    seq = (ASN1Sequence)dIn.readObject();
 
@@ -99,11 +59,9 @@ public class JDKX509CertificateFactory
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCertificates();
 
-                return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(
-                                    sData.getCertificates().getObjectAt(sDataObjectCount++)));
+                return getCertificate();
             }
         }
 
@@ -111,117 +69,67 @@ public class JDKX509CertificateFactory
                             X509CertificateStructure.getInstance(seq));
     }
 
-    /**
-     * read in a BER encoded PKCS7 certificate.
-     */
-    private Certificate readPKCS7Certificate(
-        InputStream  in)
-        throws IOException
+    private Certificate getCertificate()
+        throws CertificateParsingException
     {
-        ASN1InputStream  dIn = new ASN1InputStream(in, getLimit(in));
-        ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
-
-        if (seq.size() > 1
-                && seq.getObjectAt(0) instanceof DERObjectIdentifier)
+        if (sData != null)
         {
-            if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
+            while (sDataObjectCount < sData.size())
             {
-                sData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
-    
-                return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(
-                                    sData.getCertificates().getObjectAt(sDataObjectCount++)));
+                Object obj = sData.getObjectAt(sDataObjectCount++);
+
+                if (obj instanceof ASN1Sequence)
+                {
+                   return new X509CertificateObject(
+                                    X509CertificateStructure.getInstance(obj));
+                }
             }
         }
 
-        return new X509CertificateObject(
-                     X509CertificateStructure.getInstance(seq));
+        return null;
     }
 
     private Certificate readPEMCertificate(
         InputStream  in)
-        throws IOException
+        throws IOException, CertificateParsingException
     {
-        String          line;
-        StringBuffer    pemBuf = new StringBuffer();
+        ASN1Sequence seq = PEM_CERT_PARSER.readPEMObject(in);
 
-        while ((line = readLine(in)) != null)
+        if (seq != null)
         {
-            if (line.equals("-----BEGIN CERTIFICATE-----")
-                || line.equals("-----BEGIN X509 CERTIFICATE-----"))
-            {
-                break;
-            }
+            return new X509CertificateObject(
+                            X509CertificateStructure.getInstance(seq));
         }
 
-        while ((line = readLine(in)) != null)
-        {
-            if (line.equals("-----END CERTIFICATE-----")
-                || line.equals("-----END X509 CERTIFICATE-----"))
-            {
-                break;
-            }
+        return null;
+    }
 
-            pemBuf.append(line);
-        }
+    protected CRL createCRL(CertificateList c)
+    throws CRLException
+    {
+        return new X509CRLObject(c);
+    }
+    
+    private CRL readPEMCRL(
+        InputStream  in)
+        throws IOException, CRLException
+    {
+        ASN1Sequence seq = PEM_CRL_PARSER.readPEMObject(in);
 
-        if (pemBuf.length() != 0)
+        if (seq != null)
         {
-            return readDERCertificate(new ASN1InputStream(Base64.decode(pemBuf.toString())));
+            return createCRL(
+                            CertificateList.getInstance(seq));
         }
 
         return null;
     }
 
     private CRL readDERCRL(
-        ASN1InputStream dIn)
+        ASN1InputStream  aIn)
         throws IOException, CRLException
     {
-        return new X509CRLObject(new CertificateList((ASN1Sequence)dIn.readObject()));
-    }
-
-    private CRL readPEMCRL(
-        InputStream  in)
-        throws IOException, CRLException
-    {
-        String          line;
-        StringBuffer    pemBuf = new StringBuffer();
-
-        while ((line = readLine(in)) != null)
-        {
-            if (line.equals("-----BEGIN CRL-----")
-                || line.equals("-----BEGIN X509 CRL-----"))
-            {
-                break;
-            }
-        }
-
-        while ((line = readLine(in)) != null)
-        {
-            if (line.equals("-----END CRL-----")
-                || line.equals("-----END X509 CRL-----"))
-            {
-                break;
-            }
-
-            pemBuf.append(line);
-        }
-
-        if (pemBuf.length() != 0)
-        {
-            return readDERCRL(new ASN1InputStream(Base64.decode(pemBuf.toString())));
-        }
-
-        return null;
-    }
-
-    private CRL readPKCS7CRL(
-        InputStream  in)
-        throws IOException, CRLException
-    {
-        ASN1InputStream  dIn = new ASN1InputStream(in, getLimit(in));
-        ASN1Sequence     seq = (ASN1Sequence)dIn.readObject();
+        ASN1Sequence     seq = (ASN1Sequence)aIn.readObject();
 
         if (seq.size() > 1
                 && seq.getObjectAt(0) instanceof DERObjectIdentifier)
@@ -229,16 +137,27 @@ public class JDKX509CertificateFactory
             if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData))
             {
                 sCrlData = new SignedData(ASN1Sequence.getInstance(
-                                (ASN1TaggedObject)seq.getObjectAt(1), true));
+                                (ASN1TaggedObject)seq.getObjectAt(1), true)).getCRLs();
     
-                return new X509CRLObject(
-                            CertificateList.getInstance(
-                                    sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+                return getCRL();
             }
         }
 
-        return new X509CRLObject(
+        return createCRL(
                      CertificateList.getInstance(seq));
+    }
+
+    private CRL getCRL()
+        throws CRLException
+    {
+        if (sCrlData == null || sCrlDataObjectCount >= sCrlData.size())
+        {
+            return null;
+        }
+
+        return createCRL(
+                            CertificateList.getInstance(
+                                    sCrlData.getObjectAt(sCrlDataObjectCount++)));
     }
 
     /**
@@ -266,11 +185,9 @@ public class JDKX509CertificateFactory
         {
             if (sData != null)
             {
-                if (sDataObjectCount != sData.getCertificates().size())
+                if (sDataObjectCount != sData.size())
                 {
-                    return new X509CertificateObject(
-                                X509CertificateStructure.getInstance(
-                                        sData.getCertificates().getObjectAt(sDataObjectCount++)));
+                    return getCertificate();
                 }
                 else
                 {
@@ -279,39 +196,31 @@ public class JDKX509CertificateFactory
                     return null;
                 }
             }
-            
-            if (!in.markSupported())
-            {
-                in = new BufferedInputStream(in);
-            }
-            
-            in.mark(10);
-            int    tag = in.read();
-            
+
+            int limit = ProviderUtil.getReadLimit(in);
+
+            PushbackInputStream pis = new PushbackInputStream(in);
+            int tag = pis.read();
+
             if (tag == -1)
             {
                 return null;
             }
-            
+
+            pis.unread(tag);
+
             if (tag != 0x30)  // assume ascii PEM encoded.
             {
-                in.reset();
-                return readPEMCertificate(in);
-            }
-            else if (in.read() == 0x80)    // assume BER encoded.
-            {
-                in.reset();
-                return readPKCS7Certificate(new ASN1InputStream(in, getLimit(in)));
+                return readPEMCertificate(pis);
             }
             else
             {
-                in.reset();
-                return readDERCertificate(new ASN1InputStream(in, getLimit(in)));
+                return readDERCertificate(new ASN1InputStream(pis, limit));
             }
         }
         catch (Exception e)
         {
-            throw new CertificateException(e.toString());
+            throw new CertificateException(e);
         }
     }
 
@@ -359,11 +268,9 @@ public class JDKX509CertificateFactory
         {
             if (sCrlData != null)
             {
-                if (sCrlDataObjectCount != sCrlData.getCertificates().size())
+                if (sCrlDataObjectCount != sCrlData.size())
                 {
-                    return new X509CRLObject(
-                                CertificateList.getInstance(
-                                        sCrlData.getCRLs().getObjectAt(sCrlDataObjectCount++)));
+                    return getCRL();
                 }
                 else
                 {
@@ -372,27 +279,26 @@ public class JDKX509CertificateFactory
                     return null;
                 }
             }
-            
-            if (!inStream.markSupported())
+
+            int limit = ProviderUtil.getReadLimit(inStream);
+
+            PushbackInputStream pis = new PushbackInputStream(inStream);
+            int tag = pis.read();
+
+            if (tag == -1)
             {
-                inStream = new BufferedInputStream(inStream);
+                return null;
             }
-            
-            inStream.mark(10);
-            if (inStream.read() != 0x30)  // assume ascii PEM encoded.
+
+            pis.unread(tag);
+
+            if (tag != 0x30)  // assume ascii PEM encoded.
             {
-                inStream.reset();
-                return readPEMCRL(inStream);
-            }
-            else if (inStream.read() == 0x80)    // assume BER encoded.
-            {
-                inStream.reset();
-                return readPKCS7CRL(inStream);
+                return readPEMCRL(pis);
             }
             else
-            {
-                inStream.reset();
-                return readDERCRL(new ASN1InputStream(inStream, getLimit(inStream)));
+            {       // lazy evaluate to help processing of large CRLs
+                return readDERCRL(new ASN1InputStream(pis, limit, true));
             }
         }
         catch (CRLException e)
@@ -462,7 +368,7 @@ public class JDKX509CertificateFactory
             {
                 if (!(obj instanceof X509Certificate))
                 {
-                    throw new CertificateException("list contains none X509Certificate object while creating CertPath\n" + obj.toString());
+                    throw new CertificateException("list contains non X509Certificate object while creating CertPath\n" + obj.toString());
                 }
             }
         }

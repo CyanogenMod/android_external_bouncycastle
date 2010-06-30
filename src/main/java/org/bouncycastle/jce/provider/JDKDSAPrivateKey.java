@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.DSAPrivateKeySpec;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -20,14 +11,25 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.DSAPrivateKeySpec;
+import java.util.Enumeration;
+
 public class JDKDSAPrivateKey
     implements DSAPrivateKey, PKCS12BagAttributeCarrier
 {
+    private static final long serialVersionUID = -4677259546958385734L;
+
     BigInteger          x;
     DSAParams           dsaSpec;
 
-    private Hashtable   pkcs12Attributes = new Hashtable();
-    private Vector      pkcs12Ordering = new Vector();
+    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected JDKDSAPrivateKey()
     {
@@ -117,23 +119,51 @@ public class JDKDSAPrivateKey
             && this.getParams().getP().equals(other.getParams().getP()) 
             && this.getParams().getQ().equals(other.getParams().getQ());
     }
+
+    public int hashCode()
+    {
+        return this.getX().hashCode() ^ this.getParams().getG().hashCode()
+                ^ this.getParams().getP().hashCode() ^ this.getParams().getQ().hashCode();
+    }
     
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        this.x = (BigInteger)in.readObject();
+        this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+        
+        attrCarrier.readObject(in);
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.writeObject(x);
+        out.writeObject(dsaSpec.getP());
+        out.writeObject(dsaSpec.getQ());
+        out.writeObject(dsaSpec.getG());
+
+        attrCarrier.writeObject(out);
     }
 }
