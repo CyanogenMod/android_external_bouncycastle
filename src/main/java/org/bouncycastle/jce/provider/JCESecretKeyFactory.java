@@ -431,31 +431,33 @@ public class JCESecretKeyFactory
     //         super("PBEwithSHAand128BitRC2-CBC", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC2_CBC, true, PKCS12, SHA1, 128, 64);
     //     }
     // }
-    //
-    // /**
-    //  * PBEWithSHAAnd40BitRC2-CBC
-    //  */
-    // static public class PBEWithSHAAnd40BitRC2
-    //     extends PBEKeyFactory
-    // {
-    //     public PBEWithSHAAnd40BitRC2()
-    //     {
-    //         super("PBEwithSHAand40BitRC2-CBC", PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC, true, PKCS12, SHA1, 40, 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * PBEWithSHAAndTwofish-CBC
-    //  */
-    // static public class PBEWithSHAAndTwofish
-    //     extends PBEKeyFactory
-    // {
-    //     public PBEWithSHAAndTwofish()
-    //     {
-    //         super("PBEwithSHAandTwofish-CBC", null, true, PKCS12, SHA1, 256, 128);
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * PBEWithSHAAnd40BitRC2-CBC
+     */
+    static public class PBEWithSHAAnd40BitRC2
+        extends PBEKeyFactory
+    {
+        public PBEWithSHAAnd40BitRC2()
+        {
+            super("PBEwithSHAand40BitRC2-CBC", PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC, true, PKCS12, SHA1, 40, 64);
+        }
+    }
+    
+    /**
+     * PBEWithSHAAndTwofish-CBC
+     */
+    static public class PBEWithSHAAndTwofish
+        extends PBEKeyFactory
+    {
+        public PBEWithSHAAndTwofish()
+        {
+            super("PBEwithSHAandTwofish-CBC", null, true, PKCS12, SHA1, 256, 128);
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * PBEWithSHAAnd128BitRC4
     //  */
@@ -491,19 +493,21 @@ public class JCESecretKeyFactory
     //         super("PBEwithHmacRIPEMD160", null, false, PKCS12, RIPEMD160, 160, 0);
     //     }
     // }
-    //
-    // /**
-    //  * PBEWithHmacSHA
-    //  */
-    // public static class PBEWithSHA
-    //     extends PBEKeyFactory
-    // {
-    //     public PBEWithSHA()
-    //     {
-    //         super("PBEwithHmacSHA", null, false, PKCS12, SHA1, 160, 0);
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * PBEWithHmacSHA
+     */
+    public static class PBEWithSHA
+        extends PBEKeyFactory
+    {
+        public PBEWithSHA()
+        {
+            super("PBEwithHmacSHA", null, false, PKCS12, SHA1, 160, 0);
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * PBEWithHmacTiger
     //  */

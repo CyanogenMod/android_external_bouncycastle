@@ -530,19 +530,21 @@ public class JCEMac
     //         super(new HMac(new RIPEMD160Digest()), PKCS12, RIPEMD160, 160);
     //     }
     // }
-    //
-    //  /**
-    //   * PBEWithHmacSHA
-    //   */
-    //  public static class PBEWithSHA
-    //      extends JCEMac
-    //  {
-    //      public PBEWithSHA()
-    //      {
-    //          super(new HMac(new SHA1Digest()), PKCS12, SHA1, 160);
-    //      }
-    //  }
-    //
+    // END android-removed
+    
+    /**
+     * PBEWithHmacSHA
+     */
+    public static class PBEWithSHA
+        extends JCEMac
+    {
+        public PBEWithSHA()
+        {
+            super(new HMac(new SHA1Digest()), PKCS12, SHA1, 160);
+        }
+    }
+    
+    // BEGIN android-removed
     //  /**
     //   * PBEWithHmacTiger
     //   */

@@ -19,14 +19,15 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC532Engine;
 import org.bouncycastle.crypto.engines.RC564Engine;
-// BEGIN android-removed
 // import org.bouncycastle.crypto.engines.RC6Engine;
 // import org.bouncycastle.crypto.engines.RijndaelEngine;
 // import org.bouncycastle.crypto.engines.SEEDEngine;
 // import org.bouncycastle.crypto.engines.SerpentEngine;
 // import org.bouncycastle.crypto.engines.SkipjackEngine;
 // import org.bouncycastle.crypto.engines.TEAEngine;
-// import org.bouncycastle.crypto.engines.TwofishEngine;
+// END android-removed
+import org.bouncycastle.crypto.engines.TwofishEngine;
+// BEGIN android-removed
 // import org.bouncycastle.crypto.engines.XTEAEngine;
 // END android-removed
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
@@ -1169,31 +1170,33 @@ public class JCEBlockCipher extends WrapCipherSpi
     //         super(new CBCBlockCipher(new AESFastEngine()));
     //     }
     // }
-    //
-    // /**
-    //  * PBEWITHSHAAND40BITRC2-CBC
-    //  */
-    // static public class PBEWithSHAAnd40BitRC2
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithSHAAnd40BitRC2()
-    //     {
-    //         super(new CBCBlockCipher(new RC2Engine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * PBEWithSHAAndTwofish-CBC
-    //  */
-    // static public class PBEWithSHAAndTwofish
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithSHAAndTwofish()
-    //     {
-    //         super(new CBCBlockCipher(new TwofishEngine()));
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * PBEWITHSHAAND40BITRC2-CBC
+     */
+    static public class PBEWithSHAAnd40BitRC2
+        extends JCEBlockCipher
+    {
+        public PBEWithSHAAnd40BitRC2()
+        {
+            super(new CBCBlockCipher(new RC2Engine()));
+        }
+    }
+    
+    /**
+     * PBEWithSHAAndTwofish-CBC
+     */
+    static public class PBEWithSHAAndTwofish
+        extends JCEBlockCipher
+    {
+        public PBEWithSHAAndTwofish()
+        {
+            super(new CBCBlockCipher(new TwofishEngine()));
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * PBEWithAES-CBC
     //  */

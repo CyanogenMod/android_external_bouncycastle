@@ -255,10 +255,13 @@ public class JDKPKCS12KeyStore
             }
         }
 
-        if (c == null && k == null)
-        {
-            throw new KeyStoreException("no such entry as " + alias);
-        }
+        // BEGIN android-removed
+        // Only throw if there is a problem removing, not if missing
+        // if (c == null && k == null)
+        // {
+        //     throw new KeyStoreException("no such entry as " + alias);
+        // }
+        // END android-removed
     }
 
     /**
@@ -433,6 +436,14 @@ public class JDKPKCS12KeyStore
     
     public Date engineGetCreationDate(String alias) 
     {
+        // BEGIN android-added
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+        if (keys.get(alias) == null && certs.get(alias) == null) {
+            return null;
+        }
+        // END android-added
         return new Date();
     }
 
@@ -491,6 +502,11 @@ public class JDKPKCS12KeyStore
         Certificate[]   chain) 
         throws KeyStoreException
     {
+        // BEGIN android-added
+        if (!(key instanceof PrivateKey)) {
+            throw new KeyStoreException("PKCS12 does not support non-PrivateKeys");
+        }
+        // END android-added
         if ((key instanceof PrivateKey) && (chain == null))
         {
             throw new KeyStoreException("no certificate chain for private key");
@@ -502,12 +518,18 @@ public class JDKPKCS12KeyStore
         }
 
         keys.put(alias, key);
+        // BEGIN android-added
+        if (chain != null) {
+        // END android-added
         certs.put(alias, chain[0]);
 
         for (int i = 0; i != chain.length; i++)
         {
             chainCerts.put(new CertId(chain[i].getPublicKey()), chain[i]);
         }
+        // BEGIN android-added
+        }
+        // END android-added
     }
 
     public int engineSize() 
@@ -1522,7 +1544,7 @@ public class JDKPKCS12KeyStore
 
         public void put(String key, Object value)
         {
-            String lower = Strings.toLowerCase(key);
+            String lower = (key == null) ? null : Strings.toLowerCase(key);
             String k = (String)keys.get(lower);
             if (k != null)
             {
@@ -1540,7 +1562,9 @@ public class JDKPKCS12KeyStore
 
         public Object remove(String alias)
         {
-            String k = (String)keys.remove(Strings.toLowerCase(alias));
+            // BEGIN android-changed
+            String k = (String)keys.remove(alias == null ? null : Strings.toLowerCase(alias));
+            // END android-changed
             if (k == null)
             {
                 return null;
@@ -1551,7 +1575,9 @@ public class JDKPKCS12KeyStore
 
         public Object get(String alias)
         {
-            String k = (String)keys.get(Strings.toLowerCase(alias));
+            // BEGIN android-changed
+            String k = (String)keys.get(alias == null ? null : Strings.toLowerCase(alias));
+            // END android-changed
             if (k == null)
             {
                 return null;
