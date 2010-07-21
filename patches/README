@@ -8,7 +8,6 @@ java.security.StandardNames test support class provides the most
 up-do-date documentation of differences between the RI's list of
 supported algorithms and Android's. Some notable omissions versus the
 RI:
-- ARCFOUR
 - Blowfish
 - LDAP
 - MD2

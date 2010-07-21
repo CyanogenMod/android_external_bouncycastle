@@ -310,10 +310,12 @@ public final class BouncyCastleProvider extends Provider
         // put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
         // put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         // put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
-        // put("Cipher.ARC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
-        // put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
-        // put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
-        // put("Alg.Alias.Cipher.RC4", "ARC4");
+        // END android-removed
+        put("Cipher.ARC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
+        put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
+        put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
+        put("Alg.Alias.Cipher.RC4", "ARC4");
+        // BEGIN android-removed
         // put("Cipher.SALSA20", "org.bouncycastle.jce.provider.JCEStreamCipher$Salsa20");
         // put("Cipher.HC128", "org.bouncycastle.jce.provider.JCEStreamCipher$HC128");
         // put("Cipher.HC256", "org.bouncycastle.jce.provider.JCEStreamCipher$HC256");
@@ -467,8 +469,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         // BEGIN android-removed
         // put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
-        // END android-removed
-        // BEGIN android-removed
         // put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         // put("KeyGenerator.SKIPJACK", "org.bouncycastle.jce.provider.JCEKeyGenerator$Skipjack");
         // put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
@@ -476,8 +476,10 @@ public final class BouncyCastleProvider extends Provider
         // put("KeyGenerator.TWOFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Twofish");
         // put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         // put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
-        // put("KeyGenerator.RC4", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC4");
-        // put("Alg.Alias.KeyGenerator.ARC4", "RC4");
+        // END android-removed
+        put("KeyGenerator.RC4", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC4");
+        put("Alg.Alias.KeyGenerator.ARC4", "RC4");
+        // BEGIN android-removed
         // put("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "RC4");
         // put("KeyGenerator.RC5", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC5");
         // put("Alg.Alias.KeyGenerator.RC5-32", "RC5");
