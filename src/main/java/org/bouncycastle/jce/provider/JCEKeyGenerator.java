@@ -205,19 +205,21 @@ public class JCEKeyGenerator
     //         super("RC2", 128, new CipherKeyGenerator());
     //     }
     // }
-    //
-    // /**
-    //  * RC4
-    //  */
-    // public static class RC4
-    //     extends JCEKeyGenerator
-    // {
-    //     public RC4()
-    //     {
-    //         super("RC4", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * RC4
+     */
+    public static class RC4
+        extends JCEKeyGenerator
+    {
+        public RC4()
+        {
+            super("RC4", 128, new CipherKeyGenerator());
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * RC5
     //  */
