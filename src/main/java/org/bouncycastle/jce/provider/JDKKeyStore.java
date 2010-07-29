@@ -447,6 +447,7 @@ public class JDKKeyStore
         }
         catch (Exception e)
         {
+
             throw new IOException("Exception creating key: " + e.toString());
         }
     }
@@ -502,7 +503,13 @@ public class JDKKeyStore
 
         if (entry == null)
         {
-            throw new KeyStoreException("no such entry as " + alias);
+            // BEGIN android-removed
+            // Only throw if there is a problem removing, not if missing
+            // throw new KeyStoreException("no such entry as " + alias);
+            // END android-removed
+            // BEGIN android-added
+            return;
+            // END android-added
         }
 
         table.remove(alias);

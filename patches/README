@@ -8,7 +8,6 @@ java.security.StandardNames test support class provides the most
 up-do-date documentation of differences between the RI's list of
 supported algorithms and Android's. Some notable omissions versus the
 RI:
-- ARCFOUR
 - Blowfish
 - LDAP
 - MD2
@@ -29,3 +28,7 @@ Other performance (both speed and memory) changes:
 - Added ASN1Collection for use as new parent for ASN1Collection and ASN1Set to reduce small Vector allocation
 - removed references to SecretKeyFactory.PBE/PKCS5 SecretKeyFactory.PBE/PKCS12
 - OpenSSLDigest uses NativeCrypto JNI API
+- KeyStoreSpis made more tolerant of non-existant and null aliases
+- PKCS12 KeyStore.getCreationDate tries to mimic RI behavior on null and missing aliases
+- Make PKCS12 KeyStore throw error when setting non-PrivateKey, instead of on get
+- Make PKCS12 KeyStore tolerate setting with an empty certificate chain
