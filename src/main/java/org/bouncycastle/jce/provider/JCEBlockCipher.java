@@ -6,8 +6,8 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.BlowfishEngine;
 // BEGIN android-removed
-// import org.bouncycastle.crypto.engines.BlowfishEngine;
 // import org.bouncycastle.crypto.engines.CAST5Engine;
 // import org.bouncycastle.crypto.engines.CAST6Engine;
 // END android-removed
@@ -852,19 +852,21 @@ public class JCEBlockCipher extends WrapCipherSpi
     //         super(new SkipjackEngine());
     //     }
     // }
-    //
-    // /**
-    //  * Blowfish
-    //  */
-    // static public class Blowfish
-    //     extends JCEBlockCipher
-    // {
-    //     public Blowfish()
-    //     {
-    //         super(new BlowfishEngine());
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * Blowfish
+     */
+    static public class Blowfish
+        extends JCEBlockCipher
+    {
+        public Blowfish()
+        {
+            super(new BlowfishEngine());
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * Blowfish CBC
     //  */

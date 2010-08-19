@@ -304,7 +304,9 @@ public final class BouncyCastleProvider extends Provider
         // END android-changed
         // BEGIN android-removed
         // put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
-        // put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
+        // END android-removed
+        put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
+        // BEGIN android-removed
         // put("Cipher.1.3.6.1.4.1.3029.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$BlowfishCBC");
         // put("Cipher.TWOFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Twofish");
         // put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
@@ -471,14 +473,19 @@ public final class BouncyCastleProvider extends Provider
         // put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
         // put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
         // put("KeyGenerator.SKIPJACK", "org.bouncycastle.jce.provider.JCEKeyGenerator$Skipjack");
-        // put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
-        // put("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
+        // END android-removed
+        put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
+        put("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
+        // BEGIN android-removed
         // put("KeyGenerator.TWOFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Twofish");
         // put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         // put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         // END android-removed
         put("KeyGenerator.RC4", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC4");
         put("Alg.Alias.KeyGenerator.ARC4", "RC4");
+        // BEGIN android-added
+        put("Alg.Alias.KeyGenerator.ARCFOUR", "RC4");
+        // END android-added
         // BEGIN android-removed
         // put("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "RC4");
         // put("KeyGenerator.RC5", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC5");
@@ -564,8 +571,10 @@ public final class BouncyCastleProvider extends Provider
         // put("AlgorithmParameters.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
         // put("AlgorithmParameters.RC5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         // put("AlgorithmParameters.RC6", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // put("Alg.Alias.AlgorithmParameters.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
+        // END android-removed
+        put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("Alg.Alias.AlgorithmParameters.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
+        // BEGIN android-removed
         // put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         // put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         // put("AlgorithmParameters.RIJNDAEL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");

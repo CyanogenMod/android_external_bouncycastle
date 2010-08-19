@@ -169,19 +169,21 @@ public class JCEKeyGenerator
     //         super("SKIPJACK", 80, new CipherKeyGenerator());
     //     }
     // }
-    //
-    // /**
-    //  * Blowfish
-    //  */
-    // public static class Blowfish
-    //     extends JCEKeyGenerator
-    // {
-    //     public Blowfish()
-    //     {
-    //         super("Blowfish", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
+    // END android-removed
+    
+    /**
+     * Blowfish
+     */
+    public static class Blowfish
+        extends JCEKeyGenerator
+    {
+        public Blowfish()
+        {
+            super("Blowfish", 128, new CipherKeyGenerator());
+        }
+    }
+    
+    // BEGIN android-removed
     // /**
     //  * Twofish
     //  */
