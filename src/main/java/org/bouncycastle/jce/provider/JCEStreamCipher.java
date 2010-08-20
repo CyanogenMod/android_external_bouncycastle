@@ -31,8 +31,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -48,8 +50,10 @@ public class JCEStreamCipher
     //
     private Class[]                 availableSpecs =
                                     {
-                                        RC2ParameterSpec.class,
-                                        RC5ParameterSpec.class,
+                                        // BEGIN android-removed
+                                        // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class,
+                                        // END android-removed
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class
                                     };

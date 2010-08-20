@@ -17,8 +17,10 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 // import org.bouncycastle.crypto.engines.GOST28147Engine;
 // END android-removed
 import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.engines.RC532Engine;
-import org.bouncycastle.crypto.engines.RC564Engine;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.RC532Engine;
+// import org.bouncycastle.crypto.engines.RC564Engine;
+// END android-removed
 // import org.bouncycastle.crypto.engines.RC6Engine;
 // import org.bouncycastle.crypto.engines.RijndaelEngine;
 // import org.bouncycastle.crypto.engines.SEEDEngine;
@@ -56,10 +58,8 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.params.ParametersWithSBox;
-// END android-removed
-import org.bouncycastle.crypto.params.RC2Parameters;
-import org.bouncycastle.crypto.params.RC5Parameters;
-// BEGIN android-removed
+// import org.bouncycastle.crypto.params.RC2Parameters;
+// import org.bouncycastle.crypto.params.RC5Parameters;
 // import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 // END android-removed
 import org.bouncycastle.util.Strings;
@@ -72,8 +72,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -91,8 +93,10 @@ public class JCEBlockCipher extends WrapCipherSpi
     //
     private Class[]                 availableSpecs =
                                     {
-                                        RC2ParameterSpec.class,
-                                        RC5ParameterSpec.class,
+                                        // BEGIN android-removed
+                                        // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class,
+                                        // END android-removed
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
                                         // BEGIN android-removed
@@ -393,13 +397,15 @@ public class JCEBlockCipher extends WrapCipherSpi
             throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
         }
         
-        //
-        // for RC5-64 we must have some default parameters
-        //
-        if (params == null && baseEngine.getAlgorithmName().startsWith("RC5-64"))
-        {
-            throw new InvalidAlgorithmParameterException("RC5 requires an RC5ParametersSpec to be passed in.");
-        }
+        // BEGIN android-removed
+        // //
+        // // for RC5-64 we must have some default parameters
+        // //
+        // if (params == null && baseEngine.getAlgorithmName().startsWith("RC5-64"))
+        // {
+        //     throw new InvalidAlgorithmParameterException("RC5 requires an RC5ParametersSpec to be passed in.");
+        // }
+        // END android-removed
 
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
@@ -479,51 +485,51 @@ public class JCEBlockCipher extends WrapCipherSpi
         //         ivParam = (ParametersWithIV)param;
         //     }
         // }
+        // else if (params instanceof RC2ParameterSpec)
+        // {
+        //     RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
+        //
+        //     param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
+        //
+        //     if (rc2Param.getIV() != null && ivLength != 0)
+        //     {
+        //         param = new ParametersWithIV(param, rc2Param.getIV());
+        //         ivParam = (ParametersWithIV)param;
+        //     }
+        // }
+        // else if (params instanceof RC5ParameterSpec)
+        // {
+        //     RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
+        //
+        //     param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
+        //     if (baseEngine.getAlgorithmName().startsWith("RC5"))
+        //     {
+        //         if (baseEngine.getAlgorithmName().equals("RC5-32"))
+        //         {
+        //             if (rc5Param.getWordSize() != 32)
+        //             {
+        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
+        //             }
+        //         }
+        //         else if (baseEngine.getAlgorithmName().equals("RC5-64"))
+        //         {
+        //             if (rc5Param.getWordSize() != 64)
+        //             {
+        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
+        //     }
+        //     if ((rc5Param.getIV() != null) && (ivLength != 0))
+        //     {
+        //         param = new ParametersWithIV(param, rc5Param.getIV());
+        //         ivParam = (ParametersWithIV)param;
+        //     }
+        // }
         // END android-removed
-        else if (params instanceof RC2ParameterSpec)
-        {
-            RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
-
-            param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
-
-            if (rc2Param.getIV() != null && ivLength != 0)
-            {
-                param = new ParametersWithIV(param, rc2Param.getIV());
-                ivParam = (ParametersWithIV)param;
-            }
-        }
-        else if (params instanceof RC5ParameterSpec)
-        {
-            RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
-
-            param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
-            if (baseEngine.getAlgorithmName().startsWith("RC5"))
-            {
-                if (baseEngine.getAlgorithmName().equals("RC5-32"))
-                {
-                    if (rc5Param.getWordSize() != 32)
-                    {
-                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
-                    }
-                }
-                else if (baseEngine.getAlgorithmName().equals("RC5-64"))
-                {
-                    if (rc5Param.getWordSize() != 64)
-                    {
-                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
-                    }
-                }
-            }
-            else
-            {
-                throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
-            }
-            if ((rc5Param.getIV() != null) && (ivLength != 0))
-            {
-                param = new ParametersWithIV(param, rc5Param.getIV());
-                ivParam = (ParametersWithIV)param;
-            }
-        }
         else
         {
             throw new InvalidAlgorithmParameterException("unknown parameter type.");

@@ -18,7 +18,9 @@ import org.bouncycastle.crypto.params.DSAParameters;
 import javax.crypto.spec.DHGenParameterSpec;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// END android-removed
 import java.security.AlgorithmParameterGeneratorSpi;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;

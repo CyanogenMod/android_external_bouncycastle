@@ -29,8 +29,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 // BEGIN android-removed
 // import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
-import javax.crypto.spec.RC5ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -58,8 +58,8 @@ public abstract class WrapCipherSpi extends CipherSpi
                                         PBEParameterSpec.class,
                                         // BEGIN android-removed
                                         // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class
                                         // END android-removed
-                                        RC5ParameterSpec.class
                                     };
 
     protected int                     pbeType = PKCS12;
