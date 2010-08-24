@@ -95,7 +95,9 @@ public class JCEBlockCipher extends WrapCipherSpi
                                         RC5ParameterSpec.class,
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
-                                        //GOST28147ParameterSpec.class
+                                        // BEGIN android-removed
+                                        // GOST28147ParameterSpec.class
+                                        // END android-removed
                                     };
  
     private BlockCipher             baseEngine;
@@ -1110,31 +1112,41 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithMD5AndRC2
-    //  */
-    // static public class PBEWithMD5AndRC2
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithMD5AndRC2()
-    //     {
-    //         super(new CBCBlockCipher(new RC2Engine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * PBEWithSHA1AndDES
-    //  */
-    // static public class PBEWithSHA1AndDES
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithSHA1AndDES()
-    //     {
-    //         super(new CBCBlockCipher(new DESEngine()));
-    //     }
-    // }
-    // END android-removed
+    /**
+     * PBEWithMD5AndRC2
+     */
+    static public class PBEWithMD5AndRC2
+        extends JCEBlockCipher
+    {
+        public PBEWithMD5AndRC2()
+        {
+            super(new CBCBlockCipher(new RC2Engine()));
+        }
+    }
+    
+    /**
+     * PBEWithSHA1AndDES
+     */
+    static public class PBEWithSHA1AndDES
+        extends JCEBlockCipher
+    {
+        public PBEWithSHA1AndDES()
+        {
+            super(new CBCBlockCipher(new DESEngine()));
+        }
+    }
+
+    /**
+     * PBEWithSHA1AndRC2
+     */
+    static public class PBEWithSHA1AndRC2
+        extends JCEBlockCipher
+    {
+        public PBEWithSHA1AndRC2()
+        {
+            super(new CBCBlockCipher(new RC2Engine()));
+        }
+    }
 
     /**
      * PBEWithSHAAnd3-KeyTripleDES-CBC
@@ -1148,34 +1160,32 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithSHAAnd2-KeyTripleDES-CBC
-    //  */
-    // static public class PBEWithSHAAndDES2Key
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithSHAAndDES2Key()
-    //     {
-    //         super(new CBCBlockCipher(new DESedeEngine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * PBEWithAES-CBC
-    //  */
-    // static public class PBEWithAESCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithAESCBC()
-    //     {
-    //         super(new CBCBlockCipher(new AESFastEngine()));
-    //     }
-    // }
-    // END android-removed
+    /**
+     * PBEWithSHAAnd2-KeyTripleDES-CBC
+     */
+    static public class PBEWithSHAAndDES2Key
+        extends JCEBlockCipher
+    {
+        public PBEWithSHAAndDES2Key()
+        {
+            super(new CBCBlockCipher(new DESedeEngine()));
+        }
+    }
     
     /**
-     * PBEWITHSHAAND40BITRC2-CBC
+     * PBEWithSHAAnd128BitRC2-CBC
+     */
+    static public class PBEWithSHAAnd128BitRC2
+        extends JCEBlockCipher
+    {
+        public PBEWithSHAAnd128BitRC2()
+        {
+            super(new CBCBlockCipher(new RC2Engine()));
+        }
+    }
+
+    /**
+     * PBEWithSHAAnd40BitRC2-CBC
      */
     static public class PBEWithSHAAnd40BitRC2
         extends JCEBlockCipher
@@ -1198,19 +1208,17 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
     
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithAES-CBC
-    //  */
-    // static public class PBEWithAESCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public PBEWithAESCBC()
-    //     {
-    //         super(new CBCBlockCipher(new AESFastEngine()));
-    //     }
-    // }
-    // END android-removed
+    /**
+     * PBEWithAES-CBC
+     */
+    static public class PBEWithAESCBC
+        extends JCEBlockCipher
+    {
+        public PBEWithAESCBC()
+        {
+            super(new CBCBlockCipher(new AESFastEngine()));
+        }
+    }
 
     static private interface GenericBlockCipher
     {
