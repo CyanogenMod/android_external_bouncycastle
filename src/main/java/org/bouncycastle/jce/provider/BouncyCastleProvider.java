@@ -45,7 +45,10 @@ public final class BouncyCastleProvider extends Provider
 {
     private static String info = "BouncyCastle Security Provider v1.45";
 
-    public static String PROVIDER_NAME = "BC";
+    // BEGIN android-changed
+    //     this constant should be final
+    public static final String PROVIDER_NAME = "BC";
+    // END android-changed
 
     /*
      * Configurable symmetric ciphers

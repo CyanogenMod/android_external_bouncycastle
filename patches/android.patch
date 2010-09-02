@@ -3076,8 +3076,20 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/PKCS10CertificationRequest
  
 diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java bcprov-jdk16-145/org/bouncycastle/jce/provider/BouncyCastleProvider.java
 --- bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2010-01-11 21:46:14.000000000 +0000
-+++ bcprov-jdk16-145/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2010-08-25 15:47:14.000000000 +0000
-@@ -53,7 +53,12 @@
++++ bcprov-jdk16-145/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2010-09-02 19:18:36.000000000 +0000
+@@ -45,7 +45,10 @@
+ {
+     private static String info = "BouncyCastle Security Provider v1.45";
+
+-    public static String PROVIDER_NAME = "BC";
++    // BEGIN android-changed
++    //     this constant should be final
++    public static final String PROVIDER_NAME = "BC";
++    // END android-changed
+
+     /*
+      * Configurable symmetric ciphers
+@@ -53,7 +56,12 @@
      private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
      private static final String[] SYMMETRIC_CIPHERS =
      {
@@ -3091,7 +3103,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
      };
  
      /*
-@@ -62,7 +67,9 @@
+@@ -62,7 +70,9 @@
      private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.asymmetric.";
      private static final String[] ASYMMETRIC_CIPHERS =
      {
@@ -3102,7 +3114,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
      };
  
      /**
-@@ -89,26 +96,28 @@
+@@ -89,26 +99,28 @@
          loadAlgorithms(SYMMETRIC_CIPHER_PACKAGE, SYMMETRIC_CIPHERS);
          loadAlgorithms(ASYMMETRIC_CIPHER_PACKAGE, ASYMMETRIC_CIPHERS);
  
@@ -3151,7 +3163,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
  
          //
-@@ -117,14 +126,24 @@
+@@ -117,14 +129,24 @@
          put("KeyStore.BKS", "org.bouncycastle.jce.provider.JDKKeyStore");
          put("KeyStore.BouncyCastle", "org.bouncycastle.jce.provider.JDKKeyStore$BouncyCastleStore");
          put("KeyStore.PKCS12", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
@@ -3184,7 +3196,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          put("Alg.Alias.KeyStore.UBER", "BouncyCastle");
          put("Alg.Alias.KeyStore.BOUNCYCASTLE", "BouncyCastle");
-@@ -141,44 +160,63 @@
+@@ -141,44 +163,63 @@
          //
          put("AlgorithmParameterGenerator.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DH");
          put("AlgorithmParameterGenerator.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DSA");
@@ -3272,7 +3284,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND40BITRC2-CBC", "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND40BITRC4", "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITRC2-CBC", "PKCS12PBE");
-@@ -192,7 +230,7 @@
+@@ -192,7 +233,7 @@
          put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.5", "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.6", "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWithSHAAnd3KeyTripleDES", "PKCS12PBE");
@@ -3281,7 +3293,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
-@@ -202,22 +240,24 @@
+@@ -202,22 +243,24 @@
  
          put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSAES_OAEP, "OAEP");
          
@@ -3322,7 +3334,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");
-@@ -234,12 +274,14 @@
+@@ -234,12 +277,14 @@
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND128BITAES-CBC-BC","PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND192BITAES-CBC-BC","PKCS12PBE");
          put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND256BITAES-CBC-BC","PKCS12PBE");
@@ -3343,7 +3355,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          
          //
          // key agreement
-@@ -252,97 +294,129 @@
+@@ -252,97 +297,129 @@
          //
          put("Cipher.DES", "org.bouncycastle.jce.provider.JCEBlockCipher$DES");
          put("Cipher.DESEDE", "org.bouncycastle.jce.provider.JCEBlockCipher$DESede");
@@ -3539,7 +3551,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
          put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
-@@ -350,7 +424,7 @@
+@@ -350,7 +427,7 @@
          put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes128_cbc.getId(), "PBEWITHSHA256AND128BITAES-CBC-BC");
          put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PBEWITHSHA256AND192BITAES-CBC-BC");
          put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PBEWITHSHA256AND256BITAES-CBC-BC");
@@ -3548,7 +3560,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
          put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
          put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-@@ -372,7 +446,9 @@
+@@ -372,7 +449,9 @@
          put("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
          
          put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");
@@ -3559,7 +3571,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.1", "PBEWITHSHAAND128BITRC4");
          put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.2", "PBEWITHSHAAND40BITRC4");
-@@ -387,38 +463,49 @@
+@@ -387,38 +466,49 @@
          put("KeyGenerator.DES", "org.bouncycastle.jce.provider.JCEKeyGenerator$DES");
          put("Alg.Alias.KeyGenerator." + OIWObjectIdentifiers.desCBC, "DES");
          put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
@@ -3637,7 +3649,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          //
          // key pair generators.
-@@ -426,14 +513,18 @@
+@@ -426,14 +516,18 @@
          put("KeyPairGenerator.RSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$RSA");
          put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
          put("KeyPairGenerator.DSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DSA");
@@ -3660,7 +3672,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          //
          // key factories
-@@ -441,20 +532,24 @@
+@@ -441,20 +535,24 @@
          put("KeyFactory.RSA", "org.bouncycastle.jce.provider.JDKKeyFactory$RSA");
          put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
          put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
@@ -3693,7 +3705,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          //
          // Algorithm parameters
-@@ -462,16 +557,22 @@
+@@ -462,16 +560,22 @@
          put("AlgorithmParameters.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
          put("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
          put("AlgorithmParameters.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
@@ -3724,7 +3736,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          
          //
-@@ -479,8 +580,10 @@
+@@ -479,8 +583,10 @@
          //
          put("SecretKeyFactory.DES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DES");
          put("SecretKeyFactory.DESEDE", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DESede");
@@ -3737,7 +3749,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("SecretKeyFactory.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndDES");
          put("SecretKeyFactory.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndRC2");
          put("SecretKeyFactory.PBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndDES");
-@@ -492,31 +595,41 @@
+@@ -492,31 +598,41 @@
          put("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC2");
          put("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC2");
          put("SecretKeyFactory.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndTwofish");
@@ -3794,7 +3806,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
-@@ -561,16 +674,23 @@
+@@ -561,16 +677,23 @@
          addSignatureAlgorithms();
  
      // Certification Path API
@@ -3825,7 +3837,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
      }
  
      private void loadAlgorithms(String packageName, String[] names)
-@@ -631,68 +751,72 @@
+@@ -631,68 +754,72 @@
      //
      private void addMacAlgorithms()
      {
@@ -3954,7 +3966,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          addHMACAlgorithm("SHA256", "org.bouncycastle.jce.provider.JCEMac$SHA256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA256");
          addHMACAlias("SHA256", PKCSObjectIdentifiers.id_hmacWithSHA256);
          addHMACAlgorithm("SHA384", "org.bouncycastle.jce.provider.JCEMac$SHA384", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA384");
-@@ -700,16 +824,20 @@
+@@ -700,16 +827,20 @@
          addHMACAlgorithm("SHA512", "org.bouncycastle.jce.provider.JCEMac$SHA512", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA512");
          addHMACAlias("SHA512", PKCSObjectIdentifiers.id_hmacWithSHA512);
  
@@ -3982,7 +3994,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Alg.Alias.Mac.1.3.14.3.2.26", "PBEWITHHMACSHA");
      }
  
-@@ -747,9 +875,11 @@
+@@ -747,9 +878,11 @@
          put("Alg.Alias.MessageDigest.SHA1", "SHA-1");
          put("Alg.Alias.MessageDigest.SHA", "SHA-1");
          put("Alg.Alias.MessageDigest." + OIWObjectIdentifiers.idSHA1, "SHA-1");
@@ -3997,7 +4009,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("MessageDigest.SHA-256", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA256");
          put("Alg.Alias.MessageDigest.SHA256", "SHA-256");
          put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
-@@ -760,27 +890,31 @@
+@@ -760,27 +893,31 @@
          put("Alg.Alias.MessageDigest.SHA512", "SHA-512");
          put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha512, "SHA-512");
          
@@ -4048,7 +4060,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
      }
      
      //
-@@ -788,55 +922,70 @@
+@@ -788,55 +925,70 @@
      //
      private void addSignatureAlgorithms()
      {
@@ -4157,7 +4169,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
  
          put("Alg.Alias.Signature.SHA256withRSAEncryption", "SHA256WithRSAEncryption");
          put("Alg.Alias.Signature.SHA384withRSAEncryption", "SHA384WithRSAEncryption");
-@@ -850,24 +999,30 @@
+@@ -850,24 +1002,30 @@
          put("Alg.Alias.Signature.SHA384WITHRSAENCRYPTION", "SHA384WithRSAEncryption");
          put("Alg.Alias.Signature.SHA512WITHRSAENCRYPTION", "SHA512WithRSAEncryption");
  
@@ -4200,7 +4212,7 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
          put("Alg.Alias.Signature.SHA256WithRSA", "SHA256WithRSAEncryption");
          put("Alg.Alias.Signature.SHA256withRSA", "SHA256WithRSAEncryption");
          put("Alg.Alias.Signature.SHA384WithRSA", "SHA384WithRSAEncryption");
-@@ -877,92 +1032,110 @@
+@@ -877,92 +1035,110 @@
          put("Alg.Alias.Signature.SHA1/RSA", "SHA1WithRSAEncryption");
          put("Alg.Alias.Signature.SHA-1/RSA", "SHA1WithRSAEncryption");
          put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1WithRSAEncryption");

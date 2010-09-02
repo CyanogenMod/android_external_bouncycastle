@@ -32,3 +32,4 @@ Other performance (both speed and memory) changes:
 - Make PKCS12 KeyStore throw error when setting non-PrivateKey, instead of on get
 - Make PKCS12 KeyStore tolerate setting with an empty certificate chain
 - Fixed cut & paste instanceof error in EncryptedPrivateKeyInfo
+- Make BouncyCastleProvider.PROVIDER_NAME final
