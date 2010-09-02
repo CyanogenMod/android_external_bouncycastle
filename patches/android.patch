@@ -1314,6 +1314,24 @@ diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/asn1/OrderedTable.java bcprov-
 +        }
 +    }
 +}
+diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java bcprov-jdk16-145/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java
+--- bcprov-jdk16-145.orig/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java	2010-01-11 21:46:14.000000000 +0000
++++ bcprov-jdk16-145/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java	2010-09-02 17:28:17.000000000 +0000
+@@ -37,10 +37,13 @@
+     public static EncryptedPrivateKeyInfo getInstance(
+         Object  obj)
+     {
+-        if (obj instanceof EncryptedData)
++        // BEGIN android-changed
++        //     fix copy and paste error in instanceof call
++        if (obj instanceof EncryptedPrivateKeyInfo)
+         {
+             return (EncryptedPrivateKeyInfo)obj;
+         }
++        // END android-changed
+         else if (obj instanceof ASN1Sequence)
+         {
+             return new EncryptedPrivateKeyInfo((ASN1Sequence)obj);
 diff -Naur bcprov-jdk16-145.orig/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java bcprov-jdk16-145/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java
 --- bcprov-jdk16-145.orig/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java	2010-01-11 21:46:14.000000000 +0000
 +++ bcprov-jdk16-145/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java	2010-08-25 15:47:14.000000000 +0000
