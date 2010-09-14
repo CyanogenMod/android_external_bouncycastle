@@ -73,5 +73,6 @@ ifeq ($(WITH_HOST_DALVIK),true)
     LOCAL_JAVA_LIBRARIES := core-hostdex
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_BUILD_HOST_DEX := true
+    LOCAL_MODULE_TAGS := optional
     include $(BUILD_HOST_JAVA_LIBRARY)
 endif
