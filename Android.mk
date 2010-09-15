@@ -15,14 +15,17 @@
 #
 LOCAL_PATH := $(call my-dir)
 
+bouncycastle_src_files := $(call all-java-files-under,src/main/java)
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := bouncycastle
-LOCAL_SRC_FILES := $(call all-java-files-under,src/main/java)
+LOCAL_SRC_FILES := $(bouncycastle_src_files)
 LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_JAVA_LIBRARIES := core
 LOCAL_NO_STANDARD_LIBRARIES := true
 include $(BUILD_JAVA_LIBRARY)
 
+# This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
 # Based on "Finding dead code" example in ProGuard manual at http://proguard.sourceforge.net/
 .PHONY: bouncycastle-proguard-deadcode
 bouncycastle-proguard-deadcode: $(full_classes_compiled_jar) $(full_java_libs)
@@ -61,3 +64,14 @@ bouncycastle-proguard-deadcode: $(full_classes_compiled_jar) $(full_java_libs)
 		-keepclassmembers "class * implements org.bouncycastle.crypto.paddings.BlockCipherPadding { \
 		    public java.lang.String getPaddingName(); \
 		}"
+
+ifeq ($(WITH_HOST_DALVIK),true)
+    include $(CLEAR_VARS)
+    LOCAL_MODULE := bouncycastle-hostdex
+    LOCAL_SRC_FILES := $(bouncycastle_src_files)
+    LOCAL_JAVACFLAGS := -encoding UTF-8
+    LOCAL_JAVA_LIBRARIES := core-hostdex
+    LOCAL_NO_STANDARD_LIBRARIES := true
+    LOCAL_BUILD_HOST_DEX := true
+    include $(BUILD_HOST_JAVA_LIBRARY)
+endif
