@@ -19,6 +19,7 @@ bouncycastle_src_files := $(call all-java-files-under,src/main/java)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := bouncycastle
+LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(bouncycastle_src_files)
 LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_JAVA_LIBRARIES := core
@@ -68,6 +69,7 @@ bouncycastle-proguard-deadcode: $(full_classes_compiled_jar) $(full_java_libs)
 ifeq ($(WITH_HOST_DALVIK),true)
     include $(CLEAR_VARS)
     LOCAL_MODULE := bouncycastle-hostdex
+    LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(bouncycastle_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
     LOCAL_JAVA_LIBRARIES := core-hostdex
