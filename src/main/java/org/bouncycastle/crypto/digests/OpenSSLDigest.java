@@ -53,7 +53,7 @@ public class OpenSSLDigest implements ExtendedDigest {
             throw new RuntimeException(algorithm + " not supported");
         }
 
-        ctx = NativeCrypto.EVP_new();
+        ctx = NativeCrypto.EVP_MD_CTX_create();
         try {
             NativeCrypto.EVP_DigestInit(ctx, algorithm.replace("-", "").toLowerCase());
         } catch (Exception ex) {
@@ -72,11 +72,11 @@ public class OpenSSLDigest implements ExtendedDigest {
     }
 
     public int getDigestSize() {
-        return NativeCrypto.EVP_DigestSize(ctx);
+        return NativeCrypto.EVP_MD_CTX_size(ctx);
     }
 
     public int getByteLength() {
-        return NativeCrypto.EVP_DigestBlockSize(ctx);
+        return NativeCrypto.EVP_MD_CTX_block_size(ctx);
     }
 
     public void reset() {
@@ -95,7 +95,7 @@ public class OpenSSLDigest implements ExtendedDigest {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        NativeCrypto.EVP_free(ctx);
+        NativeCrypto.EVP_MD_CTX_destroy(ctx);
     }
 
     public static class MD5 extends OpenSSLDigest {
