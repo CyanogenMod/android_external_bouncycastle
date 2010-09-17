@@ -25,9 +25,14 @@ import org.bouncycastle.crypto.ExtendedDigest;
 public class OpenSSLDigest implements ExtendedDigest {
 
     /**
-     * Holds the name of the hashing algorithm, e.g. "SHA-1";
+     * Holds the standard name of the hashing algorithm, e.g. "SHA-1";
      */
     private String algorithm;
+
+    /**
+     * Holds the OpenSSL name of the hashing algorithm, e.g. "sha1";
+     */
+    private String openssl;
 
     /**
      * Holds a pointer to the native message digest context.
@@ -43,19 +48,14 @@ public class OpenSSLDigest implements ExtendedDigest {
      * Creates a new OpenSSLMessageDigest instance for the given algorithm
      * name.
      *
-     * @param algorithm The name of the algorithm, e.g. "SHA1".
+     * @param algorithm The standard name of the algorithm, e.g. "SHA-1".
+     * @param algorithm The name of the openssl algorithm, e.g. "sha1".
      */
-    private OpenSSLDigest(String algorithm) {
+    private OpenSSLDigest(String algorithm, String openssl) {
         this.algorithm = algorithm;
-
-        // We don't support MD2.
-        if ("MD2".equalsIgnoreCase(algorithm)) {
-            throw new RuntimeException(algorithm + " not supported");
-        }
-
         ctx = NativeCrypto.EVP_MD_CTX_create();
         try {
-            NativeCrypto.EVP_DigestInit(ctx, algorithm.replace("-", "").toLowerCase());
+            NativeCrypto.EVP_DigestInit(ctx, openssl);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage() + " (" + algorithm + ")");
         }
@@ -80,7 +80,7 @@ public class OpenSSLDigest implements ExtendedDigest {
     }
 
     public void reset() {
-        NativeCrypto.EVP_DigestInit(ctx, algorithm.replace("-", "").toLowerCase());
+        NativeCrypto.EVP_DigestInit(ctx, openssl);
     }
 
     public void update(byte in) {
@@ -96,25 +96,26 @@ public class OpenSSLDigest implements ExtendedDigest {
     protected void finalize() throws Throwable {
         super.finalize();
         NativeCrypto.EVP_MD_CTX_destroy(ctx);
+        ctx = 0;
     }
 
     public static class MD5 extends OpenSSLDigest {
-        public MD5() { super("MD5"); }
+        public MD5() { super("MD5", "md5"); }
     }
 
     public static class SHA1 extends OpenSSLDigest {
-        public SHA1() { super("SHA-1"); }
+        public SHA1() { super("SHA-1", "sha1"); }
     }
 
     public static class SHA256 extends OpenSSLDigest {
-        public SHA256() { super("SHA-256"); }
+        public SHA256() { super("SHA-256", "sha256"); }
     }
 
     public static class SHA384 extends OpenSSLDigest {
-        public SHA384() { super("SHA-384"); }
+        public SHA384() { super("SHA-384", "sha384"); }
     }
 
     public static class SHA512 extends OpenSSLDigest {
-        public SHA512() { super("SHA-512"); }
+        public SHA512() { super("SHA-512", "sha512"); }
     }
 }
