@@ -27,12 +27,12 @@ public class OpenSSLDigest implements ExtendedDigest {
     /**
      * Holds the standard name of the hashing algorithm, e.g. "SHA-1";
      */
-    private String algorithm;
+    private final String algorithm;
 
     /**
      * Holds the OpenSSL name of the hashing algorithm, e.g. "sha1";
      */
-    private String openssl;
+    private final String openssl;
 
     /**
      * Holds a pointer to the native message digest context.
@@ -42,7 +42,7 @@ public class OpenSSLDigest implements ExtendedDigest {
     /**
      * Holds a dummy buffer for writing single bytes to the digest.
      */
-    private byte[] singleByte = new byte[1];
+    private final byte[] singleByte = new byte[1];
 
     /**
      * Creates a new OpenSSLMessageDigest instance for the given algorithm
@@ -53,6 +53,7 @@ public class OpenSSLDigest implements ExtendedDigest {
      */
     private OpenSSLDigest(String algorithm, String openssl) {
         this.algorithm = algorithm;
+        this.openssl = openssl;
         ctx = NativeCrypto.EVP_MD_CTX_create();
         try {
             NativeCrypto.EVP_DigestInit(ctx, openssl);
