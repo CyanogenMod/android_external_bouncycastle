@@ -626,4 +626,56 @@ public class JCESecretKeyFactory
            super("PBEWithMD5And256BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
        }
    }
+    // BEGIN android-added
+    static public class PBKDF2WithHmacSHA1
+        extends JCESecretKeyFactory
+    {
+        public PBKDF2WithHmacSHA1()
+        {
+            super("PBKDF2WithHmacSHA1", PKCSObjectIdentifiers.id_PBKDF2);
+        }
+
+        protected SecretKey engineGenerateSecret(
+            KeySpec keySpec)
+            throws InvalidKeySpecException
+        {
+            if (keySpec instanceof PBEKeySpec)
+            {
+                PBEKeySpec          pbeSpec = (PBEKeySpec)keySpec;
+                
+                if (pbeSpec.getSalt() == null)
+                {
+                    throw new InvalidKeySpecException("missing required salt");
+                }
+
+                if (pbeSpec.getIterationCount() <= 0)
+                {
+                    throw new InvalidKeySpecException("positive iteration count required: "
+                                                      + pbeSpec.getIterationCount());
+                }
+                
+                if (pbeSpec.getKeyLength() <= 0)
+                {
+                    throw new InvalidKeySpecException("positive key length required: "
+                                                      + pbeSpec.getKeyLength());
+                }
+                
+                if (pbeSpec.getPassword().length == 0)
+                {
+                    throw new IllegalArgumentException("password empty");
+                }
+
+                int scheme = PKCS5S2;
+                int digest = SHA1;
+                int keySize = pbeSpec.getKeyLength();
+                int ivSize = -1;
+                CipherParameters param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
+                
+                return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
+            }
+            
+            throw new InvalidKeySpecException("Invalid KeySpec");
+        }
+    }
+    // END android-added
 }

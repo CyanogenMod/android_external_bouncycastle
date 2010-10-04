@@ -666,6 +666,10 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes128_cbc.getId(), "PBEWITHSHA256AND128BITAES-CBC-BC");
         put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PBEWITHSHA256AND192BITAES-CBC-BC");
         put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PBEWITHSHA256AND256BITAES-CBC-BC");
+        // BEGIN android-added
+
+        put("SecretKeyFactory.PBKDF2WithHmacSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBKDF2WithHmacSHA1");
+        // END android-added
 
         addMacAlgorithms();
 
