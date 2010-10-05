@@ -49,9 +49,7 @@ public interface PKCSObjectIdentifiers
 
     static final DERObjectIdentifier    id_PBES2                = new DERObjectIdentifier(pkcs_5 + ".13");
 
-    // BEGIN android-removed
-    // static final DERObjectIdentifier    id_PBKDF2               = new DERObjectIdentifier(pkcs_5 + ".12");
-    // END android-removed
+    static final DERObjectIdentifier    id_PBKDF2               = new DERObjectIdentifier(pkcs_5 + ".12");
 
     //
     // encryptionAlgorithm OBJECT IDENTIFIER ::= {
