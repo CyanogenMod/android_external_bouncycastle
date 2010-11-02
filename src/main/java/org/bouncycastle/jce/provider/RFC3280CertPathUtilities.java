@@ -1471,11 +1471,7 @@ public class RFC3280CertPathUtilities
         PublicKey workingPublicKey,
         boolean verificationAlreadyPerformed,
         X500Principal workingIssuerName,
-        X509Certificate sign,
-        // BEGIN android-added
-        int i, 
-        boolean trustAnchorInChain)
-        // END android-added
+        X509Certificate sign)
         throws ExtCertPathValidatorException
     {
         List certs = certPath.getCertificates();
@@ -1489,15 +1485,8 @@ public class RFC3280CertPathUtilities
             {
                 // (a) (1)
                 //
-                // BEGIN android-added
-                if (!(i == 1 && trustAnchorInChain)) // if not at the root certificate
-                {
-                // END android-added
                 CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
                     paramsPKIX.getSigProvider());
-                // BEGIN android-added
-                }
-                // END android-added
             }
             catch (GeneralSecurityException e)
             {
@@ -2088,11 +2077,7 @@ public class RFC3280CertPathUtilities
 
     protected static void prepareNextCertK(
         CertPath certPath,
-        int index,
-        // BEGIN android-added
-        int i, 
-        boolean trustAnchorInChain)
-        // END android-added
+        int index)
         throws CertPathValidatorException
     {
         List certs = certPath.getCertificates();
@@ -2120,14 +2105,7 @@ public class RFC3280CertPathUtilities
         }
         else
         {
-            // BEGIN android-added
-            if (!(i == 1 && trustAnchorInChain)) // if not at the root certificate
-            {
-            // END android-added
             throw new CertPathValidatorException("Intermediate certificate lacks BasicConstraints");
-            // BEGIN android-added
-            }
-            // END android-added
         }
     }
 

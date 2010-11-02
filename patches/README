@@ -23,7 +23,6 @@ Other performance (both speed and memory) changes:
 - PKCS12BagAttributeCarrier also uses OrderedTable to cut down on memory allocation
 - X509CertificateObject.getEncoded caches its result
 - Added IndexedPKIXParameters for faster cert lookup in CertPathValidatorUtilities.findTrustAnchor
-- CertPathValidatorUtilities.findTrustAnchor fast path compares encoded certs similar to PKIXCertPathValidatorSpi
 - Added ASN1Collection for use as new parent for ASN1Collection and ASN1Set to reduce small Vector allocation
 - removed references to SecretKeyFactory.PBE/PKCS5 SecretKeyFactory.PBE/PKCS12
 - OpenSSLDigest uses NativeCrypto JNI API

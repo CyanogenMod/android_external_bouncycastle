@@ -147,9 +147,7 @@ public class CertPathValidatorUtilities
     // BEGIN android-changed
     /**
      * Search the given Set of TrustAnchor's for one that is the
-     * issuer of the given X509 certificate. Uses the specified
-     * provider for signature verification, or the default provider
-     * if null.
+     * issuer of the given X509 certificate.
      *
      * @param cert the X509 certificate
      * @param params used to find the trust anchors and signature provider
@@ -197,46 +195,20 @@ public class CertPathValidatorUtilities
         // BEGIN android-changed
         Iterator iter = params.getTrustAnchors().iterator();
         // END android-changed
-        // BEGIN android-added
-        byte[] certBytes = null;
-        try {
-            certBytes = cert.getEncoded();
-        } catch (Exception e) {
-            // ignore, just continue
-        }
-        // END android-added
         while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor) iter.next();
-            // BEGIN android-changed
-            X509Certificate trustCert = trust.getTrustedCert();
-            // END android-changed
-            // BEGIN android-added
-            // If the trust anchor is identical to the certificate we're
-            // done. Just return the anchor.
-            // There is similar code in PKIXCertPathValidatorSpi.
-            try {
-                byte[] trustBytes = trustCert.getEncoded();
-                if (certBytes != null && Arrays.equals(trustBytes, certBytes)) {
-                    return trust;
-                }
-            } catch (Exception e) {
-                // ignore, continue and verify the certificate
-            }
-            // END android-added
-            // BEGIN android-changed
-            if (trustCert != null)
+            if (trust.getTrustedCert() != null)
             {
-                if (certSelectX509.match(trustCert))
+                if (certSelectX509.match(trust.getTrustedCert()))
                 {
-                    trustPublicKey = trustCert.getPublicKey();
+                    trustPublicKey = trust.getTrustedCert().getPublicKey();
                 }
                 else
                 {
                     trust = null;
                 }
             }
-            // END android-changed
             else if (trust.getCAName() != null
                     && trust.getCAPublicKey() != null)
             {

@@ -21,6 +21,10 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+// BEGIN android-added
+import org.apache.harmony.xnet.provider.jsse.IndexedPKIXParameters;
+
+// END android-added
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -47,6 +51,18 @@ public class PKIXCertPathValidatorSpi
                     + " instance.");
         }
 
+        // BEGIN android-added
+        IndexedPKIXParameters indexedParams;
+        if (params instanceof IndexedPKIXParameters)
+        {
+            indexedParams = (IndexedPKIXParameters)params;
+        }
+        else
+        {
+            indexedParams = null;
+        }
+
+        // END android-added
         ExtendedPKIXParameters paramsPKIX;
         if (params instanceof ExtendedPKIXParameters)
         {
@@ -91,13 +107,11 @@ public class PKIXCertPathValidatorSpi
         // (d)
         // 
         TrustAnchor trust;
-        // BEGIN android-added
-        X509Certificate lastCert = (X509Certificate) certs.get(certs.size() - 1);
-        // END android-added
         try
         {
             // BEGIN android-changed
-            trust = CertPathValidatorUtilities.findTrustAnchor(lastCert, paramsPKIX);
+            trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate) certs.get(certs.size() - 1),
+                    indexedParams != null ? indexedParams : paramsPKIX);
             // END android-changed
         }
         catch (AnnotatedException e)
@@ -194,25 +208,12 @@ public class PKIXCertPathValidatorSpi
         X500Principal workingIssuerName;
 
         X509Certificate sign = trust.getTrustedCert();
-        // BEGIN android-added
-        boolean trustAnchorInChain = false;
-        // END android-added
         try
         {
             if (sign != null)
             {
                 workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);
                 workingPublicKey = sign.getPublicKey();
-                // BEGIN android-added
-                // There is similar code in CertPathValidatorUtilities.
-                try {
-                    byte[] trustBytes = sign.getEncoded();
-                    byte[] certBytes = lastCert.getEncoded();
-                    trustAnchorInChain = Arrays.equals(trustBytes, certBytes);
-                } catch(Exception e) {
-                    // ignore, continue with trustAnchorInChain being false
-                }
-                // END android-added
             }
             else
             {
@@ -289,10 +290,8 @@ public class PKIXCertPathValidatorSpi
             // 6.1.3
             //
 
-            // BEGIN android-changed
             RFC3280CertPathUtilities.processCertA(certPath, paramsPKIX, index, workingPublicKey,
-                verificationAlreadyPerformed, workingIssuerName, sign, i, trustAnchorInChain);
-            // END android-changed
+                verificationAlreadyPerformed, workingIssuerName, sign);
 
             RFC3280CertPathUtilities.processCertBC(certPath, index, nameConstraintValidator);
 
@@ -309,18 +308,11 @@ public class PKIXCertPathValidatorSpi
 
             if (i != n)
             {
-                // BEGIN android-added
-                if (!(i == 1 && trustAnchorInChain)) // if not at the root certificate
-                {
-                // END android-added
                 if (cert != null && cert.getVersion() == 1)
                 {
                     throw new CertPathValidatorException("Version 1 certificates can't be used as CA ones.", null,
                             certPath, index);
                 }
-                // BEGIN android-added
-                }
-                // END android-added
 
                 RFC3280CertPathUtilities.prepareNextCertA(certPath, index);
 
@@ -344,9 +336,7 @@ public class PKIXCertPathValidatorSpi
                 inhibitAnyPolicy = RFC3280CertPathUtilities.prepareNextCertJ(certPath, index, inhibitAnyPolicy);
 
                 // (k)
-                // BEGIN android-changed
-                RFC3280CertPathUtilities.prepareNextCertK(certPath, index, i, trustAnchorInChain);
-                // END android-changed
+                RFC3280CertPathUtilities.prepareNextCertK(certPath, index);
 
                 // (l)
                 maxPathLength = RFC3280CertPathUtilities.prepareNextCertL(certPath, index, maxPathLength);
