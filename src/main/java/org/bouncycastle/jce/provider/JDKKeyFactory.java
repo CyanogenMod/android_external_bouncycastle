@@ -261,11 +261,11 @@ public abstract class JDKKeyFactory
         {
             return new JDKDSAPublicKey(info);
         }
+        else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+            return new JCEECPublicKey(info);
+        }
         // BEGIN android-removed
-        // else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
-        // {
-        //     return new JCEECPublicKey(info);
-        // }
         // else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
         // {
         //     return new JDKGOST3410PublicKey(info);
@@ -317,11 +317,11 @@ public abstract class JDKKeyFactory
         {
               return new JDKDSAPrivateKey(info);
         }
+        else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+              return new JCEECPrivateKey(info);
+        }
         // BEGIN android-removed
-        // else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
-        // {
-        //       return new JCEECPrivateKey(info);
-        // }
         // else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
         // {
         //       return new JDKGOST3410PrivateKey(info);

@@ -368,20 +368,17 @@ public abstract class WrapCipherSpi extends CipherSpi
 
                 DERObjectIdentifier  oid = in.getAlgorithmId().getObjectId();
 
+                if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+                {
+                    privKey = new JCEECPrivateKey(in);
+                }
                 // BEGIN android-removed
-                // if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey))
-                // {
-                //     privKey = new JCEECPrivateKey(in);
-                // }
                 // else if (oid.equals(CryptoProObjectIdentifiers.gostR3410_94))
                 // {
                 //     privKey = new JDKGOST3410PrivateKey(in);
                 // }
-                // else if (oid.equals(X9ObjectIdentifiers.id_dsa))
                 // END android-removed
-                // BEGIN android-added
-                if (oid.equals(X9ObjectIdentifiers.id_dsa))
-                // END android-added
+                else if (oid.equals(X9ObjectIdentifiers.id_dsa))
                 {
                     privKey = new JDKDSAPrivateKey(in);
                 }

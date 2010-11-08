@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // BEGIN android-removed
-// import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -16,27 +16,25 @@ import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 // BEGIN android-removed
-// import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
-// import org.bouncycastle.asn1.sec.SECNamedCurves;
 // import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 // END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.x9.X962NamedCurves;
-// import org.bouncycastle.asn1.x9.X962Parameters;
-// import org.bouncycastle.asn1.x9.X9ECParameters;
-// import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-// END android-removed
+import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.X962Parameters;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 // BEGIN android-removed
-// import org.bouncycastle.crypto.params.ECDomainParameters;
-// import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 // import org.bouncycastle.crypto.params.ElGamalParameters;
 // import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 // END android-removed
@@ -129,69 +127,71 @@ public class PrivateKeyFactory
         //
         //     return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(params.getP(), params.getG()));
         // }
-        // else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
-        // {
-        //     DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
-        //     DEREncodable de = keyInfo.getAlgorithmId().getParameters();
-        //
-        //     DSAParameters parameters = null;
-        //     if (de != null)
-        //     {
-        //         DSAParameter params = DSAParameter.getInstance(de.getDERObject());
-        //         parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
-        //     }
-        //
-        //     return new DSAPrivateKeyParameters(derX.getValue(), parameters);
-        // }
-        // else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
-        // {
-        //     X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
-        //     ECDomainParameters  dParams = null;
-        //
-        //     if (params.isNamedCurve())
-        //     {
-        //         DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-        //         X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
-        //
-        //         if (ecP == null)
-        //         {
-        //             ecP = SECNamedCurves.getByOID(oid);
-        //
-        //             if (ecP == null)
-        //             {
-        //                 ecP = NISTNamedCurves.getByOID(oid);
-        //
-        //                 if (ecP == null)
-        //                 {
-        //                     ecP = TeleTrusTNamedCurves.getByOID(oid);
-        //                 }
-        //             }
-        //         }
-        //
-        //         dParams = new ECDomainParameters(
-        //                                     ecP.getCurve(),
-        //                                     ecP.getG(),
-        //                                     ecP.getN(),
-        //                                     ecP.getH(),
-        //                                     ecP.getSeed());
-        //     }
-        //     else
-        //     {
-        //         X9ECParameters ecP = new X9ECParameters(
-        //                     (ASN1Sequence)params.getParameters());
-        //         dParams = new ECDomainParameters(
-        //                                     ecP.getCurve(),
-        //                                     ecP.getG(),
-        //                                     ecP.getN(),
-        //                                     ecP.getH(),
-        //                                     ecP.getSeed());
-        //     }
-        //
-        //     ECPrivateKeyStructure   ec = new ECPrivateKeyStructure((ASN1Sequence)keyInfo.getPrivateKey());
-        //
-        //     return new ECPrivateKeyParameters(ec.getKey(), dParams);
-        // }
         // END android-removed
+        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
+        {
+            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
+            DEREncodable de = keyInfo.getAlgorithmId().getParameters();
+        
+            DSAParameters parameters = null;
+            if (de != null)
+            {
+                DSAParameter params = DSAParameter.getInstance(de.getDERObject());
+                parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
+            }
+        
+            return new DSAPrivateKeyParameters(derX.getValue(), parameters);
+        }
+        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+            X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
+            ECDomainParameters  dParams = null;
+        
+            if (params.isNamedCurve())
+            {
+                DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+        
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByOID(oid);
+        
+                    if (ecP == null)
+                    {
+                        ecP = NISTNamedCurves.getByOID(oid);
+        
+                        // BEGIN android-removed
+                        // if (ecP == null)
+                        // {
+                        //     ecP = TeleTrusTNamedCurves.getByOID(oid);
+                        // }
+                        // END android-removed
+                    }
+                }
+        
+                dParams = new ECDomainParameters(
+                                            ecP.getCurve(),
+                                            ecP.getG(),
+                                            ecP.getN(),
+                                            ecP.getH(),
+                                            ecP.getSeed());
+            }
+            else
+            {
+                X9ECParameters ecP = new X9ECParameters(
+                            (ASN1Sequence)params.getParameters());
+                dParams = new ECDomainParameters(
+                                            ecP.getCurve(),
+                                            ecP.getG(),
+                                            ecP.getN(),
+                                            ecP.getH(),
+                                            ecP.getSeed());
+            }
+        
+            ECPrivateKeyStructure   ec = new ECPrivateKeyStructure((ASN1Sequence)keyInfo.getPrivateKey());
+        
+            return new ECPrivateKeyParameters(ec.getKey(), dParams);
+        }
         else
         {
             throw new RuntimeException("algorithm identifier in key not recognised");

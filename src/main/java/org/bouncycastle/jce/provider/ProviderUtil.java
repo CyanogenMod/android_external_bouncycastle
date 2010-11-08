@@ -1,13 +1,9 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.jce.ProviderConfigurationPermission;
-// BEGIN android-removed
-// import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
-// END android-removed
+import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-// BEGIN android-removed
-// import org.bouncycastle.jce.spec.ECParameterSpec;
-// END android-removed
+import org.bouncycastle.jce.spec.ECParameterSpec;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,74 +20,68 @@ public class ProviderUtil
                                                    "BC", ConfigurableProvider.EC_IMPLICITLY_CA);
 
     private static ThreadLocal threadSpec = new ThreadLocal();
-    // BEGIN android-removed
-    // private static volatile ECParameterSpec ecImplicitCaParams;
-    // END android-removed
+    private static volatile ECParameterSpec ecImplicitCaParams;
 
     static void setParameter(String parameterName, Object parameter)
     {
         SecurityManager securityManager = System.getSecurityManager();
 
-        // BEGIN android-removed
-        // if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA))
-        // {
-        //     ECParameterSpec curveSpec;
-        //
-        //     if (securityManager != null)
-        //     {
-        //         securityManager.checkPermission(BC_EC_LOCAL_PERMISSION);
-        //     }
-        //
-        //     if (parameter instanceof ECParameterSpec || parameter == null)
-        //     {
-        //         curveSpec = (ECParameterSpec)parameter;
-        //     }
-        //     else  // assume java.security.spec
-        //     {
-        //         curveSpec = EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter, false);
-        //     }
-        //
-        //     if (curveSpec == null)
-        //     {
-        //         threadSpec.remove();
-        //     }
-        //     else
-        //     {
-        //         threadSpec.set(curveSpec);
-        //     }
-        // }
-        // else if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA))
-        // {
-        //     if (securityManager != null)
-        //     {
-        //         securityManager.checkPermission(BC_EC_PERMISSION);
-        //     }
-        //
-        //     if (parameter instanceof ECParameterSpec || parameter == null)
-        //     {
-        //         ecImplicitCaParams = (ECParameterSpec)parameter;
-        //     }
-        //     else  // assume java.security.spec
-        //     {
-        //         ecImplicitCaParams = EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter, false);
-        //     }
-        // }
-        // END android-removed
+        if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA))
+        {
+            ECParameterSpec curveSpec;
+
+            if (securityManager != null)
+            {
+                securityManager.checkPermission(BC_EC_LOCAL_PERMISSION);
+            }
+
+            if (parameter instanceof ECParameterSpec || parameter == null)
+            {
+                curveSpec = (ECParameterSpec)parameter;
+            }
+            else  // assume java.security.spec
+            {
+                curveSpec = EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter, false);
+            }
+
+            if (curveSpec == null)
+            {
+                threadSpec.remove();
+            }
+            else
+            {
+                threadSpec.set(curveSpec);
+            }
+        }
+        else if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA))
+        {
+            if (securityManager != null)
+            {
+                securityManager.checkPermission(BC_EC_PERMISSION);
+            }
+
+            if (parameter instanceof ECParameterSpec || parameter == null)
+            {
+                ecImplicitCaParams = (ECParameterSpec)parameter;
+            }
+            else  // assume java.security.spec
+            {
+                ecImplicitCaParams = EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter, false);
+            }
+        }
     }
 
-    // BEGIN android-removed
-    // public static ECParameterSpec getEcImplicitlyCa()
-    // {
-    //     ECParameterSpec spec = (ECParameterSpec)threadSpec.get();
-    //
-    //     if (spec != null)
-    //     {
-    //         return spec;
-    //     }
-    //
-    //     return ecImplicitCaParams;
-    // }
-    // END android-removed
+    public static ECParameterSpec getEcImplicitlyCa()
+    {
+        ECParameterSpec spec = (ECParameterSpec)threadSpec.get();
+
+        if (spec != null)
+        {
+            return spec;
+        }
+
+        return ecImplicitCaParams;
+    }
 
     static int getReadLimit(InputStream in)
         throws IOException

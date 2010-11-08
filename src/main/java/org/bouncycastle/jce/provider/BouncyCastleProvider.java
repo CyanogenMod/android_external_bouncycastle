@@ -70,9 +70,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.asymmetric.";
     private static final String[] ASYMMETRIC_CIPHERS =
     {
-        // BEGIN android-removed
-        // "EC"
-        // END android-removed
+        "EC"
     };
 
     /**

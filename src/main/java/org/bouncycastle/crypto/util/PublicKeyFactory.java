@@ -10,15 +10,15 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // BEGIN android-removed
-// import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
 // BEGIN android-removed
-// import org.bouncycastle.asn1.sec.SECNamedCurves;
 // import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 // END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -26,21 +26,19 @@ import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.x9.X962NamedCurves;
-// import org.bouncycastle.asn1.x9.X962Parameters;
-// import org.bouncycastle.asn1.x9.X9ECParameters;
-// import org.bouncycastle.asn1.x9.X9ECPoint;
-// END android-removed
+import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.X962Parameters;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9ECPoint;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 // BEGIN android-removed
-// import org.bouncycastle.crypto.params.ECDomainParameters;
-// import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 // import org.bouncycastle.crypto.params.ElGamalParameters;
 // import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 // END android-removed
@@ -144,60 +142,60 @@ public class PublicKeyFactory
 
             return new DSAPublicKeyParameters(derY.getValue(), parameters);
         }
-        // BEGIN android-removed
-        // else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
-        // {
-        //     X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
-        //     ECDomainParameters  dParams = null;
-        //
-        //     if (params.isNamedCurve())
-        //     {
-        //         DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
-        //         X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
-        //
-        //         if (ecP == null)
-        //         {
-        //             ecP = SECNamedCurves.getByOID(oid);
-        //
-        //             if (ecP == null)
-        //             {
-        //                 ecP = NISTNamedCurves.getByOID(oid);
-        //
-        //                 if (ecP == null)
-        //                 {
-        //                     ecP = TeleTrusTNamedCurves.getByOID(oid);
-        //                 }
-        //             }
-        //         }
-        //
-        //         dParams = new ECDomainParameters(
-        //                                     ecP.getCurve(),
-        //                                     ecP.getG(),
-        //                                     ecP.getN(),
-        //                                     ecP.getH(),
-        //                                     ecP.getSeed());
-        //     }
-        //     else
-        //     {
-        //         X9ECParameters ecP = new X9ECParameters(
-        //                     (ASN1Sequence)params.getParameters());
-        //         dParams = new ECDomainParameters(
-        //                                     ecP.getCurve(),
-        //                                     ecP.getG(),
-        //                                     ecP.getN(),
-        //                                     ecP.getH(),
-        //                                     ecP.getSeed());
-        //     }
-        //
-        //     DERBitString    bits = keyInfo.getPublicKeyData();
-        //     byte[]          data = bits.getBytes();
-        //     ASN1OctetString key = new DEROctetString(data);
-        //
-        //     X9ECPoint       derQ = new X9ECPoint(dParams.getCurve(), key);
-        //
-        //     return new ECPublicKeyParameters(derQ.getPoint(), dParams);
-        // }
-        // END android-removed
+        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+            X962Parameters      params = new X962Parameters((DERObject)keyInfo.getAlgorithmId().getParameters());
+            ECDomainParameters  dParams = null;
+        
+            if (params.isNamedCurve())
+            {
+                DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                X9ECParameters      ecP = X962NamedCurves.getByOID(oid);
+        
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByOID(oid);
+        
+                    if (ecP == null)
+                    {
+                        ecP = NISTNamedCurves.getByOID(oid);
+        
+                        // BEGIN android-removed
+                        // if (ecP == null)
+                        // {
+                        //     ecP = TeleTrusTNamedCurves.getByOID(oid);
+                        // }
+                        // END android-removed
+                    }
+                }
+        
+                dParams = new ECDomainParameters(
+                                            ecP.getCurve(),
+                                            ecP.getG(),
+                                            ecP.getN(),
+                                            ecP.getH(),
+                                            ecP.getSeed());
+            }
+            else
+            {
+                X9ECParameters ecP = new X9ECParameters(
+                            (ASN1Sequence)params.getParameters());
+                dParams = new ECDomainParameters(
+                                            ecP.getCurve(),
+                                            ecP.getG(),
+                                            ecP.getN(),
+                                            ecP.getH(),
+                                            ecP.getSeed());
+            }
+        
+            DERBitString    bits = keyInfo.getPublicKeyData();
+            byte[]          data = bits.getBytes();
+            ASN1OctetString key = new DEROctetString(data);
+        
+            X9ECPoint       derQ = new X9ECPoint(dParams.getCurve(), key);
+        
+            return new ECPublicKeyParameters(derQ.getPoint(), dParams);
+        }
         else
         {
             throw new RuntimeException("algorithm identifier in key not recognised");
