@@ -57,6 +57,11 @@ public class JCEKeyGenerator
     {
         try
         {
+            // BEGIN android-added
+            if (random == null) {
+                random = new SecureRandom();
+            }
+            // END android-added
             engine.init(new KeyGenerationParameters(random, keySize));
             uninitialised = false;
         }
