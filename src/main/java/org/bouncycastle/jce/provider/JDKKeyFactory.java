@@ -144,6 +144,20 @@ public abstract class JDKKeyFactory
            
            return new DHPublicKeySpec(k.getY(), k.getParams().getP(), k.getParams().getG());
        }
+       // BEGIN android-added
+       else if (spec.isAssignableFrom(DSAPublicKeySpec.class) && key instanceof DSAPublicKey)
+       {
+            DSAPublicKey    k = (DSAPublicKey)key;
+
+            return new DSAPublicKeySpec(k.getY(), k.getParams().getP(), k.getParams().getQ(), k.getParams().getG());
+       }
+       else if (spec.isAssignableFrom(DSAPrivateKeySpec.class) && key instanceof DSAPrivateKey)
+       {
+            DSAPrivateKey    k = (DSAPrivateKey)key;
+
+            return new DSAPrivateKeySpec(k.getX(), k.getParams().getP(), k.getParams().getQ(), k.getParams().getG());
+       }
+       // END android-added
 
        throw new RuntimeException("not implemented yet " + key + " " + spec);
     }

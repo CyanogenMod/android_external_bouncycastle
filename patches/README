@@ -33,3 +33,4 @@ Other performance (both speed and memory) changes:
 - Fixed cut & paste instanceof error in EncryptedPrivateKeyInfo
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
+- Added DSA support to JDKKeyManager.engineGetKeySpec
