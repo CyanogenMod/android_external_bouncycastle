@@ -34,3 +34,6 @@ Other performance (both speed and memory) changes:
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
 - Added DSA support to JDKKeyManager.engineGetKeySpec
+
+Non-performance changes
+- Log entry and exit to DHParametersHelper.generateSafePrimes which has long, unpredictable runtime
