@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.util;
+package org.bouncycastle.crypto.digests;
 
 import java.io.ByteArrayOutputStream;
 

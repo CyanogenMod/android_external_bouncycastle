@@ -43,7 +43,7 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.45";
+    private static String info = "BouncyCastle Security Provider v1.46";
 
     // BEGIN android-changed
     //     this constant should be final
@@ -57,11 +57,13 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] SYMMETRIC_CIPHERS =
     {
         // BEGIN android-removed
-        // "AES", "Camellia", "CAST5", "Grainv1", "Grain128", "IDEA", "Noekeon", "SEED"
+        // "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DESede", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
+        // "Noekeon", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
         // END android-removed
         // BEGIN android-added
-        "AES",
+        "AES", "ARC4", "Blowfish", "DESede",
         // END android-added
+
     };
 
     /*
@@ -80,7 +82,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.45, info);
+        super(PROVIDER_NAME, 1.46, info);
 
         AccessController.doPrivileged(new PrivilegedAction()
         {
@@ -294,50 +296,16 @@ public final class BouncyCastleProvider extends Provider
         // cipher engines
         //
         put("Cipher.DES", "org.bouncycastle.jce.provider.JCEBlockCipher$DES");
-        put("Cipher.DESEDE", "org.bouncycastle.jce.provider.JCEBlockCipher$DESede");
         // BEGIN android-removed
-        // put("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESedeCBC");
         // put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
-        // END android-removed
-        put("Cipher.DESEDEWRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$DESEDEWrap");
-        // BEGIN android-changed
-        put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "DESEDEWRAP");
-        // END android-changed
-        // BEGIN android-removed
-        // put("Cipher.SKIPJACK", "org.bouncycastle.jce.provider.JCEBlockCipher$Skipjack");
-        // END android-removed
-        put("Cipher.BLOWFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Blowfish");
-        // BEGIN android-removed
-        // put("Cipher.1.3.6.1.4.1.3029.1.2", "org.bouncycastle.jce.provider.JCEBlockCipher$BlowfishCBC");
-        // put("Cipher.TWOFISH", "org.bouncycastle.jce.provider.JCEBlockCipher$Twofish");
+        //
         // put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
         // put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
         // put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
-        // END android-removed
-        put("Cipher.ARC4", "org.bouncycastle.jce.provider.JCEStreamCipher$RC4");
-        put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
-        put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
-        put("Alg.Alias.Cipher.RC4", "ARC4");
-        // BEGIN android-removed
-        // put("Cipher.SALSA20", "org.bouncycastle.jce.provider.JCEStreamCipher$Salsa20");
-        // put("Cipher.HC128", "org.bouncycastle.jce.provider.JCEStreamCipher$HC128");
-        // put("Cipher.HC256", "org.bouncycastle.jce.provider.JCEStreamCipher$HC256");
-        // put("Cipher.VMPC", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPC");
-        // put("Cipher.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEStreamCipher$VMPCKSA3");
-        // put("Cipher.RC5", "org.bouncycastle.jce.provider.JCEBlockCipher$RC5");
+        //
         // put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
-        // put("Alg.Alias.Cipher.RC5-32", "RC5");
-        // put("Cipher.RC5-64", "org.bouncycastle.jce.provider.JCEBlockCipher$RC564");
-        // put("Cipher.RC6", "org.bouncycastle.jce.provider.JCEBlockCipher$RC6");
-        // put("Cipher.RIJNDAEL", "org.bouncycastle.jce.provider.JCEBlockCipher$Rijndael");
-        // put("Cipher.DESEDERFC3211WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RFC3211DESedeWrap");
-        // put("Cipher.SERPENT", "org.bouncycastle.jce.provider.JCEBlockCipher$Serpent");
         // END android-removed
-
-
-        // BEGIN android-removed
-        // put("Cipher.CAST6", "org.bouncycastle.jce.provider.JCEBlockCipher$CAST6");
-        // END android-removed
+        
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
         // BEGIN android-removed
@@ -345,9 +313,6 @@ public final class BouncyCastleProvider extends Provider
         // put("Alg.Alias.Cipher.GOST", "GOST28147");
         // put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
         // put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
-        //
-        // put("Cipher.TEA", "org.bouncycastle.jce.provider.JCEBlockCipher$TEA");
-        // put("Cipher.XTEA", "org.bouncycastle.jce.provider.JCEBlockCipher$XTEA");
         // END android-removed
 
         put("Cipher.RSA", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
@@ -363,9 +328,7 @@ public final class BouncyCastleProvider extends Provider
         // put("Cipher.RSA/OAEP", "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
         // put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
         // put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
-        // END android-removed
-
-        // BEGIN android-removed
+        //
         // put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
         // put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         // put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
@@ -380,9 +343,7 @@ public final class BouncyCastleProvider extends Provider
         // put("Alg.Alias.Cipher.RSA//PKCS1PADDING", "RSA/PKCS1");
         // put("Alg.Alias.Cipher.RSA//OAEPPADDING", "RSA/OAEP");
         // put("Alg.Alias.Cipher.RSA//ISO9796-1PADDING", "RSA/ISO9796-1");
-        // END android-removed
-        
-        // BEGIN android-removed
+        //
         // put("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
         // put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
         // put("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
@@ -412,12 +373,14 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd128BitRC4");
         put("Cipher.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");
 
+        // BEGIN android-changed
         put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "PBEWITHSHAAND128BITRC2-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "PBEWITHSHAAND40BITRC2-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "PBEWITHSHAAND128BITRC4");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "PBEWITHSHAAND40BITRC4");
+        // END android-changed
 
         put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
         put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
@@ -449,7 +412,14 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");
         // BEGIN android-removed
         // put("Cipher.OLDPBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndTwofish");
+        //
+        // put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
+        // put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
         // END android-removed
+        put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
+        put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDDES");
+        put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
+        put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
 
         put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.1", "PBEWITHSHAAND128BITRC4");
         put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.2", "PBEWITHSHAAND40BITRC4");
@@ -463,44 +433,10 @@ public final class BouncyCastleProvider extends Provider
         //
         put("KeyGenerator.DES", "org.bouncycastle.jce.provider.JCEKeyGenerator$DES");
         put("Alg.Alias.KeyGenerator." + OIWObjectIdentifiers.desCBC, "DES");
-        put("KeyGenerator.DESEDE", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
-        // BEGIN android-removed
-        // put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede3");
-        // put("KeyGenerator.DESEDEWRAP", "org.bouncycastle.jce.provider.JCEKeyGenerator$DESede");
-        // put("KeyGenerator.SKIPJACK", "org.bouncycastle.jce.provider.JCEKeyGenerator$Skipjack");
-        // END android-removed
-        put("KeyGenerator.BLOWFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Blowfish");
-        put("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
-        // BEGIN android-removed
-        // put("KeyGenerator.TWOFISH", "org.bouncycastle.jce.provider.JCEKeyGenerator$Twofish");
-        // put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
-        // put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
-        // END android-removed
-        put("KeyGenerator.RC4", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC4");
-        put("Alg.Alias.KeyGenerator.ARC4", "RC4");
-        // BEGIN android-added
-        put("Alg.Alias.KeyGenerator.ARCFOUR", "RC4");
-        // END android-added
-        // BEGIN android-removed
-        // put("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "RC4");
-        // put("KeyGenerator.RC5", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC5");
-        // put("Alg.Alias.KeyGenerator.RC5-32", "RC5");
-        // put("KeyGenerator.RC5-64", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC564");
-        // put("KeyGenerator.RC6", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC6");
-        // put("KeyGenerator.RIJNDAEL", "org.bouncycastle.jce.provider.JCEKeyGenerator$Rijndael");
-        //
-        // put("KeyGenerator.SERPENT", "org.bouncycastle.jce.provider.JCEKeyGenerator$Serpent");
-        // put("KeyGenerator.SALSA20", "org.bouncycastle.jce.provider.JCEKeyGenerator$Salsa20");
-        // put("KeyGenerator.HC128", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC128");
-        // put("KeyGenerator.HC256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HC256");
-        // put("KeyGenerator.VMPC", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPC");
-        // put("KeyGenerator.VMPC-KSA3", "org.bouncycastle.jce.provider.JCEKeyGenerator$VMPCKSA3");
-        // END android-removed
 
         // BEGIN android-removed
-        // put("KeyGenerator.CAST6", "org.bouncycastle.jce.provider.JCEKeyGenerator$CAST6");
-        // put("KeyGenerator.TEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$TEA");
-        // put("KeyGenerator.XTEA", "org.bouncycastle.jce.provider.JCEKeyGenerator$XTEA");
+        // put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
+        // put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         //
         // put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
         // put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
@@ -564,25 +500,26 @@ public final class BouncyCastleProvider extends Provider
         // BEGIN android-removed
         // put("AlgorithmParameters.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
         // put("AlgorithmParameters.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
-        // put("AlgorithmParameters.RC5", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // put("AlgorithmParameters.RC6", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         // END android-removed
-        put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("Alg.Alias.AlgorithmParameters.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
-        // BEGIN android-removed
-        // put("AlgorithmParameters.TWOFISH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // put("AlgorithmParameters.SKIPJACK", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // put("AlgorithmParameters.RIJNDAEL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        // END android-removed
-
         
         //
         // secret key factories.
         //
         put("SecretKeyFactory.DES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DES");
-        put("SecretKeyFactory.DESEDE", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DESede");
         // BEGIN android-removed
         // put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");
+        // END android-removed
+
+        // BEGIN android-removed
+        // put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
+        // put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
+        // END android-removed
+        put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
+        put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDDES");
+        put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
+        put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
+
+        // BEGIN android-removed
         // put("SecretKeyFactory.PBEWITHMD2ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndRC2");
         // END android-removed
         put("SecretKeyFactory.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndDES");
@@ -709,11 +646,11 @@ public final class BouncyCastleProvider extends Provider
 
                 if (loader != null)
                 {
-                    clazz = loader.loadClass(packageName + names[i] + "Mappings");
+                    clazz = loader.loadClass(packageName + names[i] + "$Mappings");
                 }
                 else
                 {
-                    clazz = Class.forName(packageName + names[i] + "Mappings");
+                    clazz = Class.forName(packageName + names[i] + "$Mappings");
                 }
             }
             catch (ClassNotFoundException e)
@@ -730,7 +667,7 @@ public final class BouncyCastleProvider extends Provider
                 catch (Exception e)
                 {   // this should never ever happen!!
                     throw new InternalError("cannot create instance of "
-                        + packageName + names[i] + "Mappings : " + e);
+                        + packageName + names[i] + "$Mappings : " + e);
                 }
             }
         }
@@ -762,48 +699,22 @@ public final class BouncyCastleProvider extends Provider
         // put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
         // put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
         //
-        // put("Mac.DESEDEMAC", "org.bouncycastle.jce.provider.JCEMac$DESede");
-        // put("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
-        // put("Mac.DESEDEMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESedeCFB8");
-        // put("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
-        //
         // put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         // put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
-        //
-        // put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.JCEMac$DESede64");
-        // put("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
-        //
-        // put("Mac.DESEDEMAC64WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DESede64with7816d4");
-        // put("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-        // put("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-        // put("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
         //
         // put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         // put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
         // put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
         // put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
         //
-        // put("Mac.SKIPJACKMAC", "org.bouncycastle.jce.provider.JCEMac$Skipjack");
-        // put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
-        // put("Mac.SKIPJACKMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$SkipjackCFB8");
-        // put("Alg.Alias.Mac.SKIPJACK/CFB8", "SKIPJACKMAC/CFB8");
-        //
         // put("Mac.RC2MAC", "org.bouncycastle.jce.provider.JCEMac$RC2");
         // put("Alg.Alias.Mac.RC2", "RC2MAC");
         // put("Mac.RC2MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC2CFB8");
         // put("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
         //
-        // put("Mac.RC5MAC", "org.bouncycastle.jce.provider.JCEMac$RC5");
-        // put("Alg.Alias.Mac.RC5", "RC5MAC");
-        // put("Mac.RC5MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC5CFB8");
-        // put("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
         //
         // put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
         // put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
-        //
-        // put("Mac.VMPCMAC", "org.bouncycastle.jce.provider.JCEMac$VMPC");
-        // put("Alg.Alias.Mac.VMPC", "VMPCMAC");
-        // put("Alg.Alias.Mac.VMPC-MAC", "VMPCMAC");
         //
         // put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
         //

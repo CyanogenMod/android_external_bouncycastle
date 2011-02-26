@@ -21,10 +21,24 @@ public class ASN1InputStream
     private final int limit;
     private final boolean lazyEvaluate;
 
+    static int findLimit(InputStream in)
+    {
+        if (in instanceof LimitedInputStream)
+        {
+            return ((LimitedInputStream)in).getRemaining();
+        }
+        else if (in instanceof ByteArrayInputStream)
+        {
+            return ((ByteArrayInputStream)in).available();
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
     public ASN1InputStream(
         InputStream is)
     {
-        this(is, Integer.MAX_VALUE);
+        this(is, findLimit(is));
     }
 
     /**
@@ -120,7 +134,7 @@ public class ASN1InputStream
 
         if ((tag & TAGGED) != 0)
         {
-            return new BERTaggedObjectParser(tag, tagNo, defIn).getDERObject();
+            return new ASN1StreamParser(defIn).readTaggedObject(isConstructed, tagNo);
         }
 
         if (isConstructed)
@@ -207,39 +221,44 @@ public class ASN1InputStream
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             if ((tag & APPLICATION) != 0)
             {
-                ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
-
-                return new BERApplicationSpecificParser(tagNo, sp).getDERObject();
+                return new BERApplicationSpecificParser(tagNo, sp).getLoadedObject();
             }
+
             if ((tag & TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, indIn).getDERObject();
+                return new BERTaggedObjectParser(true, tagNo, sp).getLoadedObject();
             }
-
-            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)
             {
                 case OCTET_STRING:
-                    return new BEROctetStringParser(sp).getDERObject();
+                    return new BEROctetStringParser(sp).getLoadedObject();
                 case SEQUENCE:
-                    return new BERSequenceParser(sp).getDERObject();
+                    return new BERSequenceParser(sp).getLoadedObject();
                 case SET:
-                    return new BERSetParser(sp).getDERObject();
+                    return new BERSetParser(sp).getLoadedObject();
                 case EXTERNAL:
-                    return new DERExternalParser(sp).getDERObject();
+                    return new DERExternalParser(sp).getLoadedObject();
                 default:
                     throw new IOException("unknown BER object encountered");
             }
         }
         else
         {
-            return buildObject(tag, tagNo, length);
+            try
+            {
+                return buildObject(tag, tagNo, length);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new ASN1Exception("corrupted stream detected", e);
+            }
         }
     }
 
@@ -300,6 +319,7 @@ public class ASN1InputStream
         {
             int size = length & 0x7f;
 
+            // Note: The invalid long form "0xff" (see X.690 8.1.3.5c) will be caught here
             if (size > 4)
             {
                 throw new IOException("DER length more than 4 bytes: " + size);
@@ -339,12 +359,7 @@ public class ASN1InputStream
         switch (tagNo)
         {
             case BIT_STRING:
-            {
-                int padBits = bytes[0];
-                byte[] data = new byte[bytes.length - 1];
-                System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
-                return new DERBitString(data, padBits);
-            }
+                return DERBitString.fromOctetString(bytes);
             case BMP_STRING:
                 return new DERBMPString(bytes);
             case BOOLEAN:
@@ -352,21 +367,21 @@ public class ASN1InputStream
                 return DERBoolean.getInstance(bytes);
                 // END android-changed
             case ENUMERATED:
-                return new DEREnumerated(bytes);
+                return new ASN1Enumerated(bytes);
             case GENERALIZED_TIME:
-                return new DERGeneralizedTime(bytes);
+                return new ASN1GeneralizedTime(bytes);
             case GENERAL_STRING:
                 return new DERGeneralString(bytes);
             case IA5_STRING:
                 return new DERIA5String(bytes);
             case INTEGER:
-                return new DERInteger(bytes);
+                return new ASN1Integer(bytes);
             case NULL:
                 return DERNull.INSTANCE;   // actual content is ignored (enforce 0 length?)
             case NUMERIC_STRING:
                 return new DERNumericString(bytes);
             case OBJECT_IDENTIFIER:
-                return new DERObjectIdentifier(bytes);
+                return new ASN1ObjectIdentifier(bytes);
             case OCTET_STRING:
                 return new DEROctetString(bytes);
             case PRINTABLE_STRING:
@@ -376,7 +391,7 @@ public class ASN1InputStream
             case UNIVERSAL_STRING:
                 return new DERUniversalString(bytes);
             case UTC_TIME:
-                return new DERUTCTime(bytes);
+                return new ASN1UTCTime(bytes);
             case UTF8_STRING:
                 return new DERUTF8String(bytes);
             case VISIBLE_STRING:

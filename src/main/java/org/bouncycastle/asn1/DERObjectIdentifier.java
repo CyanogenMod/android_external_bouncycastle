@@ -23,16 +23,6 @@ public class DERObjectIdentifier
             return (DERObjectIdentifier)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERObjectIdentifier(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -49,7 +39,16 @@ public class DERObjectIdentifier
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERObjectIdentifier)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new ASN1ObjectIdentifier(ASN1OctetString.getInstance(obj.getObject()).getOctets());
+        }
     }
     
 
@@ -147,39 +146,15 @@ public class DERObjectIdentifier
         long            fieldValue)
         throws IOException
     {
-        if (fieldValue >= (1L << 7))
+        byte[] result = new byte[9];
+        int pos = 8;
+        result[pos] = (byte)((int)fieldValue & 0x7f);
+        while (fieldValue >= (1L << 7))
         {
-            if (fieldValue >= (1L << 14))
-            {
-                if (fieldValue >= (1L << 21))
-                {
-                    if (fieldValue >= (1L << 28))
-                    {
-                        if (fieldValue >= (1L << 35))
-                        {
-                            if (fieldValue >= (1L << 42))
-                            {
-                                if (fieldValue >= (1L << 49))
-                                {
-                                    if (fieldValue >= (1L << 56))
-                                    {
-                                        out.write((int)(fieldValue >> 56) | 0x80);
-                                    }
-                                    out.write((int)(fieldValue >> 49) | 0x80);
-                                }
-                                out.write((int)(fieldValue >> 42) | 0x80);
-                            }
-                            out.write((int)(fieldValue >> 35) | 0x80);
-                        }
-                        out.write((int)(fieldValue >> 28) | 0x80);
-                    }
-                    out.write((int)(fieldValue >> 21) | 0x80);
-                }
-                out.write((int)(fieldValue >> 14) | 0x80);
-            }
-            out.write((int)(fieldValue >> 7) | 0x80);
+            fieldValue >>= 7;
+            result[--pos] = (byte)((int)fieldValue & 0x7f | 0x80);
         }
-        out.write((int)fieldValue & 0x7f);
+        out.write(result, pos, 9 - pos);
     }
 
     private void writeField(

@@ -8,7 +8,6 @@ import java.security.spec.KeySpec;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactorySpi;
 import javax.crypto.spec.DESKeySpec;
-import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -209,20 +208,19 @@ public class JCESecretKeyFactory
                 {
                     param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
                 }
-                
+
+                KeyParameter kParam;
                 if (param instanceof ParametersWithIV)
                 {
-                    KeyParameter    kParam = (KeyParameter)((ParametersWithIV)param).getParameters();
-
-                    DESParameters.setOddParity(kParam.getKey());
+                    kParam = (KeyParameter)((ParametersWithIV)param).getParameters();
                 }
                 else
                 {
-                    KeyParameter    kParam = (KeyParameter)param;
-
-                    DESParameters.setOddParity(kParam.getKey());
+                    kParam = (KeyParameter)param;
                 }
-                
+
+                DESParameters.setOddParity(kParam.getKey());
+
                 return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
             }
             
@@ -252,75 +250,6 @@ public class JCESecretKeyFactory
         }
     }
 
-    static public class DESede
-        extends JCESecretKeyFactory
-    {
-        public DESede()
-        {
-            super("DESede", null);
-        }
-
-        protected KeySpec engineGetKeySpec(
-            SecretKey key,
-            Class keySpec)
-        throws InvalidKeySpecException
-        {
-            if (keySpec == null)
-            {
-                throw new InvalidKeySpecException("keySpec parameter is null");
-            }
-            if (key == null)
-            {
-                throw new InvalidKeySpecException("key parameter is null");
-            }
-            
-            if (SecretKeySpec.class.isAssignableFrom(keySpec))
-            {
-                return new SecretKeySpec(key.getEncoded(), algName);
-            }
-            else if (DESedeKeySpec.class.isAssignableFrom(keySpec))
-            {
-                byte[]  bytes = key.getEncoded();
-
-                try
-                {
-                    if (bytes.length == 16)
-                    {
-                        byte[]  longKey = new byte[24];
-
-                        System.arraycopy(bytes, 0, longKey, 0, 16);
-                        System.arraycopy(bytes, 0, longKey, 16, 8);
-
-                        return new DESedeKeySpec(longKey);
-                    }
-                    else
-                    {
-                        return new DESedeKeySpec(bytes);
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidKeySpecException(e.toString());
-                }
-            }
-
-            throw new InvalidKeySpecException("Invalid KeySpec");
-        }
-
-        protected SecretKey engineGenerateSecret(
-            KeySpec keySpec)
-        throws InvalidKeySpecException
-        {
-            if (keySpec instanceof DESedeKeySpec)
-            {
-                DESedeKeySpec desKeySpec = (DESedeKeySpec)keySpec;
-                return new SecretKeySpec(desKeySpec.getKey(), "DESede");
-            }
-
-            return super.engineGenerateSecret(keySpec);
-        }
-    }
-    
     // BEGIN android-removed
     // /**
     //  * PBEWithMD2AndDES
@@ -375,7 +304,7 @@ public class JCESecretKeyFactory
     * PBEWithSHA1AndDES
     */
    static public class PBEWithSHA1AndDES
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHA1AndDES()
        {
@@ -399,7 +328,7 @@ public class JCESecretKeyFactory
     * PBEWithSHAAnd3-KeyTripleDES-CBC
     */
    static public class PBEWithSHAAndDES3Key
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHAAndDES3Key()
        {
@@ -411,7 +340,7 @@ public class JCESecretKeyFactory
     * PBEWithSHAAnd2-KeyTripleDES-CBC
     */
    static public class PBEWithSHAAndDES2Key
-       extends PBEKeyFactory
+       extends DESPBEKeyFactory
    {
        public PBEWithSHAAndDES2Key()
        {

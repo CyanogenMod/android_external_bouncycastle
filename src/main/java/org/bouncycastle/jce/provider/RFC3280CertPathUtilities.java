@@ -59,6 +59,7 @@ import org.bouncycastle.x509.X509CertStoreSelector;
 
 public class RFC3280CertPathUtilities
 {
+    private static final PKIXCRLUtil CRL_UTIL = new PKIXCRLUtil();
 
     /**
      * If the complete CRL includes an issuing distribution point (IDP) CRL
@@ -491,7 +492,7 @@ public class RFC3280CertPathUtilities
             }
             try
             {
-                CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+                CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
                 selector = new X509CertStoreSelector();
                 selector.setCertificate(signingCert);
                 ExtendedPKIXParameters temp = (ExtendedPKIXParameters)paramsPKIX.clone();
@@ -678,19 +679,9 @@ public class RFC3280CertPathUtilities
         X509CRL crl)
         throws AnnotatedException
     {
-        Set completeSet = new HashSet();
         Set deltaSet = new HashSet();
         X509CRLStoreSelector crlselect = new X509CRLStoreSelector();
         crlselect.setCertificateChecking(cert);
-
-        if (paramsPKIX.getDate() != null)
-        {
-            crlselect.setDateAndTime(paramsPKIX.getDate());
-        }
-        else
-        {
-            crlselect.setDateAndTime(currentDate);
-        }
 
         try
         {
@@ -702,18 +693,8 @@ public class RFC3280CertPathUtilities
         }
 
         crlselect.setCompleteCRLEnabled(true);
+        Set completeSet = CRL_UTIL.findCRLs(crlselect, paramsPKIX, currentDate);
 
-        // get complete CRL(s)
-        try
-        {
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getAdditionalStores()));
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getStores()));
-            completeSet.addAll(CertPathValidatorUtilities.findCRLs(crlselect, paramsPKIX.getCertStores()));
-        }
-        catch (AnnotatedException e)
-        {
-            throw new AnnotatedException("Exception obtaining complete CRLs.", e);
-        }
         if (paramsPKIX.isUseDeltasEnabled())
         {
             // get delta CRL(s)
@@ -731,6 +712,8 @@ public class RFC3280CertPathUtilities
                 completeSet,
                 deltaSet};
     }
+
+
 
     /**
      * If use-deltas is set, verify the issuer and scope of the delta CRL.
@@ -1583,7 +1566,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 0)
                     {
-                        tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < explicitPolicy)
                         {
                             return tmpInt;
@@ -1637,7 +1620,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 1)
                     {
-                        tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < policyMapping)
                         {
                             return tmpInt;
@@ -2343,7 +2326,7 @@ public class RFC3280CertPathUtilities
         }
         catch (AnnotatedException e)
         {
-            throw new ExtCertPathValidatorException("Policy constraints could no be decoded.", e, certPath, index);
+            throw new ExtCertPathValidatorException("Policy constraints could not be decoded.", e, certPath, index);
         }
         if (pc != null)
         {
@@ -2357,12 +2340,12 @@ public class RFC3280CertPathUtilities
                     case 0:
                         try
                         {
-                            tmpInt = DERInteger.getInstance(constraint).getValue().intValue();
+                            tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
                         }
                         catch (Exception e)
                         {
                             throw new ExtCertPathValidatorException(
-                                "Policy constraints requireExplicitPolicy field could no be decoded.", e, certPath,
+                                "Policy constraints requireExplicitPolicy field could not be decoded.", e, certPath,
                                 index);
                         }
                         if (tmpInt == 0)

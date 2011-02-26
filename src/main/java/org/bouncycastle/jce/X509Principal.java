@@ -1,14 +1,14 @@
 package org.bouncycastle.jce;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.X509Name;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * a general extension of X509Name with a couple of extra methods and

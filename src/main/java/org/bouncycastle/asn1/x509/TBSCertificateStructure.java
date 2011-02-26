@@ -60,12 +60,12 @@ public class TBSCertificateStructure
         {
             return (TBSCertificateStructure)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new TBSCertificateStructure((ASN1Sequence)obj);
+            return new TBSCertificateStructure(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public TBSCertificateStructure(
@@ -80,7 +80,7 @@ public class TBSCertificateStructure
         //
         if (seq.getObjectAt(0) instanceof DERTaggedObject)
         {
-            version = DERInteger.getInstance(seq.getObjectAt(0));
+            version = DERInteger.getInstance((ASN1TaggedObject)seq.getObjectAt(0), true);
         }
         else
         {

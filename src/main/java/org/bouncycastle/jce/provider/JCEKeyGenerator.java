@@ -1,17 +1,17 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.KeyGenerationParameters;
-import org.bouncycastle.crypto.generators.DESKeyGenerator;
-import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
-
-import javax.crypto.KeyGeneratorSpi;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.KeyGeneratorSpi;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.crypto.CipherKeyGenerator;
+import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.crypto.generators.DESKeyGenerator;
 
 public class JCEKeyGenerator
     extends KeyGeneratorSpi
@@ -98,109 +98,7 @@ public class JCEKeyGenerator
         }
     }
 
-    /**
-     * DESede - the default for this is to generate a key in 
-     * a-b-a format that's 24 bytes long but has 16 bytes of
-     * key material (the first 8 bytes is repeated as the last
-     * 8 bytes). If you give it a size, you'll get just what you
-     * asked for.
-     */
-    public static class DESede
-        extends JCEKeyGenerator
-    {
-        private boolean     keySizeSet = false;
-
-        public DESede()
-        {
-            super("DESede", 192, new DESedeKeyGenerator());
-        }
-
-        protected void engineInit(
-            int             keySize,
-            SecureRandom    random)
-        {
-            super.engineInit(keySize, random);
-            keySizeSet = true;
-        }
-
-        protected SecretKey engineGenerateKey()
-        {
-            if (uninitialised)
-            {
-                engine.init(new KeyGenerationParameters(new SecureRandom(), defaultKeySize));
-                uninitialised = false;
-            }
-
-            //
-            // if no key size has been defined generate a 24 byte key in
-            // the a-b-a format
-            //
-            if (!keySizeSet)
-            {
-                byte[]     k = engine.generateKey();
-
-                System.arraycopy(k, 0, k, 16, 8);
-
-                return (SecretKey)(new SecretKeySpec(k, algName));
-            }
-            else
-            {
-                return (SecretKey)(new SecretKeySpec(engine.generateKey(), algName));
-            }
-        }
-    }
-    
     // BEGIN android-removed
-    // /**
-    //  * generate a desEDE key in the a-b-c format.
-    //  */
-    // public static class DESede3
-    //     extends JCEKeyGenerator
-    // {
-    //     public DESede3()
-    //     {
-    //         super("DESede3", 192, new DESedeKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * SKIPJACK
-    //  */
-    // public static class Skipjack
-    //     extends JCEKeyGenerator
-    // {
-    //     public Skipjack()
-    //     {
-    //         super("SKIPJACK", 80, new CipherKeyGenerator());
-    //     }
-    // }
-    // END android-removed
-    
-    /**
-     * Blowfish
-     */
-    public static class Blowfish
-        extends JCEKeyGenerator
-    {
-        public Blowfish()
-        {
-            super("Blowfish", 128, new CipherKeyGenerator());
-        }
-    }
-    
-    // BEGIN android-removed
-    // /**
-    //  * Twofish
-    //  */
-    // public static class Twofish
-    //     extends JCEKeyGenerator
-    // {
-    //     public Twofish()
-    //     {
-    //         super("Twofish", 256, new CipherKeyGenerator());
-    //     }
-    // }
-    //
     // /**
     //  * RC2
     //  */
@@ -210,56 +108,6 @@ public class JCEKeyGenerator
     //     public RC2()
     //     {
     //         super("RC2", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    // END android-removed
-    
-    /**
-     * RC4
-     */
-    public static class RC4
-        extends JCEKeyGenerator
-    {
-        public RC4()
-        {
-            super("RC4", 128, new CipherKeyGenerator());
-        }
-    }
-    
-    // BEGIN android-removed
-    // /**
-    //  * RC5
-    //  */
-    // public static class RC5
-    //     extends JCEKeyGenerator
-    // {
-    //     public RC5()
-    //     {
-    //         super("RC5", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * RC5
-    //  */
-    // public static class RC564
-    //     extends JCEKeyGenerator
-    // {
-    //     public RC564()
-    //     {
-    //         super("RC5-64", 256, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * RC6
-    //  */
-    // public static class RC6
-    //     extends JCEKeyGenerator
-    // {
-    //     public RC6()
-    //     {
-    //         super("RC6", 256, new CipherKeyGenerator());
     //     }
     // }
     //
@@ -272,128 +120,6 @@ public class JCEKeyGenerator
     //     public GOST28147()
     //     {
     //         super("GOST28147", 256, new CipherKeyGenerator());
-    //     }
-    // }
-    
-    // /**
-    //  * Rijndael
-    //  */
-    // public static class Rijndael
-    //     extends JCEKeyGenerator
-    // {
-    //     public Rijndael()
-    //     {
-    //         super("Rijndael", 192, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * Serpent
-    //  */
-    // public static class Serpent
-    //     extends JCEKeyGenerator
-    // {
-    //     public Serpent()
-    //     {
-    //         super("Serpent", 192, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    //
-    //
-    // /**
-    //  * CAST6
-    //  */
-    // public static class CAST6
-    //     extends JCEKeyGenerator
-    // {
-    //     public CAST6()
-    //     {
-    //         super("CAST6", 256, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * TEA
-    //  */
-    // public static class TEA
-    //     extends JCEKeyGenerator
-    // {
-    //     public TEA()
-    //     {
-    //         super("TEA", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * XTEA
-    //  */
-    // public static class XTEA
-    //     extends JCEKeyGenerator
-    // {
-    //     public XTEA()
-    //     {
-    //         super("XTEA", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * Salsa20
-    //  */
-    // public static class Salsa20
-    //     extends JCEKeyGenerator
-    // {
-    //     public Salsa20()
-    //     {
-    //         super("Salsa20", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * HC128
-    //  */
-    // public static class HC128
-    //     extends JCEKeyGenerator
-    // {
-    //     public HC128()
-    //     {
-    //         super("HC128", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * HC256
-    //  */
-    // public static class HC256
-    //     extends JCEKeyGenerator
-    // {
-    //     public HC256()
-    //     {
-    //         super("HC256", 256, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * VMPC
-    //  */
-    // public static class VMPC
-    //     extends JCEKeyGenerator
-    // {
-    //     public VMPC()
-    //     {
-    //         super("VMPC", 128, new CipherKeyGenerator());
-    //     }
-    // }
-    //
-    // /**
-    //  * VMPC-KSA3
-    //  */
-    // public static class VMPCKSA3
-    //     extends JCEKeyGenerator
-    // {
-    //     public VMPCKSA3()
-    //     {
-    //         super("VMPC-KSA3", 128, new CipherKeyGenerator());
     //     }
     // }
     // END android-removed

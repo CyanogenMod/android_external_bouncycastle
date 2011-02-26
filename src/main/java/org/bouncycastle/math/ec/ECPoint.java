@@ -133,6 +133,11 @@ public abstract class ECPoint
      */
     public ECPoint multiply(BigInteger k)
     {
+        if (k.signum() < 0)
+        {
+            throw new IllegalArgumentException("The multiplicator cannot be negative");
+        }
+
         if (this.isInfinity())
         {
             return this;
@@ -309,17 +314,16 @@ public abstract class ECPoint
             return new ECPoint.Fp(curve, this.x, this.y.negate(), this.withCompression);
         }
 
-        // TODO Uncomment this to enable WNAF algorithm for Fp point multiplication
-//        /**
-//         * Sets the default <code>ECMultiplier</code>, unless already set. 
-//         */
-//        synchronized void assertECMultiplier()
-//        {
-//            if (this.multiplier == null)
-//            {
-//                this.multiplier = new WNafMultiplier();
-//            }
-//        }
+        /**
+         * Sets the default <code>ECMultiplier</code>, unless already set. 
+         */
+        synchronized void assertECMultiplier()
+        {
+            if (this.multiplier == null)
+            {
+                this.multiplier = new WNafMultiplier();
+            }
+        }
     }
 
     /**
@@ -365,15 +369,6 @@ public abstract class ECPoint
             }
             
             this.withCompression = withCompression;
-        }
-
-        /**
-         * @deprecated use ECCurve.getInfinity()
-         * Constructor for point at infinity
-         */
-        public F2m(ECCurve curve)
-        {
-            super(curve, null, null);
         }
 
         /* (non-Javadoc)
@@ -572,23 +567,22 @@ public abstract class ECPoint
             return new ECPoint.F2m(curve, this.getX(), this.getY().add(this.getX()), withCompression);
         }
 
-        // TODO Uncomment this to enable WNAF/WTNAF F2m point multiplication
-//        /**
-//         * Sets the appropriate <code>ECMultiplier</code>, unless already set. 
-//         */
-//        synchronized void assertECMultiplier()
-//        {
-//            if (this.multiplier == null)
-//            {
-//                if (((ECCurve.F2m)(this.curve)).isKoblitz())
-//                {
-//                    this.multiplier = new WTauNafMultiplier();
-//                }
-//                else
-//                {
-//                    this.multiplier = new WNafMultiplier();
-//                }
-//            }
-//        }
+        /**
+         * Sets the appropriate <code>ECMultiplier</code>, unless already set. 
+         */
+        synchronized void assertECMultiplier()
+        {
+            if (this.multiplier == null)
+            {
+                if (((ECCurve.F2m)this.curve).isKoblitz())
+                {
+                    this.multiplier = new WTauNafMultiplier();
+                }
+                else
+                {
+                    this.multiplier = new WNafMultiplier();
+                }
+            }
+        }
     }
 }

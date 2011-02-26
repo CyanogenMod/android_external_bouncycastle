@@ -1,7 +1,12 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.crypto.params.DESParameters;
-import org.bouncycastle.util.Strings;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Hashtable;
 
 import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
@@ -10,13 +15,9 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Hashtable;
+
+import org.bouncycastle.crypto.params.DESParameters;
+import org.bouncycastle.util.Strings;
 
 /**
  * Diffie-Hellman key agreement. There's actually a better way of doing this
@@ -31,8 +32,6 @@ public class JCEDHKeyAgreement
     private BigInteger      g;
     private BigInteger      result;
 
-    private SecureRandom    random;
-
     private static final Hashtable algorithms = new Hashtable();
 
     static
@@ -41,11 +40,13 @@ public class JCEDHKeyAgreement
         Integer i64 = Integer.valueOf(64);
         Integer i192 = Integer.valueOf(192);
         Integer i128 = Integer.valueOf(128);
+        Integer i256 = Integer.valueOf(256);
         // END android-changed
 
         algorithms.put("DES", i64);
         algorithms.put("DESEDE", i192);
         algorithms.put("BLOWFISH", i128);
+        algorithms.put("AES", i256);
     }
 
     private byte[] bigIntToBytes(
@@ -172,8 +173,6 @@ public class JCEDHKeyAgreement
         }
         DHPrivateKey    privKey = (DHPrivateKey)key;
 
-        this.random = random;
-
         if (params != null)
         {
             if (!(params instanceof DHParameterSpec))
@@ -206,7 +205,6 @@ public class JCEDHKeyAgreement
 
         DHPrivateKey    privKey = (DHPrivateKey)key;
 
-        this.random = random;
         this.p = privKey.getParams().getP();
         this.g = privKey.getParams().getG();
         this.x = this.result = privKey.getX();

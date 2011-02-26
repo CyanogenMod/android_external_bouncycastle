@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.SHA224Digest;
@@ -33,7 +34,6 @@ import org.bouncycastle.crypto.signers.DSASigner;
 // BEGIN android-removed
 // import org.bouncycastle.jce.interfaces.GOST3410Key;
 // END android-removed
-import org.bouncycastle.jce.provider.util.NullDigest;
 
 public class JDKDSASigner
     extends SignatureSpi

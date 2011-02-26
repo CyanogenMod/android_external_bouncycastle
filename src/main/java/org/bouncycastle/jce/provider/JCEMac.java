@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.MacSpi;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Mac;
 // BEGIN android-removed
@@ -22,11 +31,8 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 // import org.bouncycastle.crypto.digests.TigerDigest;
 // END android-removed
 import org.bouncycastle.crypto.engines.DESEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.engines.RC2Engine;
-// import org.bouncycastle.crypto.engines.RC532Engine;
-// import org.bouncycastle.crypto.engines.SkipjackEngine;
 // END android-removed
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 // BEGIN android-removed
@@ -37,19 +43,10 @@ import org.bouncycastle.crypto.macs.HMac;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 // import org.bouncycastle.crypto.macs.OldHMac;
-// import org.bouncycastle.crypto.macs.VMPCMac;
 // END android-removed
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-
-import javax.crypto.MacSpi;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -174,30 +171,6 @@ public class JCEMac
     // }
     //
     // /**
-    //  * DESede
-    //  */
-    // public static class DESede
-    //     extends JCEMac
-    // {
-    //     public DESede()
-    //     {
-    //         super(new CBCBlockCipherMac(new DESedeEngine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * SKIPJACK
-    //  */
-    // public static class Skipjack
-    //     extends JCEMac
-    // {
-    //     public Skipjack()
-    //     {
-    //         super(new CBCBlockCipherMac(new SkipjackEngine()));
-    //     }
-    // }
-    //
-    // /**
     //  * RC2
     //  */
     // public static class RC2
@@ -206,18 +179,6 @@ public class JCEMac
     //     public RC2()
     //     {
     //         super(new CBCBlockCipherMac(new RC2Engine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * RC5
-    //  */
-    // public static class RC5
-    //     extends JCEMac
-    // {
-    //     public RC5()
-    //     {
-    //         super(new CBCBlockCipherMac(new RC532Engine()));
     //     }
     // }
     //
@@ -233,17 +194,7 @@ public class JCEMac
     //     }
     // }
     //
-    // /**
-    //  * VMPC
-    //  */
-    // public static class VMPC
-    //     extends JCEMac
-    // {
-    //     public VMPC()
-    //     {
-    //         super(new VMPCMac());
-    //     }
-    // }
+    //
     //
     // /**
     //  * DES
@@ -258,30 +209,6 @@ public class JCEMac
     // }
     //
     // /**
-    //  * DESede
-    //  */
-    // public static class DESedeCFB8
-    //     extends JCEMac
-    // {
-    //     public DESedeCFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new DESedeEngine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * SKIPJACK
-    //  */
-    // public static class SkipjackCFB8
-    //     extends JCEMac
-    // {
-    //     public SkipjackCFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new SkipjackEngine()));
-    //     }
-    // }
-    //
-    // /**
     //  * RC2CFB8
     //  */
     // public static class RC2CFB8
@@ -290,43 +217,6 @@ public class JCEMac
     //     public RC2CFB8()
     //     {
     //         super(new CFBBlockCipherMac(new RC2Engine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * RC5CFB8
-    //  */
-    // public static class RC5CFB8
-    //     extends JCEMac
-    // {
-    //     public RC5CFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new RC532Engine()));
-    //     }
-    // }
-    //
-    //
-    // /**
-    //  * DESede64
-    //  */
-    // public static class DESede64
-    //     extends JCEMac
-    // {
-    //     public DESede64()
-    //     {
-    //         super(new CBCBlockCipherMac(new DESedeEngine(), 64));
-    //     }
-    // }
-    //
-    // /**
-    //  * DESede64with7816-4Padding
-    //  */
-    // public static class DESede64with7816d4
-    //     extends JCEMac
-    // {
-    //     public DESede64with7816d4()
-    //     {
-    //         super(new CBCBlockCipherMac(new DESedeEngine(), 64, new ISO7816d4Padding()));
     //     }
     // }
     //
@@ -378,7 +268,7 @@ public class JCEMac
     //     }
     // }
     // END android-removed
-    
+
     /**
      * MD5 HMac
      */
