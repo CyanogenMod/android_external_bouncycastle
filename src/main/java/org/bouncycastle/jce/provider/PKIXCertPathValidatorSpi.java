@@ -1,5 +1,8 @@
 package org.bouncycastle.jce.provider;
 
+// BEGIN android-added
+import java.math.BigInteger;
+// END android-added
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
@@ -34,6 +37,23 @@ import org.bouncycastle.x509.ExtendedPKIXParameters;
 public class PKIXCertPathValidatorSpi
         extends CertPathValidatorSpi
 {
+    // BEGIN android-added
+    // From http://src.chromium.org/viewvc/chrome/trunk/src/net/base/x509_certificate.cc?revision=78748&view=markup
+    private static final Set<BigInteger> SERIAL_BLACKLIST = new HashSet<BigInteger>(Arrays.asList(
+        // Not a real certificate. For testing only.
+        new BigInteger(1, new byte[] {(byte)0x07,(byte)0x7a,(byte)0x59,(byte)0xbc,(byte)0xd5,(byte)0x34,(byte)0x59,(byte)0x60,(byte)0x1c,(byte)0xa6,(byte)0x90,(byte)0x72,(byte)0x67,(byte)0xa6,(byte)0xdd,(byte)0x1c}),
+
+        new BigInteger(1, new byte[] {(byte)0x04,(byte)0x7e,(byte)0xcb,(byte)0xe9,(byte)0xfc,(byte)0xa5,(byte)0x5f,(byte)0x7b,(byte)0xd0,(byte)0x9e,(byte)0xae,(byte)0x36,(byte)0xe1,(byte)0x0c,(byte)0xae,(byte)0x1e}),
+        new BigInteger(1, new byte[] {(byte)0xd8,(byte)0xf3,(byte)0x5f,(byte)0x4e,(byte)0xb7,(byte)0x87,(byte)0x2b,(byte)0x2d,(byte)0xab,(byte)0x06,(byte)0x92,(byte)0xe3,(byte)0x15,(byte)0x38,(byte)0x2f,(byte)0xb0}),
+        new BigInteger(1, new byte[] {(byte)0xb0,(byte)0xb7,(byte)0x13,(byte)0x3e,(byte)0xd0,(byte)0x96,(byte)0xf9,(byte)0xb5,(byte)0x6f,(byte)0xae,(byte)0x91,(byte)0xc8,(byte)0x74,(byte)0xbd,(byte)0x3a,(byte)0xc0}),
+        new BigInteger(1, new byte[] {(byte)0x92,(byte)0x39,(byte)0xd5,(byte)0x34,(byte)0x8f,(byte)0x40,(byte)0xd1,(byte)0x69,(byte)0x5a,(byte)0x74,(byte)0x54,(byte)0x70,(byte)0xe1,(byte)0xf2,(byte)0x3f,(byte)0x43}),
+        new BigInteger(1, new byte[] {(byte)0xe9,(byte)0x02,(byte)0x8b,(byte)0x95,(byte)0x78,(byte)0xe4,(byte)0x15,(byte)0xdc,(byte)0x1a,(byte)0x71,(byte)0x0a,(byte)0x2b,(byte)0x88,(byte)0x15,(byte)0x44,(byte)0x47}),
+        new BigInteger(1, new byte[] {(byte)0xd7,(byte)0x55,(byte)0x8f,(byte)0xda,(byte)0xf5,(byte)0xf1,(byte)0x10,(byte)0x5b,(byte)0xb2,(byte)0x13,(byte)0x28,(byte)0x2b,(byte)0x70,(byte)0x77,(byte)0x29,(byte)0xa3}),
+        new BigInteger(1, new byte[] {(byte)0xf5,(byte)0xc8,(byte)0x6a,(byte)0xf3,(byte)0x61,(byte)0x62,(byte)0xf1,(byte)0x3a,(byte)0x64,(byte)0xf5,(byte)0x4f,(byte)0x6d,(byte)0xc9,(byte)0x58,(byte)0x7c,(byte)0x06}),
+        new BigInteger(1, new byte[] {(byte)0x39,(byte)0x2a,(byte)0x43,(byte)0x4f,(byte)0x0e,(byte)0x07,(byte)0xdf,(byte)0x1f,(byte)0x8a,(byte)0xa3,(byte)0x05,(byte)0xde,(byte)0x34,(byte)0xe0,(byte)0xc2,(byte)0x29}),
+        new BigInteger(1, new byte[] {(byte)0x3e,(byte)0x75,(byte)0xce,(byte)0xd4,(byte)0x6b,(byte)0x69,(byte)0x30,(byte)0x21,(byte)0x21,(byte)0x88,(byte)0x30,(byte)0xae,(byte)0x86,(byte)0xa8,(byte)0x2a,(byte)0x71})
+    ));
+    // END android-added
 
     public CertPathValidatorResult engineValidate(
             CertPath certPath,
@@ -76,6 +96,22 @@ public class PKIXCertPathValidatorSpi
         {
             throw new CertPathValidatorException("Certification path is empty.", null, certPath, 0);
         }
+        // BEGIN android-added
+        {
+            X509Certificate cert = (X509Certificate) certs.get(0);
+
+            if (cert != null) {
+                BigInteger serial = cert.getSerialNumber();
+                if (serial != null && SERIAL_BLACKLIST.contains(serial)) {
+                    // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
+                    String message = "Certificate revocation of serial 0x" + serial.toString(16);
+                    System.out.println(message);
+                    AnnotatedException e = new AnnotatedException(message);
+                    throw new CertPathValidatorException(e.getMessage(), e, certPath, 0);
+                }
+            }
+        }
+        // END android-added
 
         //
         // (b)
