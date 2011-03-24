@@ -35,5 +35,8 @@ Other performance (both speed and memory) changes:
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
 - Added DSA support to JDKKeyManager.engineGetKeySpec
 
-Non-performance changes
+Other security changes:
+- Blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi
+
+Other changes:
 - Log entry and exit to DHParametersHelper.generateSafePrimes which has long, unpredictable runtime
