@@ -6,33 +6,41 @@ import java.io.InputStream;
 public class BERTaggedObjectParser
     implements ASN1TaggedObjectParser
 {
-    private int _baseTag;
+    private boolean _constructed;
     private int _tagNumber;
-    private InputStream _contentStream;
+    private ASN1StreamParser _parser;
 
-    private boolean _indefiniteLength;
-
+    /**
+     * @deprecated
+     */
     protected BERTaggedObjectParser(
         int         baseTag,
         int         tagNumber,
         InputStream contentStream)
     {
-        _baseTag = baseTag;
+        this((baseTag & DERTags.CONSTRUCTED) != 0, tagNumber, new ASN1StreamParser(contentStream));
+    }
+
+    BERTaggedObjectParser(
+        boolean             constructed,
+        int                 tagNumber,
+        ASN1StreamParser    parser)
+    {
+        _constructed = constructed;
         _tagNumber = tagNumber;
-        _contentStream = contentStream;
-        _indefiniteLength = contentStream instanceof IndefiniteLengthInputStream;
+        _parser = parser;
     }
 
     public boolean isConstructed()
     {
-        return (_baseTag & DERTags.CONSTRUCTED) != 0;
+        return _constructed;
     }
 
     public int getTagNo()
     {
         return _tagNumber;
     }
-    
+
     public DEREncodable getObjectParser(
         int     tag,
         boolean isExplicit)
@@ -40,84 +48,31 @@ public class BERTaggedObjectParser
     {
         if (isExplicit)
         {
-            return new ASN1StreamParser(_contentStream).readObject();
+            if (!_constructed)
+            {
+                throw new IOException("Explicit tags must be constructed (see X.690 8.14.2)");
+            }
+            return _parser.readObject();
         }
 
-        switch (tag)
-        {
-            case DERTags.SET:
-                if (_indefiniteLength)
-                {
-                    return new BERSetParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DERSetParser(new ASN1StreamParser(_contentStream));
-                }
-            case DERTags.SEQUENCE:
-                if (_indefiniteLength)
-                {
-                    return new BERSequenceParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DERSequenceParser(new ASN1StreamParser(_contentStream));
-                }
-            case DERTags.OCTET_STRING:
-                // TODO Is the handling of definite length constructed encodings correct?
-                if (_indefiniteLength || this.isConstructed())
-                {
-                    return new BEROctetStringParser(new ASN1StreamParser(_contentStream));
-                }
-                else
-                {
-                    return new DEROctetStringParser((DefiniteLengthInputStream)_contentStream);
-                }
-        }
-
-        throw new RuntimeException("implicit tagging not implemented");
+        return _parser.readImplicit(_constructed, tag);
     }
 
-    private ASN1EncodableVector rLoadVector(InputStream in)
+    public DERObject getLoadedObject()
+        throws IOException
     {
-        try
-        {
-            return new ASN1StreamParser(in).readVector();
-        }
-        catch (IOException e)
-        {
-            throw new ASN1ParsingException(e.getMessage(), e);
-        }
+        return _parser.readTaggedObject(_constructed, _tagNumber);
     }
 
     public DERObject getDERObject()
     {
-        if (_indefiniteLength)
-        {
-            ASN1EncodableVector v = rLoadVector(_contentStream);
-
-            return v.size() == 1
-                ?   new BERTaggedObject(true, _tagNumber, v.get(0))
-                :   new BERTaggedObject(false, _tagNumber, BERFactory.createSequence(v));
-        }
-
-        if (this.isConstructed())
-        {
-            ASN1EncodableVector v = rLoadVector(_contentStream);
-
-            return v.size() == 1
-                ?   new DERTaggedObject(true, _tagNumber, v.get(0))
-                :   new DERTaggedObject(false, _tagNumber, DERFactory.createSequence(v));
-        }
-
         try
         {
-            DefiniteLengthInputStream defIn = (DefiniteLengthInputStream)_contentStream;
-            return new DERTaggedObject(false, _tagNumber, new DEROctetString(defIn.toByteArray()));
+            return this.getLoadedObject();
         }
         catch (IOException e)
         {
-            throw new IllegalStateException(e.getMessage());
+            throw new ASN1ParsingException(e.getMessage());
         }
     }
 }

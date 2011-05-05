@@ -321,6 +321,10 @@ public abstract class JDKKeyFactory
         {
               return new JCEDHPrivateKey(info);
         }
+        else if (algOid.equals(X9ObjectIdentifiers.dhpublicnumber))
+        {
+              return new JCEDHPrivateKey(info);
+        }
         // BEGIN android-removed
         // else if (algOid.equals(OIWObjectIdentifiers.elGamalAlgorithm))
         // {

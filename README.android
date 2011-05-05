@@ -12,13 +12,14 @@ The following steps are recommended for porting new Bouncy Castle versions.
 
 1) Retrieve the appropriate version of the Bouncy Castle source from
    www.bouncycastle.org/latest_releases.html (in bcprov-jdk*-*.tar.gz
-   file). Check the checksum (found at bouncycastle.org/checksums.html) with:
+   file). Check the checksum (found at http://bouncycastle.org/checksums.html) with:
 
      md5sum bcprov-jdk*-*.tar.gz
      sha1sum bcprov-jdk*-*.tar.gz
 
 2) Update the variables in bouncycastle.config and bouncycastle.version as appropriate.
    At the very least you will need to update the bouncycastle.version.
+   Similarly update ThirdPartyProject.prop.
 
 3) Run:
 

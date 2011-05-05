@@ -1,27 +1,32 @@
 package org.bouncycastle.jce.provider.symmetric;
 
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.engines.AESWrapEngine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
-// END android-removed
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.modes.CFBBlockCipher;
-import org.bouncycastle.crypto.modes.OFBBlockCipher;
-import org.bouncycastle.jce.provider.JCEBlockCipher;
-import org.bouncycastle.jce.provider.JCEKeyGenerator;
-import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
-import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
-import org.bouncycastle.jce.provider.WrapCipherSpi;
-
-import javax.crypto.spec.IvParameterSpec;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.HashMap;
+
+import javax.crypto.spec.IvParameterSpec;
+
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.CipherKeyGenerator;
+import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESWrapEngine;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+// import org.bouncycastle.crypto.macs.CMac;
+// END android-removed
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.modes.OFBBlockCipher;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.JCEBlockCipher;
+import org.bouncycastle.jce.provider.JCEKeyGenerator;
+import org.bouncycastle.jce.provider.JCEMac;
+import org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator;
+import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
+import org.bouncycastle.jce.provider.WrapCipherSpi;
 
 public final class AES
 {
@@ -65,6 +70,15 @@ public final class AES
     //         super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
     //     }
     // }
+    //
+    // public static class AESCMAC
+    //     extends JCEMac
+    // {
+    //     public AESCMAC()
+    //     {
+    //         super(new CMac(new AESFastEngine()));
+    //     }
+    // }
     // END android-removed
 
     static public class Wrap
@@ -82,7 +96,7 @@ public final class AES
     // {
     //     public RFC3211Wrap()
     //     {
-    //         super(new RFC3211WrapEngine(new AESEngine()), 16);
+    //         super(new RFC3211WrapEngine(new AESFastEngine()), 16);
     //     }
     // }
     // END android-removed
@@ -155,7 +169,7 @@ public final class AES
     //
     //         try
     //         {
-    //             params = AlgorithmParameters.getInstance("AES", "BC");
+    //             params = AlgorithmParameters.getInstance("AES", BouncyCastleProvider.PROVIDER_NAME);
     //             params.init(new IvParameterSpec(iv));
     //         }
     //         catch (Exception e)
@@ -174,6 +188,91 @@ public final class AES
         protected String engineToString()
         {
             return "AES IV";
+        }
+    }
+
+    public static class Mappings
+        extends HashMap
+    {
+        /**
+         * These three got introduced in some messages as a result of a typo in an
+         * early document. We don't produce anything using these OID values, but we'll
+         * read them.
+         */
+        private static final String wrongAES128 = "2.16.840.1.101.3.4.2";
+        private static final String wrongAES192 = "2.16.840.1.101.3.4.22";
+        private static final String wrongAES256 = "2.16.840.1.101.3.4.42";
+
+        public Mappings()
+        {
+            put("AlgorithmParameters.AES", "org.bouncycastle.jce.provider.symmetric.AES$AlgParams");
+            put("Alg.Alias.AlgorithmParameters." + wrongAES128, "AES");
+            put("Alg.Alias.AlgorithmParameters." + wrongAES192, "AES");
+            put("Alg.Alias.AlgorithmParameters." + wrongAES256, "AES");
+            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
+            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
+            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
+
+            // BEGIN android-removed
+            // put("AlgorithmParameterGenerator.AES", "org.bouncycastle.jce.provider.symmetric.AES$AlgParamGen");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
+            // put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
+            // END android-removed
+
+            put("Cipher.AES", "org.bouncycastle.jce.provider.symmetric.AES$ECB");
+            put("Alg.Alias.Cipher." + wrongAES128, "AES");
+            put("Alg.Alias.Cipher." + wrongAES192, "AES");
+            put("Alg.Alias.Cipher." + wrongAES256, "AES");
+            // BEGIN android-removed
+            // put("Cipher." + NISTObjectIdentifiers.id_aes128_ECB, "org.bouncycastle.jce.provider.symmetric.AES$ECB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes192_ECB, "org.bouncycastle.jce.provider.symmetric.AES$ECB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes256_ECB, "org.bouncycastle.jce.provider.symmetric.AES$ECB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes128_CBC, "org.bouncycastle.jce.provider.symmetric.AES$CBC");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes192_CBC, "org.bouncycastle.jce.provider.symmetric.AES$CBC");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes256_CBC, "org.bouncycastle.jce.provider.symmetric.AES$CBC");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes128_OFB, "org.bouncycastle.jce.provider.symmetric.AES$OFB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes192_OFB, "org.bouncycastle.jce.provider.symmetric.AES$OFB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes256_OFB, "org.bouncycastle.jce.provider.symmetric.AES$OFB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes128_CFB, "org.bouncycastle.jce.provider.symmetric.AES$CFB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes192_CFB, "org.bouncycastle.jce.provider.symmetric.AES$CFB");
+            // put("Cipher." + NISTObjectIdentifiers.id_aes256_CFB, "org.bouncycastle.jce.provider.symmetric.AES$CFB");
+            // END android-removed
+            put("Cipher.AESWRAP", "org.bouncycastle.jce.provider.symmetric.AES$Wrap");
+            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
+            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
+            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
+            // BEGIN android-removed
+            // put("Cipher.AESRFC3211WRAP", "org.bouncycastle.jce.provider.symmetric.AES$RFC3211Wrap");
+            // END android-removed
+
+            put("KeyGenerator.AES", "org.bouncycastle.jce.provider.symmetric.AES$KeyGen");
+            // BEGIN android-removed
+            // put("KeyGenerator.2.16.840.1.101.3.4.2", "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator.2.16.840.1.101.3.4.22", "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator.2.16.840.1.101.3.4.42", "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_ECB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_OFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_ECB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_OFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_ECB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_OFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CFB, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            // put("KeyGenerator.AESWRAP", "org.bouncycastle.jce.provider.symmetric.AES$KeyGen");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen128");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen192");
+            // put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, "org.bouncycastle.jce.provider.symmetric.AES$KeyGen256");
+            //
+            // put("Mac.AESCMAC", "org.bouncycastle.jce.provider.symmetric.AES$AESCMAC");
+            // END android-removed
         }
     }
 }

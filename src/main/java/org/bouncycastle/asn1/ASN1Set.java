@@ -141,6 +141,18 @@ abstract public class ASN1Set
     // }
     // END android-removed
 
+    public ASN1Encodable[] toArray()
+    {
+        ASN1Encodable[] values = new ASN1Encodable[this.size()];
+
+        for (int i = 0; i != this.size(); i++)
+        {
+            values[i] = (ASN1Encodable)this.getObjectAt(i);
+        }
+
+        return values;
+    }
+
     public ASN1SetParser parser()
     {
         final ASN1Set outer = this;
@@ -171,6 +183,11 @@ abstract public class ASN1Set
                 return obj;
             }
 
+            public DERObject getLoadedObject()
+            {
+                return outer;
+            }
+
             public DERObject getDERObject()
             {
                 return outer;
@@ -186,12 +203,10 @@ abstract public class ASN1Set
     //
     //     while (e.hasMoreElements())
     //     {
-    //         Object o = e.nextElement();
+    //         Object o = getNext(e);
     //         hashCode *= 17;
-    //         if (o != null)
-    //         {
-    //             hashCode ^= o.hashCode();
-    //         }
+    //
+    //         hashCode ^= o.hashCode();
     //     }
     //
     //     return hashCode;
@@ -218,10 +233,13 @@ abstract public class ASN1Set
 
         while (s1.hasMoreElements())
         {
-            DERObject  o1 = ((DEREncodable)s1.nextElement()).getDERObject();
-            DERObject  o2 = ((DEREncodable)s2.nextElement()).getDERObject();
+            DEREncodable  obj1 = getNext(s1);
+            DEREncodable  obj2 = getNext(s2);
 
-            if (o1 == o2 || (o1 != null && o1.equals(o2)))
+            DERObject  o1 = obj1.getDERObject();
+            DERObject  o2 = obj2.getDERObject();
+
+            if (o1 == o2 || o1.equals(o2))
             {
                 continue;
             }
@@ -232,6 +250,19 @@ abstract public class ASN1Set
         return true;
     }
 
+    private DEREncodable getNext(Enumeration e)
+    {
+        DEREncodable encObj = (DEREncodable)e.nextElement();
+
+        // unfortunately null was allowed as a substitute for DER null
+        if (encObj == null)
+        {
+            return DERNull.INSTANCE;
+        }
+
+        return encObj;
+    }
+
     // BEGIN android-removed
     // /**
     //  * return true if a <= b (arrays are assumed padded with zeros).
@@ -240,44 +271,15 @@ abstract public class ASN1Set
     //      byte[] a,
     //      byte[] b)
     // {
-    //      if (a.length <= b.length)
-    //      {
-    //          for (int i = 0; i != a.length; i++)
-    //          {
-    //              int    l = a[i] & 0xff;
-    //              int    r = b[i] & 0xff;
-    //
-    //              if (r > l)
-    //              {
-    //                  return true;
-    //              }
-    //              else if (l > r)
-    //              {
-    //                  return false;
-    //              }
-    //          }
-    //
-    //          return true;
-    //      }
-    //      else
-    //      {
-    //          for (int i = 0; i != b.length; i++)
-    //          {
-    //              int    l = a[i] & 0xff;
-    //              int    r = b[i] & 0xff;
-    //
-    //              if (r > l)
-    //              {
-    //                  return true;
-    //              }
-    //              else if (l > r)
-    //              {
-    //                  return false;
-    //              }
-    //          }
-    //
-    //          return false;
-    //      }
+    //     int len = Math.min(a.length, b.length);
+    //     for (int i = 0; i != len; ++i)
+    //     {
+    //         if (a[i] != b[i])
+    //         {
+    //             return (a[i] & 0xff) < (b[i] & 0xff);
+    //         }
+    //     }
+    //     return len == a.length;
     // }
     // END android-removed
 

@@ -361,7 +361,7 @@ public class JDKKeyStore
 
         try
         {
-            CertificateFactory cFact = CertificateFactory.getInstance(type, "BC");
+            CertificateFactory cFact = CertificateFactory.getInstance(type, BouncyCastleProvider.PROVIDER_NAME);
             ByteArrayInputStream bIn = new ByteArrayInputStream(cEnc);
 
             return cFact.generateCertificate(bIn);
@@ -436,11 +436,11 @@ public class JDKKeyStore
             switch (keyType)
             {
             case KEY_PRIVATE:
-                return KeyFactory.getInstance(algorithm, "BC").generatePrivate(spec);
+                return KeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME).generatePrivate(spec);
             case KEY_PUBLIC:
-                return KeyFactory.getInstance(algorithm, "BC").generatePublic(spec);
+                return KeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME).generatePublic(spec);
             case KEY_SECRET:
-                return SecretKeyFactory.getInstance(algorithm, "BC").generateSecret(spec);
+                return SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME).generateSecret(spec);
             default:
                 throw new IOException("Key type " + keyType + " not recognised!");
             }
@@ -463,10 +463,10 @@ public class JDKKeyStore
         try
         {
             PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
             PBEParameterSpec    defParams = new PBEParameterSpec(salt, iterationCount);
 
-            Cipher cipher = Cipher.getInstance(algorithm, "BC");
+            Cipher cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             cipher.init(mode, keyFact.generateSecret(pbeSpec), defParams);
 

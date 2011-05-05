@@ -1,9 +1,24 @@
 package org.bouncycastle.crypto.modes.gcm;
 
 import org.bouncycastle.crypto.util.Pack;
+import org.bouncycastle.util.Arrays;
 
 abstract class GCMUtil
 {
+    static byte[] oneAsBytes()
+    {
+        byte[] tmp = new byte[16];
+        tmp[0] = (byte)0x80;
+        return tmp;
+    }
+
+    static int[] oneAsInts()
+    {
+        int[] tmp = new int[4];
+        tmp[0] = 0x80000000;
+        return tmp;
+    }
+
     static int[] asInts(byte[] bs)
     {
         int[] us = new int[4];
@@ -12,6 +27,35 @@ abstract class GCMUtil
         us[2] = Pack.bigEndianToInt(bs, 8);
         us[3] = Pack.bigEndianToInt(bs, 12);
         return us;
+    }
+
+    static void multiply(byte[] block, byte[] val)
+    {
+        byte[] tmp = Arrays.clone(block);
+        byte[] c = new byte[16];
+
+        for (int i = 0; i < 16; ++i)
+        {
+            byte bits = val[i];
+            for (int j = 7; j >= 0; --j)
+            {
+                if ((bits & (1 << j)) != 0)
+                {
+                    xor(c, tmp);
+                }
+
+                boolean lsb = (tmp[15] & 1) != 0;
+                shiftRight(tmp);
+                if (lsb)
+                {
+                    // R = new byte[]{ 0xe1, ... };
+//                    GCMUtil.xor(v, R);
+                    tmp[0] ^= (byte)0xe1;
+                }
+            }
+        }
+
+        System.arraycopy(c, 0, block, 0, 16);
     }
 
     // P is the value with only bit i=1 set

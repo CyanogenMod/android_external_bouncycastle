@@ -1,22 +1,120 @@
 package org.bouncycastle.openssl;
 
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
+import java.io.IOException;
+import java.security.Key;
+import java.security.Provider;
+import java.security.Security;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
-import java.io.IOException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 final class PEMUtilities
 {
+    private static final Map KEYSIZES = new HashMap();
+    private static final Set PKCS5_SCHEME_1 = new HashSet();
+    private static final Set PKCS5_SCHEME_2 = new HashSet();
+
+    static
+    {
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC);
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC);
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC);
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC);
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC);
+        PKCS5_SCHEME_1.add(PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC);
+
+        PKCS5_SCHEME_2.add(PKCSObjectIdentifiers.id_PBES2);
+        PKCS5_SCHEME_2.add(PKCSObjectIdentifiers.des_EDE3_CBC);
+        PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes128_CBC);
+        PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes192_CBC);
+        PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes256_CBC);
+
+        // BEGIN android-changed
+        KEYSIZES.put(PKCSObjectIdentifiers.des_EDE3_CBC.getId(), Integer.valueOf(192));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), Integer.valueOf(128));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), Integer.valueOf(192));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes256_CBC.getId(), Integer.valueOf(256));
+        // END android-changed
+    }
+
+    static int getKeySize(String algorithm)
+    {
+        if (!KEYSIZES.containsKey(algorithm))
+        {
+            throw new IllegalStateException("no key size for algorithm: " + algorithm);
+        }
+        
+        return ((Integer)KEYSIZES.get(algorithm)).intValue();
+    }
+
+    static boolean isPKCS5Scheme1(DERObjectIdentifier algOid)
+    {
+        return PKCS5_SCHEME_1.contains(algOid);
+    }
+
+    static boolean isPKCS5Scheme2(DERObjectIdentifier algOid)
+    {
+        return PKCS5_SCHEME_2.contains(algOid);
+    }
+
+    static boolean isPKCS12(DERObjectIdentifier algOid)
+    {
+        return algOid.getId().startsWith(PKCSObjectIdentifiers.pkcs_12PbeIds.getId());
+    }
+
+    static SecretKey generateSecretKeyForPKCS5Scheme2(String algorithm, char[] password, byte[] salt, int iterationCount)
+    {
+        PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
+
+        generator.init(
+            PBEParametersGenerator.PKCS5PasswordToBytes(password),
+            salt,
+            iterationCount);
+
+        return new SecretKeySpec(((KeyParameter)generator.generateDerivedParameters(PEMUtilities.getKeySize(algorithm))).getKey(), algorithm);
+    }
+
     static byte[] crypt(
         boolean encrypt,
-        String  provider,
+        String provider,
+        byte[]  bytes,
+        char[]  password,
+        String  dekAlgName,
+        byte[]  iv)
+        throws IOException
+    {
+        Provider prov = null;
+        if (provider != null)
+        {
+            prov = Security.getProvider(provider);
+            if (prov == null)
+            {
+                throw new EncryptionException("cannot find provider: " + provider);
+            }
+        }
+
+        return crypt(encrypt, prov, bytes, password, dekAlgName, iv);
+    }
+
+    static byte[] crypt(
+        boolean encrypt,
+        Provider provider,
         byte[]  bytes,
         char[]  password,
         String  dekAlgName,
@@ -28,7 +126,6 @@ final class PEMUtilities
         String                 blockMode = "CBC";
         String                 padding = "PKCS5Padding";
         Key                    sKey;
-
 
         // Figure out block mode and padding.
         if (dekAlgName.endsWith("-CFB"))

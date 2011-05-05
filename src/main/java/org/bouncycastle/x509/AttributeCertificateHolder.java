@@ -1,5 +1,19 @@
 package org.bouncycastle.x509;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.Principal;
+import java.security.cert.CertSelector;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -14,19 +28,6 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
-
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.Principal;
-import java.security.cert.CertSelector;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The Holder object.
@@ -43,7 +44,7 @@ import java.util.List;
  *                         -- for example, an executable
  *          }
  * </pre>
- * 
+ * @deprecated use org.bouncycastle.cert.AttributeCertificateHolder
  */
 public class AttributeCertificateHolder
     implements CertSelector, Selector
@@ -162,7 +163,7 @@ public class AttributeCertificateHolder
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getDigestAlgorithm().getObjectId()
+            return holder.getObjectDigestInfo().getDigestAlgorithm().getObjectId()
                 .getId();
         }
         return null;
@@ -177,7 +178,7 @@ public class AttributeCertificateHolder
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getObjectDigest().getBytes();
+            return holder.getObjectDigestInfo().getObjectDigest().getBytes();
         }
         return null;
     }

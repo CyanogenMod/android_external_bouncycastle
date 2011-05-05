@@ -28,11 +28,6 @@ public class DERGeneralizedTime
             return (DERGeneralizedTime)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERGeneralizedTime(((ASN1OctetString)obj).getOctets());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -49,7 +44,16 @@ public class DERGeneralizedTime
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERGeneralizedTime)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERGeneralizedTime(((ASN1OctetString)o).getOctets());
+        }
     }
     
     /**
@@ -223,7 +227,7 @@ public class DERGeneralizedTime
         {
             d = this.getTime();
             if (hasFractionalSeconds())
-            {
+            { 
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz");
             }
             else
@@ -260,9 +264,20 @@ public class DERGeneralizedTime
                     break;        
                 }
             }
+
             if (index - 1 > 3)
             {
                 frac = frac.substring(0, 4) + frac.substring(index);
+                d = d.substring(0, 14) + frac;
+            }
+            else if (index - 1 == 1)
+            {
+                frac = frac.substring(0, index) + "00" + frac.substring(index);
+                d = d.substring(0, 14) + frac;
+            }
+            else if (index - 1 == 2)
+            {
+                frac = frac.substring(0, index) + "0" + frac.substring(index);
                 d = d.substring(0, 14) + frac;
             }
         }

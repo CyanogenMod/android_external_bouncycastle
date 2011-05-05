@@ -25,18 +25,6 @@ public class DERBoolean
             return (DERBoolean)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            // BEGIN android-changed
-            return getInstance(((ASN1OctetString)obj).getOctets());
-            // END android-changed
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -73,24 +61,40 @@ public class DERBoolean
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
-    }
+        DERObject o = obj.getObject();
 
+        if (explicit || o instanceof DERBoolean)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            // BEGIN android-changed
+            return getInstance(((ASN1OctetString)o).getOctets());
+            // END android-changed
+        }
+    }
+    
     // BEGIN android-removed
-    //private DERBoolean(
-    //    byte[]       value)
-    //{
-    //    this.value = value[0];
-    //}
+    // public DERBoolean(
+    //     byte[]       value)
+    // {
+    //     if (value.length != 1)
+    //     {
+    //         throw new IllegalArgumentException("byte value should have 1 byte in it");
+    //     }
+    //
+    //     this.value = value[0];
+    // }
     // END android-removed
 
     // BEGIN android-changed
-    private DERBoolean(
+    protected DERBoolean(
         boolean     value)
+    // END android-changed
     {
         this.value = (value) ? (byte)0xff : (byte)0;
     }
-    // END android-changed
 
     public boolean isTrue()
     {

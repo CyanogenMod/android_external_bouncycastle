@@ -39,12 +39,12 @@ public class SubjectPublicKeyInfo
         {
             return (SubjectPublicKeyInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new SubjectPublicKeyInfo((ASN1Sequence)obj);
+            return new SubjectPublicKeyInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public SubjectPublicKeyInfo(

@@ -1,43 +1,48 @@
 package org.bouncycastle.jce.provider;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
+
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.engines.BlowfishEngine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.CAST5Engine;
-// import org.bouncycastle.crypto.engines.CAST6Engine;
-// END android-removed
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.engines.GOST28147Engine;
 // END android-removed
 import org.bouncycastle.crypto.engines.RC2Engine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.RC532Engine;
-// import org.bouncycastle.crypto.engines.RC564Engine;
-// END android-removed
-// import org.bouncycastle.crypto.engines.RC6Engine;
-// import org.bouncycastle.crypto.engines.RijndaelEngine;
-// import org.bouncycastle.crypto.engines.SEEDEngine;
-// import org.bouncycastle.crypto.engines.SerpentEngine;
-// import org.bouncycastle.crypto.engines.SkipjackEngine;
-// import org.bouncycastle.crypto.engines.TEAEngine;
-// END android-removed
 import org.bouncycastle.crypto.engines.TwofishEngine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.XTEAEngine;
-// END android-removed
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.CTSBlockCipher;
-import org.bouncycastle.crypto.modes.EAXBlockCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.modes.EAXBlockCipher;
+// END android-removed
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.modes.GOFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
@@ -63,27 +68,6 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 // import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 // END android-removed
 import org.bouncycastle.util.Strings;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-// BEGIN android-removed
-// import javax.crypto.spec.RC2ParameterSpec;
-// import javax.crypto.spec.RC5ParameterSpec;
-// END android-removed
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
 
 public class JCEBlockCipher extends WrapCipherSpi
     implements PBE
@@ -175,7 +159,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, "BC");
+                    engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(pbeSpec);
                 }
                 catch (Exception e)
@@ -194,7 +178,7 @@ public class JCEBlockCipher extends WrapCipherSpi
 
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(name, "BC");
+                    engineParams = AlgorithmParameters.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(ivParam.getIV());
                 }
                 catch (Exception e)
@@ -304,11 +288,13 @@ public class JCEBlockCipher extends WrapCipherSpi
             ivLength = baseEngine.getBlockSize();
             cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
         }
-        else if (modeName.startsWith("EAX"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
-        }
+        // BEGIN android-removed
+        // else if (modeName.startsWith("EAX"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
+        // }
+        // END android-removed
         else if (modeName.startsWith("GCM"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -801,32 +787,6 @@ public class JCEBlockCipher extends WrapCipherSpi
     //         super(new CBCBlockCipher(new DESEngine()), 64);
     //     }
     // }
-    // END android-removed
-
-    /**
-     * DESede
-     */
-    static public class DESede
-        extends JCEBlockCipher
-    {
-        public DESede()
-        {
-            super(new DESedeEngine());
-        }
-    }
-
-    // BEGIN android-removed
-    // /**
-    //  * DESedeCBC
-    //  */
-    // static public class DESedeCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public DESedeCBC()
-    //     {
-    //         super(new CBCBlockCipher(new DESedeEngine()), 64);
-    //     }
-    // }
     //
     // /**
     //  *  GOST28147
@@ -839,63 +799,13 @@ public class JCEBlockCipher extends WrapCipherSpi
     //         super(new GOST28147Engine());
     //     }
     // }
-    //    
+    //
     // static public class GOST28147cbc
     //     extends JCEBlockCipher
     // {
     //     public GOST28147cbc()
     //     {
     //         super(new CBCBlockCipher(new GOST28147Engine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * SKIPJACK
-    //  */
-    // static public class Skipjack
-    //     extends JCEBlockCipher
-    // {
-    //     public Skipjack()
-    //     {
-    //         super(new SkipjackEngine());
-    //     }
-    // }
-    // END android-removed
-    
-    /**
-     * Blowfish
-     */
-    static public class Blowfish
-        extends JCEBlockCipher
-    {
-        public Blowfish()
-        {
-            super(new BlowfishEngine());
-        }
-    }
-    
-    // BEGIN android-removed
-    // /**
-    //  * Blowfish CBC
-    //  */
-    // static public class BlowfishCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public BlowfishCBC()
-    //     {
-    //         super(new CBCBlockCipher(new BlowfishEngine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * Twofish
-    //  */
-    // static public class Twofish
-    //     extends JCEBlockCipher
-    // {
-    //     public Twofish()
-    //     {
-    //         super(new TwofishEngine());
     //     }
     // }
     //
@@ -920,188 +830,6 @@ public class JCEBlockCipher extends WrapCipherSpi
     //     public RC2CBC()
     //     {
     //         super(new CBCBlockCipher(new RC2Engine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * RC5
-    //  */
-    // static public class RC5
-    //     extends JCEBlockCipher
-    // {
-    //     public RC5()
-    //     {
-    //         super(new RC532Engine());
-    //     }
-    // }
-    //
-    // /**
-    //  * RC564
-    //  */
-    // static public class RC564
-    //     extends JCEBlockCipher
-    // {
-    //     public RC564()
-    //     {
-    //         super(new RC564Engine());
-    //     }
-    // }
-    //
-    // /**
-    //  * RC6
-    //  */
-    // static public class RC6
-    //     extends JCEBlockCipher
-    // {
-    //     public RC6()
-    //     {
-    //         super(new RC6Engine());
-    //     }
-    // }
-    //
-    // /**
-    //  * AES
-    //  */
-    // static public class AES
-    //     extends JCEBlockCipher
-    // {
-    //     public AES()
-    //     {
-    //         super(new AESFastEngine());
-    //     }
-    // }
-    //
-    // /**
-    //  * AESCBC
-    //  */
-    // static public class AESCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public AESCBC()
-    //     {
-    //         super(new CBCBlockCipher(new AESFastEngine()), 128);
-    //     }
-    // }
-    //
-    // /**
-    //  * AESCFB
-    //  */
-    // static public class AESCFB
-    //     extends JCEBlockCipher
-    // {
-    //     public AESCFB()
-    //     {
-    //         super(new CFBBlockCipher(new AESFastEngine(), 128), 128);
-    //     }
-    // }
-    //
-    // /**
-    //  * AESOFB
-    //  */
-    // static public class AESOFB
-    //     extends JCEBlockCipher
-    // {
-    //     public AESOFB()
-    //     {
-    //         super(new OFBBlockCipher(new AESFastEngine(), 128), 128);
-    //     }
-    // }
-    //
-    // /**
-    //  * Rijndael
-    //  */
-    // static public class Rijndael
-    //     extends JCEBlockCipher
-    // {
-    //     public Rijndael()
-    //     {
-    //         super(new RijndaelEngine());
-    //     }
-    // }
-    //
-    // /**
-    //  * Serpent
-    //  */
-    // static public class Serpent
-    //     extends JCEBlockCipher
-    // {
-    //     public Serpent()
-    //     {
-    //         super(new SerpentEngine());
-    //     }
-    // }
-    //
-    //
-    //
-    // /**
-    //  * CAST5
-    //  */
-    // static public class CAST5
-    //     extends JCEBlockCipher
-    // {
-    //     public CAST5()
-    //     {
-    //         super(new CAST5Engine());
-    //     }
-    // }
-    //
-    // /**
-    //  * CAST5 CBC
-    //  */
-    // static public class CAST5CBC
-    //     extends JCEBlockCipher
-    // {
-    //     public CAST5CBC()
-    //     {
-    //         super(new CBCBlockCipher(new CAST5Engine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * CAST6
-    //  */
-    // static public class CAST6
-    //     extends JCEBlockCipher
-    // {
-    //     public CAST6()
-    //     {
-    //         super(new CAST6Engine());
-    //     }
-    // }
-    // 
-    // /**
-    //  * TEA
-    //  */
-    // static public class TEA
-    //     extends JCEBlockCipher
-    // {
-    //     public TEA()
-    //     {
-    //         super(new TEAEngine());
-    //     }
-    // }
-    //
-    // /**
-    //  * XTEA
-    //  */
-    // static public class XTEA
-    //     extends JCEBlockCipher
-    // {
-    //     public XTEA()
-    //     {
-    //         super(new XTEAEngine());
-    //     }
-    // }
-    // 
-    // /**
-    //  * SEED
-    //  */
-    // static public class SEED
-    //     extends JCEBlockCipher
-    // {
-    //     public SEED()
-    //     {
-    //         super(new SEEDEngine());
     //     }
     // }
     // END android-removed

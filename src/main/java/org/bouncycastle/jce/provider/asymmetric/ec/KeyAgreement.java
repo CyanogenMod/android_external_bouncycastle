@@ -59,9 +59,11 @@ public class KeyAgreement
 
     static
     {
-        Integer i128 = new Integer(128);
-        Integer i192 = new Integer(192);
-        Integer i256 = new Integer(256);
+        // BEGIN android-changed
+        Integer i128 = Integer.valueOf(128);
+        Integer i192 = Integer.valueOf(192);
+        Integer i256 = Integer.valueOf(256);
+        // END android-changed
 
         algorithms.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), i128);
         algorithms.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), i192);

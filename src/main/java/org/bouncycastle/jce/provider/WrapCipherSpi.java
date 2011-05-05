@@ -1,23 +1,18 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.crypto.engines.DESedeEngine;
-import org.bouncycastle.crypto.engines.DESedeWrapEngine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.RC2WrapEngine;
-// import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
-// END android-removed
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -32,19 +27,22 @@ import javax.crypto.spec.PBEParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
 import javax.crypto.spec.SecretKeySpec;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.Wrapper;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.RC2WrapEngine;
+// END android-removed
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public abstract class WrapCipherSpi extends CipherSpi
     implements PBE
@@ -406,7 +404,7 @@ public abstract class WrapCipherSpi extends CipherSpi
         {
             try
             {
-                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, "BC");
+                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (wrappedKeyType == Cipher.PUBLIC_KEY)
                 {
@@ -440,17 +438,6 @@ public abstract class WrapCipherSpi extends CipherSpi
     // classes that inherit directly from us
     //
 
-
-
-    public static class DESEDEWrap
-        extends WrapCipherSpi
-    {
-        public DESEDEWrap()
-        {
-            super(new DESedeWrapEngine());
-        }
-    }
-
     // BEGIN android-removed
     // public static class RC2Wrap
     //     extends WrapCipherSpi
@@ -458,15 +445,6 @@ public abstract class WrapCipherSpi extends CipherSpi
     //     public RC2Wrap()
     //     {
     //         super(new RC2WrapEngine());
-    //     }
-    // }
-    //
-    // public static class RFC3211DESedeWrap
-    //     extends WrapCipherSpi
-    // {
-    //     public RFC3211DESedeWrap()
-    //     {
-    //         super(new RFC3211WrapEngine(new DESedeEngine()), 8);
     //     }
     // }
     // END android-removed

@@ -1,29 +1,11 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.StreamBlockCipher;
-import org.bouncycastle.crypto.StreamCipher;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.BlowfishEngine;
-// import org.bouncycastle.crypto.engines.DESEngine;
-// import org.bouncycastle.crypto.engines.DESedeEngine;
-// import org.bouncycastle.crypto.engines.HC128Engine;
-// import org.bouncycastle.crypto.engines.HC256Engine;
-// END android-removed
-import org.bouncycastle.crypto.engines.RC4Engine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.Salsa20Engine;
-// import org.bouncycastle.crypto.engines.SkipjackEngine;
-// import org.bouncycastle.crypto.engines.TwofishEngine;
-// import org.bouncycastle.crypto.engines.VMPCEngine;
-// import org.bouncycastle.crypto.engines.VMPCKSA3Engine;
-// END android-removed
-import org.bouncycastle.crypto.modes.CFBBlockCipher;
-import org.bouncycastle.crypto.modes.OFBBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -35,12 +17,26 @@ import javax.crypto.spec.PBEParameterSpec;
 // import javax.crypto.spec.RC2ParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.StreamBlockCipher;
+import org.bouncycastle.crypto.StreamCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.BlowfishEngine;
+// import org.bouncycastle.crypto.engines.DESEngine;
+// import org.bouncycastle.crypto.engines.DESedeEngine;
+// END android-removed
+import org.bouncycastle.crypto.engines.RC4Engine;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.SkipjackEngine;
+// import org.bouncycastle.crypto.engines.TwofishEngine;
+// END android-removed
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.modes.OFBBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class JCEStreamCipher
     extends WrapCipherSpi implements PBE
@@ -113,7 +109,7 @@ public class JCEStreamCipher
             {
                 try
                 {
-                    AlgorithmParameters engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, "BC");
+                    AlgorithmParameters engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(pbeSpec);
                     
                     return engineParams;
@@ -505,18 +501,6 @@ public class JCEStreamCipher
     // END android-removed
 
     /**
-     * RC4
-     */
-    static public class RC4
-        extends JCEStreamCipher
-    {
-        public RC4()
-        {
-            super(new RC4Engine(), 0);
-        }
-    }
-
-    /**
      * PBEWithSHAAnd128BitRC4
      */
     static public class PBEWithSHAAnd128BitRC4
@@ -539,66 +523,4 @@ public class JCEStreamCipher
             super(new RC4Engine(), 0);
         }
     }
-    
-    // BEGIN android-removed
-    // /**
-    //  * Salsa20
-    //  */
-    // static public class Salsa20
-    //     extends JCEStreamCipher
-    // {
-    //     public Salsa20()
-    //     {
-    //         super(new Salsa20Engine(), 8);
-    //     }
-    // }
-    //
-    // /**
-    //  * HC-128
-    //  */
-    // static public class HC128
-    //     extends JCEStreamCipher
-    // {
-    //     public HC128()
-    //     {
-    //         super(new HC128Engine(), 16);
-    //     }
-    // }
-    //
-    // /**
-    //  * HC-256
-    //  */
-    // static public class HC256
-    //     extends JCEStreamCipher
-    // {
-    //     public HC256()
-    //     {
-    //         super(new HC256Engine(), 32);
-    //     }
-    // }
-    //
-    // /**
-    //  * VMPC
-    //  */
-    // static public class VMPC
-    //     extends JCEStreamCipher
-    // {
-    //     public VMPC()
-    //     {
-    //         super(new VMPCEngine(), 16);
-    //     }
-    // }
-    //
-    // /**
-    //  * VMPC-KSA3
-    //  */
-    // static public class VMPCKSA3
-    //     extends JCEStreamCipher
-    // {
-    //     public VMPCKSA3()
-    //     {
-    //         super(new VMPCKSA3Engine(), 16);
-    //     }
-    // }
-    // END android-removed
 }
