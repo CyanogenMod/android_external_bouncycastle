@@ -36,10 +36,6 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-// BEGIN android-added
-import org.apache.harmony.xnet.provider.jsse.IndexedPKIXParameters;
-
-// END android-added
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -121,38 +117,13 @@ public class CertPathValidatorUtilities
         "privilegeWithdrawn",
         "aACompromise" };
     
-    // BEGIN android-removed
-    // /**
-    //  * Search the given Set of TrustAnchor's for one that is the
-    //  * issuer of the given X509 certificate. Uses the default provider
-    //  * for signature verification.
-    //  *
-    //  * @param cert the X509 certificate
-    //  * @param trustAnchors a Set of TrustAnchor's
-    //  *
-    //  * @return the <code>TrustAnchor</code> object if found or
-    //  * <code>null</code> if not.
-    //  *
-    //  * @exception AnnotatedException
-    //  *                if a TrustAnchor was found but the signature verification
-    //  *                on the given certificate has thrown an exception.
-    //  */
-    // protected static TrustAnchor findTrustAnchor(
-    //     X509Certificate cert,
-    //     Set             trustAnchors)
-    //         throws AnnotatedException
-    // {
-    //     return findTrustAnchor(cert, trustAnchors, null);
-    // }
-    // END android-removed
-    
-    // BEGIN android-changed
     /**
      * Search the given Set of TrustAnchor's for one that is the
-     * issuer of the given X509 certificate.
+     * issuer of the given X509 certificate. Uses the default provider
+     * for signature verification.
      *
      * @param cert the X509 certificate
-     * @param params used to find the trust anchors and signature provider
+     * @param trustAnchors a Set of TrustAnchor's
      *
      * @return the <code>TrustAnchor</code> object if found or
      * <code>null</code> if not.
@@ -163,21 +134,35 @@ public class CertPathValidatorUtilities
      */
     protected static TrustAnchor findTrustAnchor(
         X509Certificate cert,
-        PKIXParameters  params)
+        Set             trustAnchors)
             throws AnnotatedException
-    // END android-changed
     {
-        // BEGIN android-changed
-        // If we have a trust anchor index, use it.
-        if (params instanceof IndexedPKIXParameters) {
-            try {
-                IndexedPKIXParameters indexed = (IndexedPKIXParameters) params;
-                return indexed.findTrustAnchor(cert);
-            } catch (CertPathValidatorException e) {
-                throw new AnnotatedException(e.getMessage(), e);
-            }
-        }
-        // END android-changed
+        return findTrustAnchor(cert, trustAnchors, null);
+    }
+    
+    /**
+     * Search the given Set of TrustAnchor's for one that is the
+     * issuer of the given X509 certificate. Uses the specified
+     * provider for signature verification, or the default provider
+     * if null.
+     *
+     * @param cert the X509 certificate
+     * @param trustAnchors a Set of TrustAnchor's
+     * @param sigProvider the provider to use for signature verification
+     *
+     * @return the <code>TrustAnchor</code> object if found or
+     * <code>null</code> if not.
+     *
+     * @exception AnnotatedException
+     *                if a TrustAnchor was found but the signature verification
+     *                on the given certificate has thrown an exception.
+     */
+    protected static TrustAnchor findTrustAnchor(
+        X509Certificate cert,
+        Set             trustAnchors,
+        String          sigProvider) 
+            throws AnnotatedException
+    {
         TrustAnchor trust = null;
         PublicKey trustPublicKey = null;
         Exception invalidKeyEx = null;
@@ -194,9 +179,7 @@ public class CertPathValidatorUtilities
             throw new AnnotatedException("Cannot set subject search criteria for trust anchor.", ex);
         }
 
-        // BEGIN android-changed
-        Iterator iter = params.getTrustAnchors().iterator();
-        // END android-changed
+        Iterator iter = trustAnchors.iterator();
         while (iter.hasNext() && trust == null)
         {
             trust = (TrustAnchor) iter.next();
@@ -240,9 +223,7 @@ public class CertPathValidatorUtilities
             {
                 try
                 {
-                    // BEGIN android-changed
-                    verifyX509Certificate(cert, trustPublicKey, params.getSigProvider());
-                    // END android-changed
+                    verifyX509Certificate(cert, trustPublicKey, sigProvider);
                 }
                 catch (Exception ex)
                 {

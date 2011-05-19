@@ -24,10 +24,6 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-// BEGIN android-added
-import org.apache.harmony.xnet.provider.jsse.IndexedPKIXParameters;
-
-// END android-added
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -71,18 +67,6 @@ public class PKIXCertPathValidatorSpi
                     + " instance.");
         }
 
-        // BEGIN android-added
-        IndexedPKIXParameters indexedParams;
-        if (params instanceof IndexedPKIXParameters)
-        {
-            indexedParams = (IndexedPKIXParameters)params;
-        }
-        else
-        {
-            indexedParams = null;
-        }
-
-        // END android-added
         ExtendedPKIXParameters paramsPKIX;
         if (params instanceof ExtendedPKIXParameters)
         {
@@ -145,10 +129,8 @@ public class PKIXCertPathValidatorSpi
         TrustAnchor trust;
         try
         {
-            // BEGIN android-changed
             trust = CertPathValidatorUtilities.findTrustAnchor((X509Certificate) certs.get(certs.size() - 1),
-                    indexedParams != null ? indexedParams : paramsPKIX);
-            // END android-changed
+                    paramsPKIX.getTrustAnchors(), paramsPKIX.getSigProvider());
         }
         catch (AnnotatedException e)
         {
