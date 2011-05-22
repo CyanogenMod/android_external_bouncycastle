@@ -2,20 +2,12 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 import java.util.Enumeration;
-// BEGIN android-removed
-// import java.util.Vector;
-// END android-removed
-
-// BEGIN android-note
-// Changed inheritence of class.
-// END android-note
+import java.util.Vector;
 
 public abstract class ASN1Sequence
-    extends ASN1Collection
+    extends ASN1Object
 {
-    // BEGIN android-removed
-    // private Vector seq = new Vector();
-    // END android-removed
+    private Vector seq = new Vector();
 
     /**
      * return an ASN1Sequence from the given object.
@@ -104,12 +96,10 @@ public abstract class ASN1Sequence
         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }
 
-    // BEGIN android-removed
-    // public Enumeration getObjects()
-    // {
-    //     return seq.elements();
-    // }
-    // END android-removed
+    public Enumeration getObjects()
+    {
+        return seq.elements();
+    }
 
     public ASN1SequenceParser parser()
     {
@@ -153,45 +143,43 @@ public abstract class ASN1Sequence
         };
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * return the object at the sequence position indicated by index.
-    //  *
-    //  * @param index the sequence number (starting at zero) of the object
-    //  * @return the object at the sequence position indicated by index.
-    //  */
-    // public DEREncodable getObjectAt(
-    //     int index)
-    // {
-    //     return (DEREncodable)seq.elementAt(index);
-    // }
-    //
-    // /**
-    //  * return the number of objects in this sequence.
-    //  *
-    //  * @return the number of objects in this sequence.
-    //  */
-    // public int size()
-    // {
-    //     return seq.size();
-    // }
-    //
-    // public int hashCode()
-    // {
-    //     Enumeration             e = this.getObjects();
-    //     int                     hashCode = size();
-    //
-    //     while (e.hasMoreElements())
-    //     {
-    //         Object o = getNext(e);
-    //         hashCode *= 17;
-    //
-    //         hashCode ^= o.hashCode();
-    //     }
-    //
-    //     return hashCode;
-    // }
-    // END android-removed
+    /**
+     * return the object at the sequence position indicated by index.
+     *
+     * @param index the sequence number (starting at zero) of the object
+     * @return the object at the sequence position indicated by index.
+     */
+    public DEREncodable getObjectAt(
+        int index)
+    {
+        return (DEREncodable)seq.elementAt(index);
+    }
+
+    /**
+     * return the number of objects in this sequence.
+     *
+     * @return the number of objects in this sequence.
+     */
+    public int size()
+    {
+        return seq.size();
+    }
+
+    public int hashCode()
+    {
+        Enumeration             e = this.getObjects();
+        int                     hashCode = size();
+
+        while (e.hasMoreElements())
+        {
+            Object o = getNext(e);
+            hashCode *= 17;
+
+            hashCode ^= o.hashCode();
+        }
+
+        return hashCode;
+    }
 
     boolean asn1Equals(
         DERObject  o)
@@ -243,19 +231,17 @@ public abstract class ASN1Sequence
         return encObj;
     }
 
-    // BEGIN android-removed
-    //protected void addObject(
-    //    DEREncodable obj)
-    //{
-    //    seq.addElement(obj);
-    //}
+    protected void addObject(
+        DEREncodable obj)
+    {
+        seq.addElement(obj);
+    }
 
-    //abstract void encode(DEROutputStream out)
-    //    throws IOException;
+    abstract void encode(DEROutputStream out)
+        throws IOException;
 
-    //public String toString() 
-    //{
-    //  return seq.toString();
-    //}
-    // END android-removed
+    public String toString() 
+    {
+      return seq.toString();
+    }
 }

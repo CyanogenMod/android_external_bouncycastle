@@ -3,20 +3,12 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
-// BEGIN android-removed
-// import java.util.Vector;
-// END android-removed
-
-// BEGIN android-note
-// Changed inheritence of class.
-// END android-note
+import java.util.Vector;
 
 abstract public class ASN1Set
-    extends ASN1Collection
+    extends ASN1Object
 {
-    // BEGIN android-removed
-    // protected Vector set = new Vector();
-    // END android-removed
+    protected Vector set = new Vector();
 
     /**
      * return an ASN1Set from the given object.
@@ -112,34 +104,32 @@ abstract public class ASN1Set
     {
     }
 
-    // BEGIN android-removed
-    // public Enumeration getObjects()
-    // {
-    //     return set.elements();
-    // }
-    //
-    // /**
-    //  * return the object at the set position indicated by index.
-    //  *
-    //  * @param index the set number (starting at zero) of the object
-    //  * @return the object at the set position indicated by index.
-    //  */
-    // public DEREncodable getObjectAt(
-    //     int index)
-    // {
-    //     return (DEREncodable)set.elementAt(index);
-    // }
-    //
-    // /**
-    //  * return the number of objects in this set.
-    //  *
-    //  * @return the number of objects in this set.
-    //  */
-    // public int size()
-    // {
-    //     return set.size();
-    // }
-    // END android-removed
+    public Enumeration getObjects()
+    {
+        return set.elements();
+    }
+
+    /**
+     * return the object at the set position indicated by index.
+     *
+     * @param index the set number (starting at zero) of the object
+     * @return the object at the set position indicated by index.
+     */
+    public DEREncodable getObjectAt(
+        int index)
+    {
+        return (DEREncodable)set.elementAt(index);
+    }
+
+    /**
+     * return the number of objects in this set.
+     *
+     * @return the number of objects in this set.
+     */
+    public int size()
+    {
+        return set.size();
+    }
 
     public ASN1Encodable[] toArray()
     {
@@ -195,23 +185,21 @@ abstract public class ASN1Set
         };
     }
 
-    // BEGIN android-removed
-    // public int hashCode()
-    // {
-    //     Enumeration             e = this.getObjects();
-    //     int                     hashCode = size();
-    //
-    //     while (e.hasMoreElements())
-    //     {
-    //         Object o = getNext(e);
-    //         hashCode *= 17;
-    //
-    //         hashCode ^= o.hashCode();
-    //     }
-    //
-    //     return hashCode;
-    // }
-    // END android-removed
+    public int hashCode()
+    {
+        Enumeration             e = this.getObjects();
+        int                     hashCode = size();
+
+        while (e.hasMoreElements())
+        {
+            Object o = getNext(e);
+            hashCode *= 17;
+
+            hashCode ^= o.hashCode();
+        }
+
+        return hashCode;
+    }
 
     boolean asn1Equals(
         DERObject  o)
@@ -263,25 +251,23 @@ abstract public class ASN1Set
         return encObj;
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * return true if a <= b (arrays are assumed padded with zeros).
-    //  */
-    // private boolean lessThanOrEqual(
-    //      byte[] a,
-    //      byte[] b)
-    // {
-    //     int len = Math.min(a.length, b.length);
-    //     for (int i = 0; i != len; ++i)
-    //     {
-    //         if (a[i] != b[i])
-    //         {
-    //             return (a[i] & 0xff) < (b[i] & 0xff);
-    //         }
-    //     }
-    //     return len == a.length;
-    // }
-    // END android-removed
+    /**
+     * return true if a <= b (arrays are assumed padded with zeros).
+     */
+    private boolean lessThanOrEqual(
+         byte[] a,
+         byte[] b)
+    {
+        int len = Math.min(a.length, b.length);
+        for (int i = 0; i != len; ++i)
+        {
+            if (a[i] != b[i])
+            {
+                return (a[i] & 0xff) < (b[i] & 0xff);
+            }
+        }
+        return len == a.length;
+    }
 
     private byte[] getEncoded(
         DEREncodable obj)
@@ -301,61 +287,59 @@ abstract public class ASN1Set
         return bOut.toByteArray();
     }
 
-    // BEGIN android-removed
-    // protected void sort()
-    // {
-    //     if (set.size() > 1)
-    //     {
-    //         boolean    swapped = true;
-    //         int        lastSwap = set.size() - 1;
-    //
-    //         while (swapped)
-    //         {
-    //             int    index = 0;
-    //             int    swapIndex = 0;
-    //             byte[] a = getEncoded((DEREncodable)set.elementAt(0));
-    //
-    //             swapped = false;
-    //
-    //             while (index != lastSwap)
-    //             {
-    //                 byte[] b = getEncoded((DEREncodable)set.elementAt(index + 1));
-    //
-    //                 if (lessThanOrEqual(a, b))
-    //                 {
-    //                     a = b;
-    //                 }
-    //                 else
-    //                 {
-    //                     Object  o = set.elementAt(index);
-    //
-    //                     set.setElementAt(set.elementAt(index + 1), index);
-    //                     set.setElementAt(o, index + 1);
-    //
-    //                     swapped = true;
-    //                     swapIndex = index;
-    //                 }
-    //
-    //                 index++;
-    //             }
-    //
-    //             lastSwap = swapIndex;
-    //         }
-    //     }
-    // }
-    //
-    // protected void addObject(
-    //     DEREncodable obj)
-    // {
-    //     set.addElement(obj);
-    // }
-    //
-    // abstract void encode(DEROutputStream out)
-    //         throws IOException;
-    //
-    // public String toString() 
-    // {
-    //   return set.toString();
-    // }
-    // END android-removed
+    protected void sort()
+    {
+        if (set.size() > 1)
+        {
+            boolean    swapped = true;
+            int        lastSwap = set.size() - 1;
+
+            while (swapped)
+            {
+                int    index = 0;
+                int    swapIndex = 0;
+                byte[] a = getEncoded((DEREncodable)set.elementAt(0));
+                
+                swapped = false;
+
+                while (index != lastSwap)
+                {
+                    byte[] b = getEncoded((DEREncodable)set.elementAt(index + 1));
+
+                    if (lessThanOrEqual(a, b))
+                    {
+                        a = b;
+                    }
+                    else
+                    {
+                        Object  o = set.elementAt(index);
+
+                        set.setElementAt(set.elementAt(index + 1), index);
+                        set.setElementAt(o, index + 1);
+
+                        swapped = true;
+                        swapIndex = index;
+                    }
+
+                    index++;
+                }
+
+                lastSwap = swapIndex;
+            }
+        }
+    }
+
+    protected void addObject(
+        DEREncodable obj)
+    {
+        set.addElement(obj);
+    }
+
+    abstract void encode(DEROutputStream out)
+            throws IOException;
+
+    public String toString() 
+    {
+      return set.toString();
+    }
 }

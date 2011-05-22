@@ -14,9 +14,6 @@ import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
-// BEGIN android-added
-import org.bouncycastle.asn1.OrderedTable;
-// END android-added
 
 public class X509Extensions
     extends ASN1Encodable
@@ -207,9 +204,8 @@ public class X509Extensions
      */
     public static final ASN1ObjectIdentifier TargetInformation = new ASN1ObjectIdentifier("2.5.29.55");
     
-    // BEGIN android-changed
-    private OrderedTable table = new OrderedTable();
-    // END android-changed
+    private Hashtable               extensions = new Hashtable();
+    private Vector                  ordering = new Vector();
 
     public static X509Extensions getInstance(
         ASN1TaggedObject obj,
@@ -253,26 +249,20 @@ public class X509Extensions
         {
             ASN1Sequence            s = ASN1Sequence.getInstance(e.nextElement());
 
-            // BEGIN android-changed
-            int sSize = s.size();
-            DERObjectIdentifier key = (DERObjectIdentifier) s.getObjectAt(0);
-            Object value;
-            
-            if (sSize == 3)
+            if (s.size() == 3)
             {
-                value = new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2)));
+                extensions.put(s.getObjectAt(0), new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2))));
             }
-            else if (sSize == 2)
+            else if (s.size() == 2)
             {
-                value = new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1)));
+                extensions.put(s.getObjectAt(0), new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1))));
             }
             else
             {
-                throw new IllegalArgumentException("Bad sequence size: " + sSize);
+                throw new IllegalArgumentException("Bad sequence size: " + s.size());
             }
 
-            table.add(key, value);
-            // END android-changed
+            ordering.addElement(s.getObjectAt(0));
         }
     }
 
@@ -307,23 +297,19 @@ public class X509Extensions
             e = ordering.elements();
         }
 
-        // BEGIN android-removed
-        // while (e.hasMoreElements())
-        // {
-        //     this.ordering.addElement(new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId())); 
-        // }
-        //
-        // e = this.ordering.elements();
-        // END android-removed
+        while (e.hasMoreElements())
+        {
+            this.ordering.addElement(new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId())); 
+        }
+
+        e = this.ordering.elements();
 
         while (e.hasMoreElements())
         {
             ASN1ObjectIdentifier     oid = new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId());
             X509Extension           ext = (X509Extension)extensions.get(oid);
 
-            // BEGIN android-changed
-            table.add(oid, ext);
-            // END android-changed
+            this.extensions.put(oid, ext);
         }
     }
 
@@ -339,27 +325,21 @@ public class X509Extensions
     {
         Enumeration e = objectIDs.elements();
 
-        // BEGIN android-removed
-        // while (e.hasMoreElements())
-        // {
-        //     this.ordering.addElement(e.nextElement()); 
-        // }
-        // END android-removed
+        while (e.hasMoreElements())
+        {
+            this.ordering.addElement(e.nextElement()); 
+        }
 
         int count = 0;
         
-        // BEGIN android-removed
-        // e = this.ordering.elements();
-        // END android-removed
+        e = this.ordering.elements();
 
         while (e.hasMoreElements())
         {
             ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
             X509Extension           ext = (X509Extension)values.elementAt(count);
 
-            // BEGIN android-changed
-            table.add(oid, ext);
-            // END android-changed
+            this.extensions.put(oid, ext);
             count++;
         }
     }
@@ -369,9 +349,7 @@ public class X509Extensions
      */
     public Enumeration oids()
     {
-        // BEGIN android-changed
-        return table.getKeys();
-        // END android-changed
+        return ordering.elements();
     }
 
     /**
@@ -383,9 +361,7 @@ public class X509Extensions
     public X509Extension getExtension(
         ASN1ObjectIdentifier oid)
     {
-        // BEGIN android-changed
-        return (X509Extension)table.get(oid);
-        // END android-changed
+        return (X509Extension)extensions.get(oid);
     }
 
     /**
@@ -396,9 +372,7 @@ public class X509Extensions
     public X509Extension getExtension(
         DERObjectIdentifier oid)
     {
-        // BEGIN android-changed
-        return (X509Extension)table.get(oid);
-        // END android-changed
+        return (X509Extension)extensions.get(oid);
     }
 
     /**
@@ -414,14 +388,12 @@ public class X509Extensions
     public DERObject toASN1Object()
     {
         ASN1EncodableVector     vec = new ASN1EncodableVector();
-        // BEGIN android-changed
-        int                     size = table.size();
+        Enumeration             e = ordering.elements();
 
-        for (int i = 0; i < size; i++)
+        while (e.hasMoreElements())
         {
-            DERObjectIdentifier     oid = table.getKey(i);
-            X509Extension           ext = (X509Extension)table.getValue(i);
-            // END android-changed
+            ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
+            X509Extension           ext = (X509Extension)extensions.get(oid);
             ASN1EncodableVector     v = new ASN1EncodableVector();
 
             v.add(oid);
@@ -444,24 +416,18 @@ public class X509Extensions
     public boolean equivalent(
         X509Extensions other)
     {
-        // BEGIN android-changed
-        if (table.size() != other.table.size())
-        // END android-changed
+        if (extensions.size() != other.extensions.size())
         {
             return false;
         }
 
-        // BEGIN android-changed
-        Enumeration     e1 = table.getKeys();
-        // END android-changed
+        Enumeration     e1 = extensions.keys();
 
         while (e1.hasMoreElements())
         {
-            // BEGIN android-changed
-            DERObjectIdentifier  key = (DERObjectIdentifier)e1.nextElement();
+            Object  key = e1.nextElement();
 
-            if (!table.get(key).equals(other.table.get(key)))
-            // END android-changed
+            if (!extensions.get(key).equals(other.extensions.get(key)))
             {
                 return false;
             }
@@ -470,39 +436,37 @@ public class X509Extensions
         return true;
     }
 
-    // BEGIN android-removed
-    // public ASN1ObjectIdentifier[] getExtensionOIDs()
-    // {
-    //     return toOidArray(ordering);
-    // }
-    //
-    // public ASN1ObjectIdentifier[] getNonCriticalExtensionOIDs()
-    // {
-    //     return getExtensionOIDs(false);
-    // }
-    //
-    // public ASN1ObjectIdentifier[] getCriticalExtensionOIDs()
-    // {
-    //     return getExtensionOIDs(true);
-    // }
-    //
-    // private ASN1ObjectIdentifier[] getExtensionOIDs(boolean isCritical)
-    // {
-    //     Vector oidVec = new Vector();
-    //
-    //     for (int i = 0; i != ordering.size(); i++)
-    //     {
-    //         Object oid = ordering.elementAt(i);
-    //
-    //         if (((X509Extension)extensions.get(oid)).isCritical() == isCritical)
-    //         {
-    //             oidVec.addElement(oid);
-    //         }
-    //     }
-    //
-    //     return toOidArray(oidVec);
-    // }
-    // END android-removed
+    public ASN1ObjectIdentifier[] getExtensionOIDs()
+    {
+        return toOidArray(ordering);
+    }
+    
+    public ASN1ObjectIdentifier[] getNonCriticalExtensionOIDs()
+    {
+        return getExtensionOIDs(false);
+    }
+
+    public ASN1ObjectIdentifier[] getCriticalExtensionOIDs()
+    {
+        return getExtensionOIDs(true);
+    }
+
+    private ASN1ObjectIdentifier[] getExtensionOIDs(boolean isCritical)
+    {
+        Vector oidVec = new Vector();
+
+        for (int i = 0; i != ordering.size(); i++)
+        {
+            Object oid = ordering.elementAt(i);
+
+            if (((X509Extension)extensions.get(oid)).isCritical() == isCritical)
+            {
+                oidVec.addElement(oid);
+            }
+        }
+
+        return toOidArray(oidVec);
+    }
 
     private ASN1ObjectIdentifier[] toOidArray(Vector oidVec)
     {

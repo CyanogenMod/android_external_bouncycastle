@@ -249,10 +249,10 @@ public class X509Name
      */
     public static final Hashtable SymbolLookUp = DefaultLookUp;
 
-    // BEGIN android-removed
-    //private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
-    //private static final Boolean FALSE = new Boolean(false);
-    // END android-removed
+    // BEGIN android-changed
+    private static final Boolean TRUE = Boolean.TRUE;
+    private static final Boolean FALSE = Boolean.FALSE;
+    // END android-changed
 
     static
     {
@@ -344,9 +344,9 @@ public class X509Name
     }
 
     private X509NameEntryConverter  converter = null;
-    // BEGIN android-changed
-    private X509NameElementList     elems = new X509NameElementList();
-    // END android-changed
+    private Vector                  ordering = new Vector();
+    private Vector                  values = new Vector();
+    private Vector                  added = new Vector();
 
     private ASN1Sequence            seq;
 
@@ -415,29 +415,27 @@ public class X509Name
                        throw new IllegalArgumentException("badly sized pair");
                    }
 
-                   // BEGIN android-changed
-                   DERObjectIdentifier key = DERObjectIdentifier.getInstance(s.getObjectAt(0));
+                   ordering.addElement(DERObjectIdentifier.getInstance(s.getObjectAt(0)));
                    
                    DEREncodable value = s.getObjectAt(1);
-                   String valueStr;
                    if (value instanceof DERString && !(value instanceof DERUniversalString))
                    {
                        String v = ((DERString)value).getString();
                        if (v.length() > 0 && v.charAt(0) == '#')
                        {
-                           valueStr = "\\" + v;
+                           values.addElement("\\" + v);
                        }
                        else
                        {
-                           valueStr = v;
+                           values.addElement(v);
                        }
                    }
                    else
                    {
-                       valueStr = "#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded()));
+                       values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                    }
-                   boolean added = (i != 0);  // to allow earlier JDK compatibility
-                   elems.add(key, valueStr, added);
+                   // BEGIN android-changed
+                   added.addElement(Boolean.valueOf(i != 0));
                    // END android-changed
             }
         }
@@ -492,23 +490,14 @@ public class X509Name
         Hashtable                attributes,
         X509NameEntryConverter   converter)
     {
-        // BEGIN android-changed
-        DERObjectIdentifier problem = null;
         this.converter = converter;
 
         if (ordering != null)
         {
             for (int i = 0; i != ordering.size(); i++)
             {
-                DERObjectIdentifier key =
-                    (DERObjectIdentifier) ordering.elementAt(i);
-                String value = (String) attributes.get(key);
-                if (value == null)
-                {
-                    problem = key;
-                    break;
-                }
-                elems.add(key, value);
+                this.ordering.addElement(ordering.elementAt(i));
+                this.added.addElement(FALSE);
             }
         }
         else
@@ -517,23 +506,22 @@ public class X509Name
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier key =
-                    (DERObjectIdentifier) e.nextElement();
-                String value = (String) attributes.get(key);
-                if (value == null)
-                {
-                    problem = key;
-                    break;
-                }
-                elems.add(key, value);
+                this.ordering.addElement(e.nextElement());
+                this.added.addElement(FALSE);
             }
         }
 
-        if (problem != null)
+        for (int i = 0; i != this.ordering.size(); i++)
         {
-            throw new IllegalArgumentException("No attribute for object id - " + problem.getId() + " - passed to distinguished name");
+            DERObjectIdentifier     oid = (DERObjectIdentifier)this.ordering.elementAt(i);
+
+            if (attributes.get(oid) == null)
+            {
+                throw new IllegalArgumentException("No attribute for object id - " + oid.getId() + " - passed to distinguished name");
+            }
+
+            this.values.addElement(attributes.get(oid)); // copy the hash table
         }
-        // END android-changed
     }
 
     /**
@@ -566,10 +554,9 @@ public class X509Name
 
         for (int i = 0; i < oids.size(); i++)
         {
-            // BEGIN android-changed
-            elems.add((DERObjectIdentifier) oids.elementAt(i),
-                    (String) values.elementAt(i));
-            // END android-changed
+            this.ordering.addElement(oids.elementAt(i));
+            this.values.addElement(values.elementAt(i));
+            this.added.addElement(FALSE);
         }
     }
 
@@ -706,7 +693,9 @@ public class X509Name
 
             if (index == -1)
             {
+                // BEGIN android-changed
                 throw new IllegalArgumentException("badly formatted directory string");
+                // END android-changed
             }
 
             String              name = token.substring(0, index);
@@ -718,9 +707,9 @@ public class X509Name
                 X509NameTokenizer   vTok = new X509NameTokenizer(value, '+');
                 String  v = vTok.nextToken();
 
-                // BEGIN android-changed
-                this.elems.add(oid, v);
-                // END android-changed
+                this.ordering.addElement(oid);
+                this.values.addElement(v);
+                this.added.addElement(FALSE);
 
                 while (vTok.hasMoreTokens())
                 {
@@ -729,24 +718,48 @@ public class X509Name
 
                     String  nm = sv.substring(0, ndx);
                     String  vl = sv.substring(ndx + 1);
-                    // BEGIN android-changed
-                    this.elems.add(decodeOID(nm, lookUp), vl, true);
-                    // END android-changed
+                    this.ordering.addElement(decodeOID(nm, lookUp));
+                    this.values.addElement(vl);
+                    this.added.addElement(TRUE);
                 }
             }
             else
             {
-                // BEGIN android-changed
-                this.elems.add(oid, value);
-                // END android-changed
+                this.ordering.addElement(oid);
+                this.values.addElement(value);
+                this.added.addElement(FALSE);
             }
         }
 
         if (reverse)
         {
-            // BEGIN android-changed
-            this.elems = this.elems.reverse();
-            // END android-changed
+            Vector  o = new Vector();
+            Vector  v = new Vector();
+            Vector  a = new Vector();
+
+            int count = 1;
+
+            for (int i = 0; i < this.ordering.size(); i++)
+            {
+                if (((Boolean)this.added.elementAt(i)).booleanValue())
+                {
+                    o.insertElementAt(this.ordering.elementAt(i), count);
+                    v.insertElementAt(this.values.elementAt(i), count);
+                    a.insertElementAt(this.added.elementAt(i), count);
+                    count++;
+                }
+                else
+                {
+                    o.insertElementAt(this.ordering.elementAt(i), 0);
+                    v.insertElementAt(this.values.elementAt(i), 0);
+                    a.insertElementAt(this.added.elementAt(i), 0);
+                    count = 1;
+                }
+            }
+
+            this.ordering = o;
+            this.values = v;
+            this.added = a;
         }
     }
 
@@ -755,17 +768,14 @@ public class X509Name
      */
     public Vector getOIDs()
     {
-        // BEGIN android-changed
         Vector  v = new Vector();
-        int     size = elems.size();
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i != ordering.size(); i++)
         {
-            v.addElement(elems.getKey(i));
+            v.addElement(ordering.elementAt(i));
         }
 
         return v;
-        // END android-changed
     }
 
     /**
@@ -775,14 +785,11 @@ public class X509Name
     public Vector getValues()
     {
         Vector  v = new Vector();
-        // BEGIN android-changed
-        int     size = elems.size();
 
-        for (int i = 0; i != size; i++)
+        for (int i = 0; i != values.size(); i++)
         {
-            v.addElement(elems.getValue(i));
+            v.addElement(values.elementAt(i));
         }
-        // END android-changed
 
         return v;
     }
@@ -795,14 +802,12 @@ public class X509Name
         DERObjectIdentifier oid)
     {
         Vector  v = new Vector();
-        int     size = elems.size();
-        // BEGIN android-changed
 
-        for (int i = 0; i != size; i++)
+        for (int i = 0; i != values.size(); i++)
         {
-            if (elems.getKey(i).equals(oid))
+            if (ordering.elementAt(i).equals(oid))
             {
-                String val = elems.getValue(i);
+                String val = (String)values.elementAt(i);
 
                 if (val.length() > 2 && val.charAt(0) == '\\' && val.charAt(1) == '#')
                 {
@@ -814,7 +819,6 @@ public class X509Name
                 }
             }
         }
-        // END android-changed
 
         return v;
     }
@@ -826,23 +830,20 @@ public class X509Name
             ASN1EncodableVector  vec = new ASN1EncodableVector();
             ASN1EncodableVector  sVec = new ASN1EncodableVector();
             DERObjectIdentifier  lstOid = null;
-            // BEGIN android-changed
-            int                  size = elems.size();
             
-            for (int i = 0; i != size; i++)
+            for (int i = 0; i != ordering.size(); i++)
             {
                 ASN1EncodableVector     v = new ASN1EncodableVector();
-                DERObjectIdentifier     oid = elems.getKey(i);
+                DERObjectIdentifier     oid = (DERObjectIdentifier)ordering.elementAt(i);
 
                 v.add(oid);
 
-                String  str = elems.getValue(i);
+                String  str = (String)values.elementAt(i);
 
                 v.add(converter.getConvertedValue(oid, str));
  
                 if (lstOid == null 
-                    || this.elems.getAdded(i))
-                // END android-changed
+                    || ((Boolean)this.added.elementAt(i)).booleanValue())
                 {
                     sVec.add(new DERSequence(v));
                 }
@@ -860,7 +861,6 @@ public class X509Name
             vec.add(new DERSet(sVec));
             
             seq = new DERSequence(vec);
-            // END android-changed
         }
 
         return seq;
@@ -905,28 +905,22 @@ public class X509Name
             return false;
         }
 
-        // BEGIN android-changed
-        int      orderingSize = elems.size();
+        int      orderingSize = ordering.size();
 
-        if (orderingSize != other.elems.size())
-        // END android-changed
+        if (orderingSize != other.ordering.size())
         {
             return false;
         }
 
         for (int i = 0; i < orderingSize; i++)
         {
-            // BEGIN android-changed
-            DERObjectIdentifier  oid = elems.getKey(i);
-            DERObjectIdentifier  oOid = other.elems.getKey(i);
-            // END android-changed
+            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
+            DERObjectIdentifier  oOid = (DERObjectIdentifier)other.ordering.elementAt(i);
 
             if (oid.equals(oOid))
             {
-                // BEGIN android-changed
-                String value = elems.getValue(i);
-                String oValue = other.elems.getValue(i);
-                // END android-changed
+                String value = (String)values.elementAt(i);
+                String oValue = (String)other.values.elementAt(i);
 
                 if (!equivalentStrings(value, oValue))
                 {
@@ -952,16 +946,14 @@ public class X509Name
         isHashCodeCalculated = true;
 
         // this needs to be order independent, like equals
-        for (int i = 0; i != elems.size(); i += 1)
+        for (int i = 0; i != ordering.size(); i += 1)
         {
-            String value = (String)elems.getValue(i);
+            String value = (String)values.elementAt(i);
 
             value = canonicalize(value);
             value = stripInternalSpaces(value);
 
-            // BEGIN android-changed
-            hashCodeValue ^= elems.getKey(i).hashCode();
-            // END android-changed
+            hashCodeValue ^= ordering.elementAt(i).hashCode();
             hashCodeValue ^= value.hashCode();
         }
 
@@ -1001,11 +993,9 @@ public class X509Name
             return false;
         }
 
-        // BEGIN android-changed
-        int      orderingSize = elems.size();
+        int      orderingSize = ordering.size();
 
-        if (orderingSize != other.elems.size())
-            // END android-changed
+        if (orderingSize != other.ordering.size())
         {
             return false;
         }
@@ -1013,9 +1003,7 @@ public class X509Name
         boolean[] indexes = new boolean[orderingSize];
         int       start, end, delta;
 
-        // BEGIN android-changed
-        if (elems.getKey(0).equals(other.elems.getKey(0)))   // guess forward
-        // END android-changed
+        if (ordering.elementAt(0).equals(other.ordering.elementAt(0)))   // guess forward
         {
             start = 0;
             end = orderingSize;
@@ -1031,10 +1019,8 @@ public class X509Name
         for (int i = start; i != end; i += delta)
         {
             boolean              found = false;
-            // BEGIN android-changed
-            DERObjectIdentifier  oid = elems.getKey(i);
-            String               value = elems.getValue(i);
-            // END android-changed
+            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
+            String               value = (String)values.elementAt(i);
 
             for (int j = 0; j < orderingSize; j++)
             {
@@ -1043,15 +1029,11 @@ public class X509Name
                     continue;
                 }
 
-                // BEGIN android-changed
-                DERObjectIdentifier oOid = other.elems.getKey(j);
-                // END android-changed
+                DERObjectIdentifier oOid = (DERObjectIdentifier)other.ordering.elementAt(j);
 
                 if (oid.equals(oOid))
                 {
-                    // BEGIN android-changed
-                    String oValue = other.elems.getValue(j);
-                    // END android-changed
+                    String oValue = (String)other.values.elementAt(j);
 
                     if (equivalentStrings(value, oValue))
                     {
@@ -1216,36 +1198,28 @@ public class X509Name
 
         StringBuffer ava = null;
 
-        // BEGIN android-changed
-        for (int i = 0; i < elems.size(); i++)
-        // END android-changed
+        for (int i = 0; i < ordering.size(); i++)
         {
-            if (elems.getAdded(i))
+            if (((Boolean)added.elementAt(i)).booleanValue())
             {
                 ava.append('+');
                 appendValue(ava, oidSymbols,
-                    // BEGIN android-changed
-                    elems.getKey(i),
-                    elems.getValue(i));
-                    // END android-changed
+                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (String)values.elementAt(i));
             }
             else
             {
                 ava = new StringBuffer();
                 appendValue(ava, oidSymbols,
-                    // BEGIN android-changed
-                    elems.getKey(i),
-                    elems.getValue(i));
-                    // END android-changed
+                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (String)values.elementAt(i));
                 components.addElement(ava);
             }
         }
 
         if (reverse)
         {
-            // BEGIN android-changed
-            for (int i = elems.size() - 1; i >= 0; i--)
-            // END android-changed
+            for (int i = components.size() - 1; i >= 0; i--)
             {
                 if (first)
                 {

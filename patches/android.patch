@@ -1,308 +1,6 @@
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Collection.java bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Collection.java
---- bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Collection.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Collection.java	2011-05-19 22:33:02.000000000 +0000
-@@ -0,0 +1,298 @@
-+package org.bouncycastle.asn1;
-+
-+import java.io.ByteArrayOutputStream;
-+import java.io.IOException;
-+import java.util.Enumeration;
-+import java.util.ConcurrentModificationException;
-+
-+// BEGIN android-note
-+/*
-+ * This is a new class that was synthesized from ASN1Sequence and
-+ * ASN1Set, but with extra smarts about efficiently storing its
-+ * elements.
-+ */
-+// END android-note
-+
-+/**
-+ * Base class for collection-like <code>DERObject</code>s. Instances
-+ * of this class will keep up to four elements directly, resorting to
-+ * an external collection only if more elements than that need to be
-+ * stored.
-+ */
-+public abstract class ASN1Collection
-+    extends ASN1Object
-+{
-+    /** &gt;= 0; size of the collection */
-+    private int size;
-+
-+    /** null-ok; element #0 */
-+    private DEREncodable obj0;
-+
-+    /** null-ok; element #1 */
-+    private DEREncodable obj1;
-+
-+    /** null-ok; element #2 */
-+    private DEREncodable obj2;
-+
-+    /** null-ok; element #3 */
-+    private DEREncodable obj3;
-+
-+    /** null-ok; elements #4 and higher */
-+    private DEREncodable[] rest;
-+
-+    /**
-+     * Returns the object at the postion indicated by index.
-+     *
-+     * @param index the index (starting at zero) of the object
-+     * @return the object at the postion indicated by index
-+     */
-+    public DEREncodable getObjectAt(int index) {
-+        if ((index < 0) || (index >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(index));
-+        }
-+                    
-+        switch (index) {
-+            case 0: return obj0;
-+            case 1: return obj1;
-+            case 2: return obj2;
-+            case 3: return obj3;
-+            default: return rest[index - 4];
-+        }
-+    }
-+
-+    /**
-+     * Returns the number of objects in this instance.
-+     *
-+     * @return the number of objects in this instance
-+     */
-+    public int size() {
-+        return size;
-+    }
-+
-+    /** {@inheritDoc} */
-+    public final int hashCode() {
-+        Enumeration e = this.getObjects();
-+        int hashCode = 0;
-+
-+        while (e.hasMoreElements()) {
-+            Object o = e.nextElement();
-+            
-+            if (o != null) {
-+                hashCode ^= o.hashCode();
-+            }
-+        }
-+
-+        return hashCode;
-+    }
-+
-+    /**
-+     * Adds a new element to this instance.
-+     * 
-+     * @param obj non-null; the instance to add
-+     */
-+    protected void addObject(DEREncodable obj) {
-+        if (obj == null) {
-+            throw new NullPointerException("obj == null");
-+        }
-+
-+        int sz = size;
-+        
-+        switch (sz) {
-+            case 0: obj0 = obj; break;
-+            case 1: obj1 = obj; break;
-+            case 2: obj2 = obj; break;
-+            case 3: obj3 = obj; break;
-+            case 4: {
-+                // Initial allocation of rest.
-+                rest = new DEREncodable[5];
-+                rest[0] = obj;
-+                break;
-+            }
-+            default: {
-+                int index = sz - 4;
-+                if (index >= rest.length) {
-+                    // Grow rest.
-+                    DEREncodable[] newRest = new DEREncodable[index * 2 + 10];
-+                    System.arraycopy(rest, 0, newRest, 0, rest.length);
-+                    rest = newRest;
-+                }
-+                rest[index] = obj;
-+                break;
-+            }
-+        }
-+
-+        size++;
-+    }
-+
-+    /**
-+     * Sets the element at a given index (used by {@link #sort}).
-+     * 
-+     * @param obj non-null; the object to set
-+     * @param index &gt;= 0; the index
-+     */
-+    private void setObjectAt(DEREncodable obj, int index) {
-+        switch (index) {
-+            case 0: obj0 = obj; break;
-+            case 1: obj1 = obj; break;
-+            case 2: obj2 = obj; break;
-+            case 3: obj3 = obj; break;
-+            default: {
-+                rest[index - 4] = obj;
-+                break;
-+            }
-+        }
-+    }
-+
-+    /**
-+     * Encodes this instance to the given stream.
-+     * 
-+     * @param out non-null; stream to encode to
-+     */
-+    /*package*/ abstract void encode(DEROutputStream out) throws IOException;
-+
-+    /**
-+     * Gets an enumeration of all the objects in this collection.
-+     * 
-+     * @return non-null; the enumeration
-+     */
-+    public Enumeration getObjects() {
-+        return new ASN1CollectionEnumeration();
-+    }
-+
-+    /**
-+     * Associated enumeration class.
-+     */
-+    private class ASN1CollectionEnumeration implements Enumeration {
-+        /** original size; used for modification detection */
-+        private final int origSize = size;
-+
-+        /** &gt;= 0; current cursor */
-+        private int at = 0;
-+
-+        /** {@inheritDoc} */
-+        public boolean hasMoreElements() {
-+            if (size != origSize) {
-+                throw new ConcurrentModificationException();
-+            }
-+
-+            return at < origSize;
-+        }
-+
-+        /** {@inheritDoc} */
-+        public Object nextElement() {
-+            if (size != origSize) {
-+                throw new ConcurrentModificationException();
-+            }
-+
-+            switch (at++) {
-+                case 0: return obj0;
-+                case 1: return obj1;
-+                case 2: return obj2;
-+                case 3: return obj3;
-+                default: return rest[at - 5];
-+            }
-+        }
-+    }
-+
-+    /**
-+     * Sorts the elements in this instance.
-+     */
-+    protected void sort() {
-+        if (size <= 1) {
-+            return;
-+        }
-+
-+        boolean swapped = true;
-+
-+        // TODO: This is bubble sort. Probably not the best choice.
-+        while (swapped) {
-+            int index = 0;
-+            byte[] a = getEncoded(getObjectAt(0));
-+                
-+            swapped = false;
-+                
-+            while (index != size - 1) {
-+                int nextIndex = index + 1;
-+                byte[] b = getEncoded(getObjectAt(nextIndex));
-+
-+                if (lessThanOrEqual(a, b)) {
-+                    a = b;
-+                } else {
-+                    DEREncodable o = getObjectAt(index);
-+                    
-+                    setObjectAt(getObjectAt(nextIndex), index);
-+                    setObjectAt(o, nextIndex);
-+
-+                    swapped = true;
-+                }
-+
-+                index++;
-+            }
-+        }
-+    }
-+    
-+    /**
-+     * Returns true if a <= b (arrays are assumed padded with zeros).
-+     */
-+    private static boolean lessThanOrEqual(byte[] a, byte[] b) {
-+        if (a.length <= b.length) {
-+            for (int i = 0; i != a.length; i++) {
-+                int l = a[i] & 0xff;
-+                int r = b[i] & 0xff;
-+                 
-+                if (r > l) {
-+                    return true;
-+                } else if (l > r) {
-+                    return false;
-+                }
-+            }
-+
-+            return true;
-+        } else {
-+            for (int i = 0; i != b.length; i++) {
-+                 int l = a[i] & 0xff;
-+                 int r = b[i] & 0xff;
-+                 
-+                 if (r > l) {
-+                     return true;
-+                 } else if (l > r) {
-+                     return false;
-+                 }
-+             }
-+
-+             return false;
-+         }
-+    }
-+
-+    /**
-+     * Gets the encoded form of an object.
-+     * 
-+     * @param obj non-null; object to encode
-+     * @return non-null; the encoded form
-+     */
-+    private static byte[] getEncoded(DEREncodable obj) {
-+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-+        ASN1OutputStream aOut = new ASN1OutputStream(bOut);
-+
-+        try {
-+            aOut.writeObject(obj);
-+        } catch (IOException e) {
-+            throw new IllegalArgumentException(
-+                    "cannot encode object added to collection");
-+        }
-+
-+        return bOut.toByteArray();
-+    }
-+
-+    /** {@inheritDoc} */
-+    public final String toString() {
-+        StringBuilder sb = new StringBuilder();
-+        sb.append('[');
-+        for (int i = 0; i < size; i++) {
-+            if (i != 0) sb.append(", ");
-+            sb.append(getObjectAt(i));
-+        }
-+        sb.append(']');
-+        return sb.toString();
-+    }
-+}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1InputStream.java bcprov-jdk16-146/org/bouncycastle/asn1/ASN1InputStream.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1InputStream.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1InputStream.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1InputStream.java	2011-05-23 18:37:28.000000000 +0000
 @@ -363,7 +363,9 @@
              case BMP_STRING:
                  return new DERBMPString(bytes);
@@ -316,7 +14,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1InputStream.java bcpr
              case GENERALIZED_TIME:
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Null.java bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Null.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Null.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Null.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Null.java	2011-05-23 18:37:28.000000000 +0000
 @@ -8,9 +8,11 @@
  public abstract class ASN1Null
      extends ASN1Object
@@ -330,456 +28,9 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Null.java bcprov-jdk1
  
      public int hashCode()
      {
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Sequence.java bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Sequence.java
---- bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Sequence.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Sequence.java	2011-05-19 22:33:02.000000000 +0000
-@@ -2,12 +2,20 @@
- 
- import java.io.IOException;
- import java.util.Enumeration;
--import java.util.Vector;
-+// BEGIN android-removed
-+// import java.util.Vector;
-+// END android-removed
-+
-+// BEGIN android-note
-+// Changed inheritence of class.
-+// END android-note
- 
- public abstract class ASN1Sequence
--    extends ASN1Object
-+    extends ASN1Collection
- {
--    private Vector seq = new Vector();
-+    // BEGIN android-removed
-+    // private Vector seq = new Vector();
-+    // END android-removed
- 
-     /**
-      * return an ASN1Sequence from the given object.
-@@ -96,10 +104,12 @@
-         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
-     }
- 
--    public Enumeration getObjects()
--    {
--        return seq.elements();
--    }
-+    // BEGIN android-removed
-+    // public Enumeration getObjects()
-+    // {
-+    //     return seq.elements();
-+    // }
-+    // END android-removed
- 
-     public ASN1SequenceParser parser()
-     {
-@@ -143,43 +153,45 @@
-         };
-     }
- 
--    /**
--     * return the object at the sequence position indicated by index.
--     *
--     * @param index the sequence number (starting at zero) of the object
--     * @return the object at the sequence position indicated by index.
--     */
--    public DEREncodable getObjectAt(
--        int index)
--    {
--        return (DEREncodable)seq.elementAt(index);
--    }
--
--    /**
--     * return the number of objects in this sequence.
--     *
--     * @return the number of objects in this sequence.
--     */
--    public int size()
--    {
--        return seq.size();
--    }
--
--    public int hashCode()
--    {
--        Enumeration             e = this.getObjects();
--        int                     hashCode = size();
--
--        while (e.hasMoreElements())
--        {
--            Object o = getNext(e);
--            hashCode *= 17;
--
--            hashCode ^= o.hashCode();
--        }
--
--        return hashCode;
--    }
-+    // BEGIN android-removed
-+    // /**
-+    //  * return the object at the sequence position indicated by index.
-+    //  *
-+    //  * @param index the sequence number (starting at zero) of the object
-+    //  * @return the object at the sequence position indicated by index.
-+    //  */
-+    // public DEREncodable getObjectAt(
-+    //     int index)
-+    // {
-+    //     return (DEREncodable)seq.elementAt(index);
-+    // }
-+    //
-+    // /**
-+    //  * return the number of objects in this sequence.
-+    //  *
-+    //  * @return the number of objects in this sequence.
-+    //  */
-+    // public int size()
-+    // {
-+    //     return seq.size();
-+    // }
-+    //
-+    // public int hashCode()
-+    // {
-+    //     Enumeration             e = this.getObjects();
-+    //     int                     hashCode = size();
-+    //
-+    //     while (e.hasMoreElements())
-+    //     {
-+    //         Object o = getNext(e);
-+    //         hashCode *= 17;
-+    //
-+    //         hashCode ^= o.hashCode();
-+    //     }
-+    //
-+    //     return hashCode;
-+    // }
-+    // END android-removed
- 
-     boolean asn1Equals(
-         DERObject  o)
-@@ -231,17 +243,19 @@
-         return encObj;
-     }
- 
--    protected void addObject(
--        DEREncodable obj)
--    {
--        seq.addElement(obj);
--    }
--
--    abstract void encode(DEROutputStream out)
--        throws IOException;
--
--    public String toString() 
--    {
--      return seq.toString();
--    }
-+    // BEGIN android-removed
-+    //protected void addObject(
-+    //    DEREncodable obj)
-+    //{
-+    //    seq.addElement(obj);
-+    //}
-+
-+    //abstract void encode(DEROutputStream out)
-+    //    throws IOException;
-+
-+    //public String toString() 
-+    //{
-+    //  return seq.toString();
-+    //}
-+    // END android-removed
- }
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Set.java bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Set.java
---- bcprov-jdk16-146.orig/org/bouncycastle/asn1/ASN1Set.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/ASN1Set.java	2011-05-19 22:33:02.000000000 +0000
-@@ -3,12 +3,20 @@
- import java.io.ByteArrayOutputStream;
- import java.io.IOException;
- import java.util.Enumeration;
--import java.util.Vector;
-+// BEGIN android-removed
-+// import java.util.Vector;
-+// END android-removed
-+
-+// BEGIN android-note
-+// Changed inheritence of class.
-+// END android-note
- 
- abstract public class ASN1Set
--    extends ASN1Object
-+    extends ASN1Collection
- {
--    protected Vector set = new Vector();
-+    // BEGIN android-removed
-+    // protected Vector set = new Vector();
-+    // END android-removed
- 
-     /**
-      * return an ASN1Set from the given object.
-@@ -104,32 +112,34 @@
-     {
-     }
- 
--    public Enumeration getObjects()
--    {
--        return set.elements();
--    }
--
--    /**
--     * return the object at the set position indicated by index.
--     *
--     * @param index the set number (starting at zero) of the object
--     * @return the object at the set position indicated by index.
--     */
--    public DEREncodable getObjectAt(
--        int index)
--    {
--        return (DEREncodable)set.elementAt(index);
--    }
--
--    /**
--     * return the number of objects in this set.
--     *
--     * @return the number of objects in this set.
--     */
--    public int size()
--    {
--        return set.size();
--    }
-+    // BEGIN android-removed
-+    // public Enumeration getObjects()
-+    // {
-+    //     return set.elements();
-+    // }
-+    //
-+    // /**
-+    //  * return the object at the set position indicated by index.
-+    //  *
-+    //  * @param index the set number (starting at zero) of the object
-+    //  * @return the object at the set position indicated by index.
-+    //  */
-+    // public DEREncodable getObjectAt(
-+    //     int index)
-+    // {
-+    //     return (DEREncodable)set.elementAt(index);
-+    // }
-+    //
-+    // /**
-+    //  * return the number of objects in this set.
-+    //  *
-+    //  * @return the number of objects in this set.
-+    //  */
-+    // public int size()
-+    // {
-+    //     return set.size();
-+    // }
-+    // END android-removed
- 
-     public ASN1Encodable[] toArray()
-     {
-@@ -185,21 +195,23 @@
-         };
-     }
- 
--    public int hashCode()
--    {
--        Enumeration             e = this.getObjects();
--        int                     hashCode = size();
--
--        while (e.hasMoreElements())
--        {
--            Object o = getNext(e);
--            hashCode *= 17;
--
--            hashCode ^= o.hashCode();
--        }
--
--        return hashCode;
--    }
-+    // BEGIN android-removed
-+    // public int hashCode()
-+    // {
-+    //     Enumeration             e = this.getObjects();
-+    //     int                     hashCode = size();
-+    //
-+    //     while (e.hasMoreElements())
-+    //     {
-+    //         Object o = getNext(e);
-+    //         hashCode *= 17;
-+    //
-+    //         hashCode ^= o.hashCode();
-+    //     }
-+    //
-+    //     return hashCode;
-+    // }
-+    // END android-removed
- 
-     boolean asn1Equals(
-         DERObject  o)
-@@ -251,23 +263,25 @@
-         return encObj;
-     }
- 
--    /**
--     * return true if a <= b (arrays are assumed padded with zeros).
--     */
--    private boolean lessThanOrEqual(
--         byte[] a,
--         byte[] b)
--    {
--        int len = Math.min(a.length, b.length);
--        for (int i = 0; i != len; ++i)
--        {
--            if (a[i] != b[i])
--            {
--                return (a[i] & 0xff) < (b[i] & 0xff);
--            }
--        }
--        return len == a.length;
--    }
-+    // BEGIN android-removed
-+    // /**
-+    //  * return true if a <= b (arrays are assumed padded with zeros).
-+    //  */
-+    // private boolean lessThanOrEqual(
-+    //      byte[] a,
-+    //      byte[] b)
-+    // {
-+    //     int len = Math.min(a.length, b.length);
-+    //     for (int i = 0; i != len; ++i)
-+    //     {
-+    //         if (a[i] != b[i])
-+    //         {
-+    //             return (a[i] & 0xff) < (b[i] & 0xff);
-+    //         }
-+    //     }
-+    //     return len == a.length;
-+    // }
-+    // END android-removed
- 
-     private byte[] getEncoded(
-         DEREncodable obj)
-@@ -287,59 +301,61 @@
-         return bOut.toByteArray();
-     }
- 
--    protected void sort()
--    {
--        if (set.size() > 1)
--        {
--            boolean    swapped = true;
--            int        lastSwap = set.size() - 1;
--
--            while (swapped)
--            {
--                int    index = 0;
--                int    swapIndex = 0;
--                byte[] a = getEncoded((DEREncodable)set.elementAt(0));
--                
--                swapped = false;
--
--                while (index != lastSwap)
--                {
--                    byte[] b = getEncoded((DEREncodable)set.elementAt(index + 1));
--
--                    if (lessThanOrEqual(a, b))
--                    {
--                        a = b;
--                    }
--                    else
--                    {
--                        Object  o = set.elementAt(index);
--
--                        set.setElementAt(set.elementAt(index + 1), index);
--                        set.setElementAt(o, index + 1);
--
--                        swapped = true;
--                        swapIndex = index;
--                    }
--
--                    index++;
--                }
--
--                lastSwap = swapIndex;
--            }
--        }
--    }
--
--    protected void addObject(
--        DEREncodable obj)
--    {
--        set.addElement(obj);
--    }
--
--    abstract void encode(DEROutputStream out)
--            throws IOException;
--
--    public String toString() 
--    {
--      return set.toString();
--    }
-+    // BEGIN android-removed
-+    // protected void sort()
-+    // {
-+    //     if (set.size() > 1)
-+    //     {
-+    //         boolean    swapped = true;
-+    //         int        lastSwap = set.size() - 1;
-+    //
-+    //         while (swapped)
-+    //         {
-+    //             int    index = 0;
-+    //             int    swapIndex = 0;
-+    //             byte[] a = getEncoded((DEREncodable)set.elementAt(0));
-+    //
-+    //             swapped = false;
-+    //
-+    //             while (index != lastSwap)
-+    //             {
-+    //                 byte[] b = getEncoded((DEREncodable)set.elementAt(index + 1));
-+    //
-+    //                 if (lessThanOrEqual(a, b))
-+    //                 {
-+    //                     a = b;
-+    //                 }
-+    //                 else
-+    //                 {
-+    //                     Object  o = set.elementAt(index);
-+    //
-+    //                     set.setElementAt(set.elementAt(index + 1), index);
-+    //                     set.setElementAt(o, index + 1);
-+    //
-+    //                     swapped = true;
-+    //                     swapIndex = index;
-+    //                 }
-+    //
-+    //                 index++;
-+    //             }
-+    //
-+    //             lastSwap = swapIndex;
-+    //         }
-+    //     }
-+    // }
-+    //
-+    // protected void addObject(
-+    //     DEREncodable obj)
-+    // {
-+    //     set.addElement(obj);
-+    // }
-+    //
-+    // abstract void encode(DEROutputStream out)
-+    //         throws IOException;
-+    //
-+    // public String toString() 
-+    // {
-+    //   return set.toString();
-+    // }
-+    // END android-removed
- }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERBoolean.java bcprov-jdk16-146/org/bouncycastle/asn1/DERBoolean.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERBoolean.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/DERBoolean.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/DERBoolean.java	2011-05-23 18:37:28.000000000 +0000
 @@ -5,7 +5,9 @@
  public class DERBoolean
      extends ASN1Object
@@ -853,7 +104,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERBoolean.java bcprov-jd
      }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERNull.java bcprov-jdk16-146/org/bouncycastle/asn1/DERNull.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERNull.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/DERNull.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/DERNull.java	2011-05-23 18:37:28.000000000 +0000
 @@ -10,9 +10,13 @@
  {
      public static final DERNull INSTANCE = new DERNull();
@@ -872,7 +123,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERNull.java bcprov-jdk16
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERObjectIdentifier.java bcprov-jdk16-146/org/bouncycastle/asn1/DERObjectIdentifier.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERObjectIdentifier.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/DERObjectIdentifier.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/DERObjectIdentifier.java	2011-05-23 18:37:28.000000000 +0000
 @@ -110,7 +110,13 @@
              }
          }
@@ -905,7 +156,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERObjectIdentifier.java 
      public String getId()
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERPrintableString.java bcprov-jdk16-146/org/bouncycastle/asn1/DERPrintableString.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERPrintableString.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/DERPrintableString.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/DERPrintableString.java	2011-05-23 18:37:28.000000000 +0000
 @@ -9,7 +9,9 @@
      extends ASN1Object
      implements DERString
@@ -939,294 +190,9 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/DERPrintableString.java b
      }
  
      public String getString()
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/OrderedTable.java bcprov-jdk16-146/org/bouncycastle/asn1/OrderedTable.java
---- bcprov-jdk16-146.orig/org/bouncycastle/asn1/OrderedTable.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/OrderedTable.java	2011-05-19 22:33:02.000000000 +0000
-@@ -0,0 +1,281 @@
-+package org.bouncycastle.asn1;
-+
-+import java.util.Enumeration;
-+import java.util.ConcurrentModificationException;
-+
-+// BEGIN android-note
-+/*
-+ * This is a new class that was synthesized from the observed
-+ * requirement for a lookup table that preserves order. Since in
-+ * practice the element count is typically very low, we just use a
-+ * flat list rather than doing any hashing / bucketing.
-+ */
-+// END android-note
-+
-+/**
-+ * Ordered lookup table. Instances of this class will keep up to four
-+ * key-value pairs directly, resorting to an external collection only
-+ * if more elements than that need to be stored.
-+ */
-+public final class OrderedTable {
-+    /** null-ok; key #0 */
-+    private DERObjectIdentifier key0;
-+    
-+    /** null-ok; key #1 */
-+    private DERObjectIdentifier key1;
-+
-+    /** null-ok; key #2 */
-+    private DERObjectIdentifier key2;
-+
-+    /** null-ok; key #3 */
-+    private DERObjectIdentifier key3;
-+    
-+    /** null-ok; value #0 */
-+    private Object value0;
-+    
-+    /** null-ok; value #1 */
-+    private Object value1;
-+
-+    /** null-ok; value #2 */
-+    private Object value2;
-+
-+    /** null-ok; value #3 */
-+    private Object value3;
-+    
-+    /**
-+     * null-ok; array of additional keys and values, alternating
-+     * key then value, etc. 
-+     */
-+    private Object[] rest;
-+
-+    /** &gt;= 0; number of elements in the list */
-+    private int size;
-+
-+    // Note: Default public constructor.
-+
-+    /**
-+     * Adds an element assuming no duplicate key.
-+     * 
-+     * @see #put
-+     * 
-+     * @param key non-null; the key
-+     * @param value non-null; the value
-+     */
-+    public void add(DERObjectIdentifier key, Object value) {
-+        if (key == null) {
-+            throw new NullPointerException("key == null");
-+        }
-+
-+        if (value == null) {
-+            throw new NullPointerException("value == null");
-+        }
-+
-+        int sz = size;
-+
-+        switch (sz) {
-+            case 0: {
-+                key0 = key;
-+                value0 = value;
-+                break;
-+            }
-+            case 1: {
-+                key1 = key;
-+                value1 = value;
-+                break;
-+            }
-+            case 2: {
-+                key2 = key;
-+                value2 = value;
-+                break;
-+            }
-+            case 3: {
-+                key3 = key;
-+                value3 = value;
-+                break;
-+            }
-+            case 4: {
-+                // Do initial allocation of rest.
-+                rest = new Object[10];
-+                rest[0] = key;
-+                rest[1] = value;
-+                break;
-+            }
-+            default: {
-+                int index = (sz - 4) * 2;
-+                int index1 = index + 1;
-+                if (index1 >= rest.length) {
-+                    // Grow rest.
-+                    Object[] newRest = new Object[index1 * 2 + 10];
-+                    System.arraycopy(rest, 0, newRest, 0, rest.length);
-+                    rest = newRest;
-+                }
-+                rest[index] = key;
-+                rest[index1] = value;
-+                break;
-+            }
-+        }
-+        
-+        size = sz + 1;
-+    }
-+
-+    /**
-+     * Gets the number of elements in this instance.
-+     */
-+    public int size() {
-+        return size;
-+    }
-+
-+    /**
-+     * Look up the given key, returning the associated value if found.
-+     * 
-+     * @param key non-null; the key to look up
-+     * @return null-ok; the associated value
-+     */
-+    public Object get(DERObjectIdentifier key) {
-+        int keyHash = key.hashCode();
-+        int sz = size;
-+
-+        for (int i = 0; i < size; i++) {
-+            DERObjectIdentifier probe = getKey(i);
-+            if ((probe.hashCode() == keyHash) &&
-+                    probe.equals(key)) {
-+                return getValue(i);
-+            }
-+        }
-+
-+        return null;
-+    }
-+    
-+    /**
-+     * Replace a key if present, otherwise add
-+     * 
-+     * @see #add
-+     * 
-+     * @param key non-null; the key
-+     * @param value non-null; the value
-+     */
-+    public void put(DERObjectIdentifier key, Object value) {
-+        if (key == null) {
-+            throw new NullPointerException("key == null");
-+        }
-+
-+        if (value == null) {
-+            throw new NullPointerException("value == null");
-+        }
-+
-+        int keyHash = key.hashCode();
-+        int sz = size;
-+
-+        for (int i = 0; i < size; i++) {
-+            DERObjectIdentifier probe = getKey(i);
-+            if ((probe.hashCode() == keyHash) &&
-+                    probe.equals(key)) {
-+                setValue(i, value);
-+                return;
-+            }
-+        }
-+
-+        add(key, value);
-+    }
-+    
-+    /**
-+     * Gets the nth key.
-+     * 
-+     * @param n index
-+     * @return non-null; the nth key
-+     */
-+    public DERObjectIdentifier getKey(int n) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+
-+        switch (n) {
-+            case 0: return key0;
-+            case 1: return key1;
-+            case 2: return key2;
-+            case 3: return key3;
-+            default: return (DERObjectIdentifier) rest[(n - 4) * 2];
-+        }
-+    }
-+
-+    /**
-+     * Gets the nth value.
-+     * 
-+     * @param n index
-+     * @return non-null; the nth value
-+     */
-+    public Object getValue(int n) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+
-+        switch (n) {
-+            case 0: return value0;
-+            case 1: return value1;
-+            case 2: return value2;
-+            case 3: return value3;
-+            default: return rest[((n - 4) * 2) + 1];
-+        }
-+    }
-+
-+    /**
-+     * Sets the nth value.
-+     * 
-+     * @param n index
-+     * @param value non-null object
-+     */
-+    public void setValue(int n, Object value) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+        if (value == null) {
-+            throw new NullPointerException("value == null");
-+        }
-+
-+        switch (n) {
-+            case 0: value0 = value; return;
-+            case 1: value1 = value; return;
-+            case 2: value2 = value; return;
-+            case 3: value3 = value; return;
-+            default: rest[((n - 4) * 2) + 1] = value; return;
-+        }
-+    }
-+
-+    /**
-+     * Gets an enumeration of the keys, in order.
-+     * 
-+     * @return non-null; an enumeration of the keys
-+     */
-+    public Enumeration getKeys() {
-+        return new KeyEnumeration();
-+    }
-+
-+    /**
-+     * Associated enumeration class.
-+     */
-+    private class KeyEnumeration implements Enumeration {
-+        /** original size; used for modification detection */
-+        private final int origSize = size;
-+
-+        /** &gt;= 0; current cursor */
-+        private int at = 0;
-+
-+        /** {@inheritDoc} */
-+        public boolean hasMoreElements() {
-+            if (size != origSize) {
-+                throw new ConcurrentModificationException();
-+            }
-+
-+            return at < origSize;
-+        }
-+
-+        /** {@inheritDoc} */
-+        public Object nextElement() {
-+            if (size != origSize) {
-+                throw new ConcurrentModificationException();
-+            }
-+
-+            return getKey(at++);
-+        }
-+    }
-+}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/cms/ContentInfo.java bcprov-jdk16-146/org/bouncycastle/asn1/cms/ContentInfo.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/cms/ContentInfo.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/cms/ContentInfo.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/cms/ContentInfo.java	2011-05-23 18:37:28.000000000 +0000
 @@ -12,7 +12,9 @@
  
  public class ContentInfo
@@ -1240,7 +206,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/cms/ContentInfo.java bcpr
      private DEREncodable        content;
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyInfo.java	2011-05-23 18:37:28.000000000 +0000
 @@ -37,10 +37,13 @@
      public static EncryptedPrivateKeyInfo getInstance(
          Object  obj)
@@ -1258,7 +224,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/EncryptedPrivateKeyI
              return new EncryptedPrivateKeyInfo((ASN1Sequence)obj);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifiers.java	2011-05-23 18:37:28.000000000 +0000
 @@ -10,8 +10,10 @@
      //
      static final ASN1ObjectIdentifier    pkcs_1                    = new ASN1ObjectIdentifier("1.2.840.113549.1.1");
@@ -1316,7 +282,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/PKCSObjectIdentifier
      static final ASN1ObjectIdentifier    id_hmacWithSHA512       = digestAlgorithm.branch("11");
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java	2011-05-23 18:37:28.000000000 +0000
 @@ -19,7 +19,9 @@
      private AlgorithmIdentifier maskGenAlgorithm;
      private AlgorithmIdentifier pSourceAlgorithm;
@@ -1330,7 +296,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSAESOAEPparams.java
      
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java	2011-05-23 18:37:28.000000000 +0000
 @@ -20,7 +20,9 @@
      private DERInteger          saltLength;
      private DERInteger          trailerField;
@@ -1344,7 +310,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/pkcs/RSASSAPSSparams.java
      public final static DERInteger          DEFAULT_TRAILER_FIELD = new DERInteger(1);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/util/ASN1Dump.java bcprov-jdk16-146/org/bouncycastle/asn1/util/ASN1Dump.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/util/ASN1Dump.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/util/ASN1Dump.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/util/ASN1Dump.java	2011-05-23 18:37:28.000000000 +0000
 @@ -79,7 +79,9 @@
              {
                  Object  o = e.nextElement();
@@ -1358,7 +324,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/util/ASN1Dump.java bcprov
                      buf.append("NULL");
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/AttCertIssuer.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/AttCertIssuer.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/AttCertIssuer.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/AttCertIssuer.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/AttCertIssuer.java	2011-05-23 18:37:28.000000000 +0000
 @@ -45,7 +45,7 @@
          ASN1TaggedObject obj,
          boolean          explicit)
@@ -1370,7 +336,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/AttCertIssuer.java b
      /**
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/BasicConstraints.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/BasicConstraints.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/BasicConstraints.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/BasicConstraints.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/BasicConstraints.java	2011-05-23 18:37:28.000000000 +0000
 @@ -14,7 +14,9 @@
  public class BasicConstraints
      extends ASN1Encodable
@@ -1417,7 +383,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/BasicConstraints.jav
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/IssuingDistributionPoint.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/IssuingDistributionPoint.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/IssuingDistributionPoint.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/IssuingDistributionPoint.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/IssuingDistributionPoint.java	2011-05-23 18:37:28.000000000 +0000
 @@ -96,11 +96,15 @@
          }
          if (onlyContainsUserCerts)
@@ -1456,179 +422,8 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/IssuingDistributionP
          seq = new DERSequence(vec);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509Extensions.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Extensions.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509Extensions.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Extensions.java	2011-05-19 22:33:02.000000000 +0000
-@@ -14,6 +14,9 @@
- import org.bouncycastle.asn1.DERObject;
- import org.bouncycastle.asn1.DERObjectIdentifier;
- import org.bouncycastle.asn1.DERSequence;
-+// BEGIN android-added
-+import org.bouncycastle.asn1.OrderedTable;
-+// END android-added
- 
- public class X509Extensions
-     extends ASN1Encodable
-@@ -204,8 +207,9 @@
-      */
-     public static final ASN1ObjectIdentifier TargetInformation = new ASN1ObjectIdentifier("2.5.29.55");
-     
--    private Hashtable               extensions = new Hashtable();
--    private Vector                  ordering = new Vector();
-+    // BEGIN android-changed
-+    private OrderedTable table = new OrderedTable();
-+    // END android-changed
- 
-     public static X509Extensions getInstance(
-         ASN1TaggedObject obj,
-@@ -249,20 +253,26 @@
-         {
-             ASN1Sequence            s = ASN1Sequence.getInstance(e.nextElement());
- 
--            if (s.size() == 3)
-+            // BEGIN android-changed
-+            int sSize = s.size();
-+            DERObjectIdentifier key = (DERObjectIdentifier) s.getObjectAt(0);
-+            Object value;
-+            
-+            if (sSize == 3)
-             {
--                extensions.put(s.getObjectAt(0), new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2))));
-+                value = new X509Extension(DERBoolean.getInstance(s.getObjectAt(1)), ASN1OctetString.getInstance(s.getObjectAt(2)));
-             }
--            else if (s.size() == 2)
-+            else if (sSize == 2)
-             {
--                extensions.put(s.getObjectAt(0), new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1))));
-+                value = new X509Extension(false, ASN1OctetString.getInstance(s.getObjectAt(1)));
-             }
-             else
-             {
--                throw new IllegalArgumentException("Bad sequence size: " + s.size());
-+                throw new IllegalArgumentException("Bad sequence size: " + sSize);
-             }
- 
--            ordering.addElement(s.getObjectAt(0));
-+            table.add(key, value);
-+            // END android-changed
-         }
-     }
- 
-@@ -297,19 +307,23 @@
-             e = ordering.elements();
-         }
- 
--        while (e.hasMoreElements())
--        {
--            this.ordering.addElement(new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId())); 
--        }
--
--        e = this.ordering.elements();
-+        // BEGIN android-removed
-+        // while (e.hasMoreElements())
-+        // {
-+        //     this.ordering.addElement(new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId())); 
-+        // }
-+        //
-+        // e = this.ordering.elements();
-+        // END android-removed
- 
-         while (e.hasMoreElements())
-         {
-             ASN1ObjectIdentifier     oid = new ASN1ObjectIdentifier(((DERObjectIdentifier)e.nextElement()).getId());
-             X509Extension           ext = (X509Extension)extensions.get(oid);
- 
--            this.extensions.put(oid, ext);
-+            // BEGIN android-changed
-+            table.add(oid, ext);
-+            // END android-changed
-         }
-     }
- 
-@@ -325,21 +339,27 @@
-     {
-         Enumeration e = objectIDs.elements();
- 
--        while (e.hasMoreElements())
--        {
--            this.ordering.addElement(e.nextElement()); 
--        }
-+        // BEGIN android-removed
-+        // while (e.hasMoreElements())
-+        // {
-+        //     this.ordering.addElement(e.nextElement()); 
-+        // }
-+        // END android-removed
- 
-         int count = 0;
-         
--        e = this.ordering.elements();
-+        // BEGIN android-removed
-+        // e = this.ordering.elements();
-+        // END android-removed
- 
-         while (e.hasMoreElements())
-         {
-             ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
-             X509Extension           ext = (X509Extension)values.elementAt(count);
- 
--            this.extensions.put(oid, ext);
-+            // BEGIN android-changed
-+            table.add(oid, ext);
-+            // END android-changed
-             count++;
-         }
-     }
-@@ -349,7 +369,9 @@
-      */
-     public Enumeration oids()
-     {
--        return ordering.elements();
-+        // BEGIN android-changed
-+        return table.getKeys();
-+        // END android-changed
-     }
- 
-     /**
-@@ -361,7 +383,9 @@
-     public X509Extension getExtension(
-         ASN1ObjectIdentifier oid)
-     {
--        return (X509Extension)extensions.get(oid);
-+        // BEGIN android-changed
-+        return (X509Extension)table.get(oid);
-+        // END android-changed
-     }
- 
-     /**
-@@ -372,7 +396,9 @@
-     public X509Extension getExtension(
-         DERObjectIdentifier oid)
-     {
--        return (X509Extension)extensions.get(oid);
-+        // BEGIN android-changed
-+        return (X509Extension)table.get(oid);
-+        // END android-changed
-     }
- 
-     /**
-@@ -388,19 +414,23 @@
-     public DERObject toASN1Object()
-     {
-         ASN1EncodableVector     vec = new ASN1EncodableVector();
--        Enumeration             e = ordering.elements();
-+        // BEGIN android-changed
-+        int                     size = table.size();
- 
--        while (e.hasMoreElements())
-+        for (int i = 0; i < size; i++)
-         {
--            ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
--            X509Extension           ext = (X509Extension)extensions.get(oid);
-+            DERObjectIdentifier     oid = table.getKey(i);
-+            X509Extension           ext = (X509Extension)table.getValue(i);
-+            // END android-changed
-             ASN1EncodableVector     v = new ASN1EncodableVector();
- 
-             v.add(oid);
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Extensions.java	2011-05-23 18:37:28.000000000 +0000
+@@ -400,7 +400,9 @@
  
              if (ext.isCritical())
              {
@@ -1639,793 +434,47 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509Extensions.java 
              }
  
              v.add(ext.getValue());
-@@ -414,18 +444,24 @@
-     public boolean equivalent(
-         X509Extensions other)
-     {
--        if (extensions.size() != other.extensions.size())
-+        // BEGIN android-changed
-+        if (table.size() != other.table.size())
-+        // END android-changed
-         {
-             return false;
-         }
- 
--        Enumeration     e1 = extensions.keys();
-+        // BEGIN android-changed
-+        Enumeration     e1 = table.getKeys();
-+        // END android-changed
- 
-         while (e1.hasMoreElements())
-         {
--            Object  key = e1.nextElement();
-+            // BEGIN android-changed
-+            DERObjectIdentifier  key = (DERObjectIdentifier)e1.nextElement();
- 
--            if (!extensions.get(key).equals(other.extensions.get(key)))
-+            if (!table.get(key).equals(other.table.get(key)))
-+            // END android-changed
-             {
-                 return false;
-             }
-@@ -434,37 +470,39 @@
-         return true;
-     }
- 
--    public ASN1ObjectIdentifier[] getExtensionOIDs()
--    {
--        return toOidArray(ordering);
--    }
--    
--    public ASN1ObjectIdentifier[] getNonCriticalExtensionOIDs()
--    {
--        return getExtensionOIDs(false);
--    }
--
--    public ASN1ObjectIdentifier[] getCriticalExtensionOIDs()
--    {
--        return getExtensionOIDs(true);
--    }
--
--    private ASN1ObjectIdentifier[] getExtensionOIDs(boolean isCritical)
--    {
--        Vector oidVec = new Vector();
--
--        for (int i = 0; i != ordering.size(); i++)
--        {
--            Object oid = ordering.elementAt(i);
--
--            if (((X509Extension)extensions.get(oid)).isCritical() == isCritical)
--            {
--                oidVec.addElement(oid);
--            }
--        }
--
--        return toOidArray(oidVec);
--    }
-+    // BEGIN android-removed
-+    // public ASN1ObjectIdentifier[] getExtensionOIDs()
-+    // {
-+    //     return toOidArray(ordering);
-+    // }
-+    //
-+    // public ASN1ObjectIdentifier[] getNonCriticalExtensionOIDs()
-+    // {
-+    //     return getExtensionOIDs(false);
-+    // }
-+    //
-+    // public ASN1ObjectIdentifier[] getCriticalExtensionOIDs()
-+    // {
-+    //     return getExtensionOIDs(true);
-+    // }
-+    //
-+    // private ASN1ObjectIdentifier[] getExtensionOIDs(boolean isCritical)
-+    // {
-+    //     Vector oidVec = new Vector();
-+    //
-+    //     for (int i = 0; i != ordering.size(); i++)
-+    //     {
-+    //         Object oid = ordering.elementAt(i);
-+    //
-+    //         if (((X509Extension)extensions.get(oid)).isCritical() == isCritical)
-+    //         {
-+    //             oidVec.addElement(oid);
-+    //         }
-+    //     }
-+    //
-+    //     return toOidArray(oidVec);
-+    // }
-+    // END android-removed
- 
-     private ASN1ObjectIdentifier[] toOidArray(Vector oidVec)
-     {
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509Name.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Name.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509Name.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Name.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509Name.java	2011-05-23 18:37:28.000000000 +0000
 @@ -249,8 +249,10 @@
       */
      public static final Hashtable SymbolLookUp = DefaultLookUp;
  
 -    private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
 -    private static final Boolean FALSE = new Boolean(false);
-+    // BEGIN android-removed
-+    //private static final Boolean TRUE = new Boolean(true); // for J2ME compatibility
-+    //private static final Boolean FALSE = new Boolean(false);
-+    // END android-removed
++    // BEGIN android-changed
++    private static final Boolean TRUE = Boolean.TRUE;
++    private static final Boolean FALSE = Boolean.FALSE;
++    // END android-changed
  
      static
      {
-@@ -342,9 +344,9 @@
-     }
- 
-     private X509NameEntryConverter  converter = null;
--    private Vector                  ordering = new Vector();
--    private Vector                  values = new Vector();
--    private Vector                  added = new Vector();
-+    // BEGIN android-changed
-+    private X509NameElementList     elems = new X509NameElementList();
-+    // END android-changed
- 
-     private ASN1Sequence            seq;
- 
-@@ -413,26 +415,30 @@
-                        throw new IllegalArgumentException("badly sized pair");
-                    }
- 
--                   ordering.addElement(DERObjectIdentifier.getInstance(s.getObjectAt(0)));
-+                   // BEGIN android-changed
-+                   DERObjectIdentifier key = DERObjectIdentifier.getInstance(s.getObjectAt(0));
-                    
-                    DEREncodable value = s.getObjectAt(1);
-+                   String valueStr;
-                    if (value instanceof DERString && !(value instanceof DERUniversalString))
+@@ -432,7 +434,9 @@
                     {
-                        String v = ((DERString)value).getString();
-                        if (v.length() > 0 && v.charAt(0) == '#')
-                        {
--                           values.addElement("\\" + v);
-+                           valueStr = "\\" + v;
-                        }
-                        else
-                        {
--                           values.addElement(v);
-+                           valueStr = v;
-                        }
-                    }
-                    else
-                    {
--                       values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
-+                       valueStr = "#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded()));
+                        values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
                     }
 -                   added.addElement((i != 0) ? TRUE : FALSE);  // to allow earlier JDK compatibility
-+                   boolean added = (i != 0);  // to allow earlier JDK compatibility
-+                   elems.add(key, valueStr, added);
++                   // BEGIN android-changed
++                   added.addElement(Boolean.valueOf(i != 0));
 +                   // END android-changed
              }
          }
      }
-@@ -486,14 +492,23 @@
-         Hashtable                attributes,
-         X509NameEntryConverter   converter)
-     {
-+        // BEGIN android-changed
-+        DERObjectIdentifier problem = null;
-         this.converter = converter;
- 
-         if (ordering != null)
-         {
-             for (int i = 0; i != ordering.size(); i++)
-             {
--                this.ordering.addElement(ordering.elementAt(i));
--                this.added.addElement(FALSE);
-+                DERObjectIdentifier key =
-+                    (DERObjectIdentifier) ordering.elementAt(i);
-+                String value = (String) attributes.get(key);
-+                if (value == null)
-+                {
-+                    problem = key;
-+                    break;
-+                }
-+                elems.add(key, value);
-             }
-         }
-         else
-@@ -502,22 +517,23 @@
- 
-             while (e.hasMoreElements())
-             {
--                this.ordering.addElement(e.nextElement());
--                this.added.addElement(FALSE);
-+                DERObjectIdentifier key =
-+                    (DERObjectIdentifier) e.nextElement();
-+                String value = (String) attributes.get(key);
-+                if (value == null)
-+                {
-+                    problem = key;
-+                    break;
-+                }
-+                elems.add(key, value);
-             }
-         }
- 
--        for (int i = 0; i != this.ordering.size(); i++)
-+        if (problem != null)
-         {
--            DERObjectIdentifier     oid = (DERObjectIdentifier)this.ordering.elementAt(i);
--
--            if (attributes.get(oid) == null)
--            {
--                throw new IllegalArgumentException("No attribute for object id - " + oid.getId() + " - passed to distinguished name");
--            }
--
--            this.values.addElement(attributes.get(oid)); // copy the hash table
-+            throw new IllegalArgumentException("No attribute for object id - " + problem.getId() + " - passed to distinguished name");
-         }
-+        // END android-changed
-     }
- 
-     /**
-@@ -550,9 +566,10 @@
- 
-         for (int i = 0; i < oids.size(); i++)
-         {
--            this.ordering.addElement(oids.elementAt(i));
--            this.values.addElement(values.elementAt(i));
--            this.added.addElement(FALSE);
-+            // BEGIN android-changed
-+            elems.add((DERObjectIdentifier) oids.elementAt(i),
-+                    (String) values.elementAt(i));
-+            // END android-changed
-         }
-     }
- 
-@@ -689,7 +706,7 @@
+@@ -689,7 +693,9 @@
  
              if (index == -1)
              {
 -                throw new IllegalArgumentException("badly formated directory string");
++                // BEGIN android-changed
 +                throw new IllegalArgumentException("badly formatted directory string");
++                // END android-changed
              }
  
              String              name = token.substring(0, index);
-@@ -701,9 +718,9 @@
-                 X509NameTokenizer   vTok = new X509NameTokenizer(value, '+');
-                 String  v = vTok.nextToken();
- 
--                this.ordering.addElement(oid);
--                this.values.addElement(v);
--                this.added.addElement(FALSE);
-+                // BEGIN android-changed
-+                this.elems.add(oid, v);
-+                // END android-changed
- 
-                 while (vTok.hasMoreTokens())
-                 {
-@@ -712,48 +729,24 @@
- 
-                     String  nm = sv.substring(0, ndx);
-                     String  vl = sv.substring(ndx + 1);
--                    this.ordering.addElement(decodeOID(nm, lookUp));
--                    this.values.addElement(vl);
--                    this.added.addElement(TRUE);
-+                    // BEGIN android-changed
-+                    this.elems.add(decodeOID(nm, lookUp), vl, true);
-+                    // END android-changed
-                 }
-             }
-             else
-             {
--                this.ordering.addElement(oid);
--                this.values.addElement(value);
--                this.added.addElement(FALSE);
-+                // BEGIN android-changed
-+                this.elems.add(oid, value);
-+                // END android-changed
-             }
-         }
- 
-         if (reverse)
-         {
--            Vector  o = new Vector();
--            Vector  v = new Vector();
--            Vector  a = new Vector();
--
--            int count = 1;
--
--            for (int i = 0; i < this.ordering.size(); i++)
--            {
--                if (((Boolean)this.added.elementAt(i)).booleanValue())
--                {
--                    o.insertElementAt(this.ordering.elementAt(i), count);
--                    v.insertElementAt(this.values.elementAt(i), count);
--                    a.insertElementAt(this.added.elementAt(i), count);
--                    count++;
--                }
--                else
--                {
--                    o.insertElementAt(this.ordering.elementAt(i), 0);
--                    v.insertElementAt(this.values.elementAt(i), 0);
--                    a.insertElementAt(this.added.elementAt(i), 0);
--                    count = 1;
--                }
--            }
--
--            this.ordering = o;
--            this.values = v;
--            this.added = a;
-+            // BEGIN android-changed
-+            this.elems = this.elems.reverse();
-+            // END android-changed
-         }
-     }
- 
-@@ -762,14 +755,17 @@
-      */
-     public Vector getOIDs()
-     {
-+        // BEGIN android-changed
-         Vector  v = new Vector();
-+        int     size = elems.size();
- 
--        for (int i = 0; i != ordering.size(); i++)
-+        for (int i = 0; i < size; i++)
-         {
--            v.addElement(ordering.elementAt(i));
-+            v.addElement(elems.getKey(i));
-         }
- 
-         return v;
-+        // END android-changed
-     }
- 
-     /**
-@@ -779,11 +775,14 @@
-     public Vector getValues()
-     {
-         Vector  v = new Vector();
-+        // BEGIN android-changed
-+        int     size = elems.size();
- 
--        for (int i = 0; i != values.size(); i++)
-+        for (int i = 0; i != size; i++)
-         {
--            v.addElement(values.elementAt(i));
-+            v.addElement(elems.getValue(i));
-         }
-+        // END android-changed
- 
-         return v;
-     }
-@@ -796,12 +795,14 @@
-         DERObjectIdentifier oid)
-     {
-         Vector  v = new Vector();
-+        int     size = elems.size();
-+        // BEGIN android-changed
- 
--        for (int i = 0; i != values.size(); i++)
-+        for (int i = 0; i != size; i++)
-         {
--            if (ordering.elementAt(i).equals(oid))
-+            if (elems.getKey(i).equals(oid))
-             {
--                String val = (String)values.elementAt(i);
-+                String val = elems.getValue(i);
- 
-                 if (val.length() > 2 && val.charAt(0) == '\\' && val.charAt(1) == '#')
-                 {
-@@ -813,6 +814,7 @@
-                 }
-             }
-         }
-+        // END android-changed
- 
-         return v;
-     }
-@@ -824,20 +826,23 @@
-             ASN1EncodableVector  vec = new ASN1EncodableVector();
-             ASN1EncodableVector  sVec = new ASN1EncodableVector();
-             DERObjectIdentifier  lstOid = null;
-+            // BEGIN android-changed
-+            int                  size = elems.size();
-             
--            for (int i = 0; i != ordering.size(); i++)
-+            for (int i = 0; i != size; i++)
-             {
-                 ASN1EncodableVector     v = new ASN1EncodableVector();
--                DERObjectIdentifier     oid = (DERObjectIdentifier)ordering.elementAt(i);
-+                DERObjectIdentifier     oid = elems.getKey(i);
- 
-                 v.add(oid);
- 
--                String  str = (String)values.elementAt(i);
-+                String  str = elems.getValue(i);
- 
-                 v.add(converter.getConvertedValue(oid, str));
-  
-                 if (lstOid == null 
--                    || ((Boolean)this.added.elementAt(i)).booleanValue())
-+                    || this.elems.getAdded(i))
-+                // END android-changed
-                 {
-                     sVec.add(new DERSequence(v));
-                 }
-@@ -855,6 +860,7 @@
-             vec.add(new DERSet(sVec));
-             
-             seq = new DERSequence(vec);
-+            // END android-changed
-         }
- 
-         return seq;
-@@ -899,22 +905,28 @@
-             return false;
-         }
- 
--        int      orderingSize = ordering.size();
-+        // BEGIN android-changed
-+        int      orderingSize = elems.size();
- 
--        if (orderingSize != other.ordering.size())
-+        if (orderingSize != other.elems.size())
-+        // END android-changed
-         {
-             return false;
-         }
- 
-         for (int i = 0; i < orderingSize; i++)
-         {
--            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
--            DERObjectIdentifier  oOid = (DERObjectIdentifier)other.ordering.elementAt(i);
-+            // BEGIN android-changed
-+            DERObjectIdentifier  oid = elems.getKey(i);
-+            DERObjectIdentifier  oOid = other.elems.getKey(i);
-+            // END android-changed
- 
-             if (oid.equals(oOid))
-             {
--                String value = (String)values.elementAt(i);
--                String oValue = (String)other.values.elementAt(i);
-+                // BEGIN android-changed
-+                String value = elems.getValue(i);
-+                String oValue = other.elems.getValue(i);
-+                // END android-changed
- 
-                 if (!equivalentStrings(value, oValue))
-                 {
-@@ -940,14 +952,16 @@
-         isHashCodeCalculated = true;
- 
-         // this needs to be order independent, like equals
--        for (int i = 0; i != ordering.size(); i += 1)
-+        for (int i = 0; i != elems.size(); i += 1)
-         {
--            String value = (String)values.elementAt(i);
-+            String value = (String)elems.getValue(i);
- 
-             value = canonicalize(value);
-             value = stripInternalSpaces(value);
- 
--            hashCodeValue ^= ordering.elementAt(i).hashCode();
-+            // BEGIN android-changed
-+            hashCodeValue ^= elems.getKey(i).hashCode();
-+            // END android-changed
-             hashCodeValue ^= value.hashCode();
-         }
- 
-@@ -987,9 +1001,11 @@
-             return false;
-         }
- 
--        int      orderingSize = ordering.size();
-+        // BEGIN android-changed
-+        int      orderingSize = elems.size();
- 
--        if (orderingSize != other.ordering.size())
-+        if (orderingSize != other.elems.size())
-+            // END android-changed
-         {
-             return false;
-         }
-@@ -997,7 +1013,9 @@
-         boolean[] indexes = new boolean[orderingSize];
-         int       start, end, delta;
- 
--        if (ordering.elementAt(0).equals(other.ordering.elementAt(0)))   // guess forward
-+        // BEGIN android-changed
-+        if (elems.getKey(0).equals(other.elems.getKey(0)))   // guess forward
-+        // END android-changed
-         {
-             start = 0;
-             end = orderingSize;
-@@ -1013,8 +1031,10 @@
-         for (int i = start; i != end; i += delta)
-         {
-             boolean              found = false;
--            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
--            String               value = (String)values.elementAt(i);
-+            // BEGIN android-changed
-+            DERObjectIdentifier  oid = elems.getKey(i);
-+            String               value = elems.getValue(i);
-+            // END android-changed
- 
-             for (int j = 0; j < orderingSize; j++)
-             {
-@@ -1023,11 +1043,15 @@
-                     continue;
-                 }
- 
--                DERObjectIdentifier oOid = (DERObjectIdentifier)other.ordering.elementAt(j);
-+                // BEGIN android-changed
-+                DERObjectIdentifier oOid = other.elems.getKey(j);
-+                // END android-changed
- 
-                 if (oid.equals(oOid))
-                 {
--                    String oValue = (String)other.values.elementAt(j);
-+                    // BEGIN android-changed
-+                    String oValue = other.elems.getValue(j);
-+                    // END android-changed
- 
-                     if (equivalentStrings(value, oValue))
-                     {
-@@ -1192,28 +1216,36 @@
- 
-         StringBuffer ava = null;
- 
--        for (int i = 0; i < ordering.size(); i++)
-+        // BEGIN android-changed
-+        for (int i = 0; i < elems.size(); i++)
-+        // END android-changed
-         {
--            if (((Boolean)added.elementAt(i)).booleanValue())
-+            if (elems.getAdded(i))
-             {
-                 ava.append('+');
-                 appendValue(ava, oidSymbols,
--                    (DERObjectIdentifier)ordering.elementAt(i),
--                    (String)values.elementAt(i));
-+                    // BEGIN android-changed
-+                    elems.getKey(i),
-+                    elems.getValue(i));
-+                    // END android-changed
-             }
-             else
-             {
-                 ava = new StringBuffer();
-                 appendValue(ava, oidSymbols,
--                    (DERObjectIdentifier)ordering.elementAt(i),
--                    (String)values.elementAt(i));
-+                    // BEGIN android-changed
-+                    elems.getKey(i),
-+                    elems.getValue(i));
-+                    // END android-changed
-                 components.addElement(ava);
-             }
-         }
- 
-         if (reverse)
-         {
--            for (int i = components.size() - 1; i >= 0; i--)
-+            // BEGIN android-changed
-+            for (int i = elems.size() - 1; i >= 0; i--)
-+            // END android-changed
-             {
-                 if (first)
-                 {
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509NameElementList.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509NameElementList.java
---- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509NameElementList.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509NameElementList.java	2011-05-19 22:33:02.000000000 +0000
-@@ -0,0 +1,206 @@
-+package org.bouncycastle.asn1.x509;
-+
-+import java.util.ArrayList;
-+import java.util.BitSet;
-+import org.bouncycastle.asn1.DERObjectIdentifier;
-+
-+// BEGIN android-note
-+// This class was extracted from X509Name as a way to keep the element
-+// list in a more controlled fashion.
-+// END android-note
-+
-+/**
-+ * List of elements of an X509 name. Each element has a key, a value, and
-+ * an "added" flag.
-+ */
-+public class X509NameElementList {
-+    /** null-ok; key #0 */
-+    private DERObjectIdentifier key0;
-+    
-+    /** null-ok; key #1 */
-+    private DERObjectIdentifier key1;
-+
-+    /** null-ok; key #2 */
-+    private DERObjectIdentifier key2;
-+
-+    /** null-ok; key #3 */
-+    private DERObjectIdentifier key3;
-+    
-+    /** null-ok; value #0 */
-+    private String value0;
-+    
-+    /** null-ok; value #1 */
-+    private String value1;
-+
-+    /** null-ok; value #2 */
-+    private String value2;
-+
-+    /** null-ok; value #3 */
-+    private String value3;
-+    
-+    /**
-+     * null-ok; array of additional keys and values, alternating
-+     * key then value, etc. 
-+     */
-+    private ArrayList<Object> rest;
-+
-+    /** bit vector for all the "added" bits */
-+    private BitSet added = new BitSet();
-+
-+    /** &gt;= 0; number of elements in the list */
-+    private int size;
-+
-+    // Note: Default public constructor.
-+    
-+    /**
-+     * Adds an element. The "added" flag is set to false for the element.
-+     * 
-+     * @param key non-null; the key
-+     * @param value non-null; the value
-+     */
-+    public void add(DERObjectIdentifier key, String value) {
-+        add(key, value, false);
-+    }
-+
-+    /**
-+     * Adds an element.
-+     * 
-+     * @param key non-null; the key
-+     * @param value non-null; the value
-+     * @param added the added bit
-+     */
-+    public void add(DERObjectIdentifier key, String value, boolean added) {
-+        if (key == null) {
-+            throw new NullPointerException("key == null");
-+        }
-+
-+        if (value == null) {
-+            throw new NullPointerException("value == null");
-+        }
-+
-+        int sz = size;
-+
-+        switch (sz) {
-+            case 0: {
-+                key0 = key;
-+                value0 = value;
-+                break;
-+            }
-+            case 1: {
-+                key1 = key;
-+                value1 = value;
-+                break;
-+            }
-+            case 2: {
-+                key2 = key;
-+                value2 = value;
-+                break;
-+            }
-+            case 3: {
-+                key3 = key;
-+                value3 = value;
-+                break;
-+            }
-+            case 4: {
-+                // Do initial allocation of rest.
-+                rest = new ArrayList<Object>();
-+                // Fall through...
-+            }
-+            default: {
-+                rest.add(key);
-+                rest.add(value);
-+                break;
-+            }
-+        }
-+
-+        if (added) {
-+            this.added.set(sz);
-+        }
-+        
-+        size = sz + 1;
-+    }
-+
-+    /**
-+     * Sets the "added" flag on the most recently added element.
-+     */
-+    public void setLastAddedFlag() {
-+        added.set(size - 1);
-+    }
-+
-+    /**
-+     * Gets the number of elements in this instance.
-+     */
-+    public int size() {
-+        return size;
-+    }
-+    
-+    /**
-+     * Gets the nth key.
-+     * 
-+     * @param n index
-+     * @return non-null; the nth key
-+     */
-+    public DERObjectIdentifier getKey(int n) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+
-+        switch (n) {
-+            case 0: return key0;
-+            case 1: return key1;
-+            case 2: return key2;
-+            case 3: return key3;
-+            default: return (DERObjectIdentifier) rest.get((n - 4) * 2);
-+        }
-+    }
-+
-+    /**
-+     * Gets the nth value.
-+     * 
-+     * @param n index
-+     * @return non-null; the nth value
-+     */
-+    public String getValue(int n) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+
-+        switch (n) {
-+            case 0: return value0;
-+            case 1: return value1;
-+            case 2: return value2;
-+            case 3: return value3;
-+            default: return (String) rest.get(((n - 4) * 2) + 1);
-+        }
-+    }
-+
-+    /**
-+     * Gets the nth added flag bit.
-+     * 
-+     * @param n index
-+     * @return the nth added flag bit
-+     */
-+    public boolean getAdded(int n) {
-+        if ((n < 0) || (n >= size)) {
-+            throw new IndexOutOfBoundsException(Integer.toString(n));
-+        }
-+
-+        return added.get(n);
-+    }
-+
-+    /**
-+     * Constructs and returns a new instance which consists of the
-+     * elements of this one in reverse order
-+     * 
-+     * @return non-null; the reversed instance
-+     */
-+    public X509NameElementList reverse() {
-+        X509NameElementList result = new X509NameElementList();
-+            
-+        for (int i = size - 1; i >= 0; i--) {
-+            result.add(getKey(i), getValue(i), getAdded(i));
-+        }
-+
-+        return result;
-+    }
-+}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509NameTokenizer.java bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509NameTokenizer.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509NameTokenizer.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509NameTokenizer.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/asn1/x509/X509NameTokenizer.java	2011-05-23 18:37:28.000000000 +0000
 @@ -58,6 +58,17 @@
                  }
                  else
@@ -2453,7 +502,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/asn1/x509/X509NameTokenizer.ja
 \ No newline at end of file
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/PBEParametersGenerator.java bcprov-jdk16-146/org/bouncycastle/crypto/PBEParametersGenerator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/PBEParametersGenerator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/PBEParametersGenerator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/PBEParametersGenerator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -136,7 +136,8 @@
      public static byte[] PKCS12PasswordToBytes(
          char[]  password)
@@ -2473,7 +522,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/PBEParametersGenerator.
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java bcprov-jdk16-146/org/bouncycastle/crypto/digests/OpenSSLDigest.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2011-05-23 18:37:28.000000000 +0000
 @@ -0,0 +1,159 @@
 +/*
 + * Copyright (C) 2008 The Android Open Source Project
@@ -2636,7 +685,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.j
 +}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/engines/RC2Engine.java bcprov-jdk16-146/org/bouncycastle/crypto/engines/RC2Engine.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/engines/RC2Engine.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/engines/RC2Engine.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/engines/RC2Engine.java	2011-05-23 18:37:28.000000000 +0000
 @@ -313,4 +313,4 @@
          out[outOff + 6] = (byte)x76;
          out[outOff + 7] = (byte)(x76 >> 8);
@@ -2646,7 +695,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/engines/RC2Engine.java 
 \ No newline at end of file
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/generators/DHParametersHelper.java bcprov-jdk16-146/org/bouncycastle/crypto/generators/DHParametersHelper.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/generators/DHParametersHelper.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/generators/DHParametersHelper.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/generators/DHParametersHelper.java	2011-05-23 18:37:28.000000000 +0000
 @@ -3,10 +3,17 @@
  import java.math.BigInteger;
  import java.security.SecureRandom;
@@ -2699,7 +748,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/generators/DHParameters
      }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/macs/HMac.java bcprov-jdk16-146/org/bouncycastle/crypto/macs/HMac.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/macs/HMac.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/macs/HMac.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/macs/HMac.java	2011-05-23 18:37:28.000000000 +0000
 @@ -32,23 +32,23 @@
      {
          blockLengths = new Hashtable();
@@ -2741,7 +790,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/macs/HMac.java bcprov-j
      private static int getByteLength(
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/signers/RSADigestSigner.java bcprov-jdk16-146/org/bouncycastle/crypto/signers/RSADigestSigner.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/signers/RSADigestSigner.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/signers/RSADigestSigner.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/signers/RSADigestSigner.java	2011-05-23 18:37:28.000000000 +0000
 @@ -46,8 +46,10 @@
          oidMap.put("SHA-384", NISTObjectIdentifiers.id_sha384);
          oidMap.put("SHA-512", NISTObjectIdentifiers.id_sha512);
@@ -2757,7 +806,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/signers/RSADigestSigner
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PrivateKeyFactory.java bcprov-jdk16-146/org/bouncycastle/crypto/util/PrivateKeyFactory.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PrivateKeyFactory.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/util/PrivateKeyFactory.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/util/PrivateKeyFactory.java	2011-05-23 18:37:28.000000000 +0000
 @@ -12,7 +12,9 @@
  import org.bouncycastle.asn1.DERObject;
  import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -2839,7 +888,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PrivateKeyFactory.
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PublicKeyFactory.java bcprov-jdk16-146/org/bouncycastle/crypto/util/PublicKeyFactory.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PublicKeyFactory.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/crypto/util/PublicKeyFactory.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/crypto/util/PublicKeyFactory.java	2011-05-23 18:37:28.000000000 +0000
 @@ -15,12 +15,16 @@
  import org.bouncycastle.asn1.DERObjectIdentifier;
  import org.bouncycastle.asn1.DEROctetString;
@@ -2918,7 +967,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/crypto/util/PublicKeyFactory.j
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/PKCS10CertificationRequest.java bcprov-jdk16-146/org/bouncycastle/jce/PKCS10CertificationRequest.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/PKCS10CertificationRequest.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/PKCS10CertificationRequest.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/PKCS10CertificationRequest.java	2011-05-23 18:37:28.000000000 +0000
 @@ -80,15 +80,20 @@
  
      static
@@ -3168,7 +1217,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/PKCS10CertificationRequest
              return digestAlgOID.getId();            
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java bcprov-jdk16-146/org/bouncycastle/jce/provider/BouncyCastleProvider.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2011-05-23 18:37:28.000000000 +0000
 @@ -45,7 +45,10 @@
  {
      private static String info = "BouncyCastle Security Provider v1.46";
@@ -4332,7 +2381,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/BouncyCastleProvi
      {
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java bcprov-jdk16-146/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java	2011-05-23 18:37:28.000000000 +0000
 @@ -24,6 +24,7 @@
  import java.security.spec.DSAPublicKeySpec;
  import java.text.ParseException;
@@ -4514,7 +2563,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/CertPathValidator
          CRLDistPoint crldp, ExtendedPKIXParameters pkixParams)
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEBlockCipher.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEBlockCipher.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEBlockCipher.java	2011-05-23 18:37:28.000000000 +0000
 @@ -17,8 +17,10 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -4979,7 +3028,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEBlockCipher.ja
       */
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDHKeyAgreement.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDHKeyAgreement.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDHKeyAgreement.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDHKeyAgreement.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDHKeyAgreement.java	2011-05-23 18:37:28.000000000 +0000
 @@ -36,10 +36,12 @@
  
      static
@@ -4999,7 +3048,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDHKeyAgreement
          algorithms.put("DESEDE", i192);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDigestUtil.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDigestUtil.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDigestUtil.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDigestUtil.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEDigestUtil.java	2011-05-23 18:37:28.000000000 +0000
 @@ -12,7 +12,9 @@
  import org.bouncycastle.crypto.Digest;
  import org.bouncycastle.crypto.digests.MD5Digest;
@@ -5082,7 +3131,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEDigestUtil.jav
              || (sha512.contains(digest1) && sha512.contains(digest2))
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPrivateKey.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPrivateKey.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPrivateKey.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPrivateKey.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPrivateKey.java	2011-05-23 18:37:28.000000000 +0000
 @@ -20,7 +20,9 @@
  import org.bouncycastle.asn1.DERObject;
  import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -5154,7 +3203,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPrivateKey.j
              info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), keyStructure.getDERObject());
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPublicKey.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPublicKey.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPublicKey.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPublicKey.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEECPublicKey.java	2011-05-23 18:37:28.000000000 +0000
 @@ -20,8 +20,10 @@
  import org.bouncycastle.asn1.DERObjectIdentifier;
  import org.bouncycastle.asn1.DEROctetString;
@@ -5402,7 +3451,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEECPublicKey.ja
              {
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEKeyGenerator.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEKeyGenerator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEKeyGenerator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEKeyGenerator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEKeyGenerator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -57,6 +57,11 @@
      {
          try
@@ -5638,7 +3687,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEKeyGenerator.j
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEMac.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEMac.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEMac.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEMac.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEMac.java	2011-05-23 18:37:28.000000000 +0000
 @@ -11,25 +11,39 @@
  
  import org.bouncycastle.crypto.CipherParameters;
@@ -6168,7 +4217,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEMac.java bcpro
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSACipher.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSACipher.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSACipher.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSACipher.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSACipher.java	2011-05-23 18:37:28.000000000 +0000
 @@ -535,48 +535,50 @@
          }
      }
@@ -6266,7 +4315,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSACipher.java
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateCrtKey.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateCrtKey.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateCrtKey.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateCrtKey.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateCrtKey.java	2011-05-23 18:37:28.000000000 +0000
 @@ -125,7 +125,9 @@
       */
      public byte[] getEncoded()
@@ -6280,7 +4329,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateCrtK
      }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateKey.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateKey.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateKey.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateKey.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPrivateKey.java	2011-05-23 18:37:28.000000000 +0000
 @@ -77,7 +77,9 @@
  
      public byte[] getEncoded()
@@ -6294,7 +4343,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPrivateKey.
      }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPublicKey.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPublicKey.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPublicKey.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPublicKey.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCERSAPublicKey.java	2011-05-23 18:37:28.000000000 +0000
 @@ -90,7 +90,9 @@
  
      public byte[] getEncoded()
@@ -6308,7 +4357,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCERSAPublicKey.j
      }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCESecretKeyFactory.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCESecretKeyFactory.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2011-05-23 18:37:28.000000000 +0000
 @@ -250,29 +250,31 @@
          }
      }
@@ -6485,7 +4534,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCESecretKeyFacto
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEStreamCipher.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEStreamCipher.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JCEStreamCipher.java	2011-05-23 18:37:28.000000000 +0000
 @@ -13,20 +13,26 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -6791,7 +4840,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JCEStreamCipher.j
       */
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParameterGenerator.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameterGenerator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParameterGenerator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameterGenerator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameterGenerator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -11,18 +11,24 @@
  import javax.crypto.spec.DHGenParameterSpec;
  import javax.crypto.spec.DHParameterSpec;
@@ -7217,7 +5266,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParam
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParameters.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameters.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParameters.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameters.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKAlgorithmParameters.java	2011-05-23 18:37:28.000000000 +0000
 @@ -10,21 +10,27 @@
  import org.bouncycastle.asn1.DERObjectIdentifier;
  import org.bouncycastle.asn1.DEROctetString;
@@ -8717,7 +6766,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKAlgorithmParam
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDSASigner.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDSASigner.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDSASigner.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDSASigner.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDSASigner.java	2011-05-23 18:37:28.000000000 +0000
 @@ -23,13 +23,17 @@
  import org.bouncycastle.crypto.Digest;
  import org.bouncycastle.crypto.digests.NullDigest;
@@ -8868,7 +6917,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDSASigner.java
          extends JDKDSASigner
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDigestSignature.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDigestSignature.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDigestSignature.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDigestSignature.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKDigestSignature.java	2011-05-23 18:37:28.000000000 +0000
 @@ -23,15 +23,21 @@
  import org.bouncycastle.crypto.AsymmetricBlockCipher;
  import org.bouncycastle.crypto.CipherParameters;
@@ -9070,7 +7119,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKDigestSignatur
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyFactory.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyFactory.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyFactory.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyFactory.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyFactory.java	2011-05-23 18:37:28.000000000 +0000
 @@ -36,17 +36,21 @@
  import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
  import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -9456,7 +7505,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyFactory.jav
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyPairGenerator.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyPairGenerator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyPairGenerator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyPairGenerator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyPairGenerator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -6,9 +6,11 @@
  import org.bouncycastle.crypto.generators.DHParametersGenerator;
  import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
@@ -9800,7 +7849,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyPairGenerat
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyStore.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyStore.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyStore.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyStore.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKKeyStore.java	2011-05-23 18:37:28.000000000 +0000
 @@ -39,7 +39,12 @@
  import org.bouncycastle.crypto.CipherParameters;
  import org.bouncycastle.crypto.Digest;
@@ -9903,7 +7952,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKKeyStore.java 
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKMessageDigest.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKMessageDigest.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKMessageDigest.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKMessageDigest.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKMessageDigest.java	2011-05-23 18:37:28.000000000 +0000
 @@ -57,36 +57,38 @@
          {
              super(new SHA1Digest());
@@ -10350,7 +8399,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKMessageDigest.
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKPKCS12KeyStore.java bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKPKCS12KeyStore.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKPKCS12KeyStore.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKPKCS12KeyStore.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/JDKPKCS12KeyStore.java	2011-05-23 18:37:28.000000000 +0000
 @@ -260,10 +260,13 @@
              }
          }
@@ -10520,7 +8569,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/JDKPKCS12KeyStore
                  return null;
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PBE.java bcprov-jdk16-146/org/bouncycastle/jce/provider/PBE.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PBE.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PBE.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PBE.java	2011-05-23 18:37:28.000000000 +0000
 @@ -7,12 +7,18 @@
  
  import org.bouncycastle.crypto.CipherParameters;
@@ -10593,152 +8642,9 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PBE.java bcprov-j
                  case SHA256:
                      generator = new PKCS12ParametersGenerator(new SHA256Digest());
                      break;
-diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKCS12BagAttributeCarrierImpl.java bcprov-jdk16-146/org/bouncycastle/jce/provider/PKCS12BagAttributeCarrierImpl.java
---- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKCS12BagAttributeCarrierImpl.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKCS12BagAttributeCarrierImpl.java	2011-05-19 22:33:02.000000000 +0000
-@@ -1,6 +1,9 @@
- package org.bouncycastle.jce.provider;
- 
- import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-+// BEGIN android-added
-+import org.bouncycastle.asn1.OrderedTable;
-+// END android-added
- import org.bouncycastle.asn1.DERObjectIdentifier;
- import org.bouncycastle.asn1.DEREncodable;
- import org.bouncycastle.asn1.ASN1OutputStream;
-@@ -17,65 +20,73 @@
- class PKCS12BagAttributeCarrierImpl
-     implements PKCS12BagAttributeCarrier
- {
--    private Hashtable pkcs12Attributes;
--    private Vector pkcs12Ordering;
--
--    PKCS12BagAttributeCarrierImpl(Hashtable attributes, Vector ordering)
--    {
--        this.pkcs12Attributes = attributes;
--        this.pkcs12Ordering = ordering;
--    }
-+    // BEGIN android-changed
-+    private OrderedTable pkcs12 = new OrderedTable();
-+    // END android-changed
-+
-+    // BEGIN android-removed
-+    // PKCS12BagAttributeCarrierImpl(Hashtable attributes, Vector ordering)
-+    // {
-+    //     this.pkcs12Attributes = attributes;
-+    //     this.pkcs12Ordering = ordering;
-+    // }
-+    // END android-removed
- 
-     public PKCS12BagAttributeCarrierImpl()
-     {
--        this(new Hashtable(), new Vector());
-+        // BEGIN android-removed
-+        // this(new Hashtable(), new Vector());
-+        // END android-removed
-     }
- 
-     public void setBagAttribute(
-         DERObjectIdentifier oid,
-         DEREncodable        attribute)
-     {
--        if (pkcs12Attributes.containsKey(oid))
--        {                           // preserve original ordering
--            pkcs12Attributes.put(oid, attribute);
--        }
--        else
--        {
--            pkcs12Attributes.put(oid, attribute);
--            pkcs12Ordering.addElement(oid);
--        }
-+        // BEGIN android-changed
-+        // preserve original ordering
-+        pkcs12.put(oid, attribute);
-+        // END android-changed
-     }
- 
-     public DEREncodable getBagAttribute(
-         DERObjectIdentifier oid)
-     {
--        return (DEREncodable)pkcs12Attributes.get(oid);
-+        // BEGIN android-changed
-+        return (DEREncodable)pkcs12.get(oid);
-+        // END android-changed
-     }
- 
-     public Enumeration getBagAttributeKeys()
-     {
--        return pkcs12Ordering.elements();
-+        // BEGIN android-changed
-+        return pkcs12.getKeys();
-+        // END android-changed
-     }
- 
-     int size()
-     {
--        return pkcs12Ordering.size();
--    }
--
--    Hashtable getAttributes()
--    {
--        return pkcs12Attributes;
--    }
--
--    Vector getOrdering()
--    {
--        return pkcs12Ordering;
--    }
-+        // BEGIN android-changed
-+        return pkcs12.size();
-+        // END android-changed
-+    }
-+
-+    // BEGIN android-removed
-+    // Hashtable getAttributes()
-+    // {
-+    //     return pkcs12Attributes;
-+    // }
-+    //
-+    // Vector getOrdering()
-+    // {
-+    //     return pkcs12Ordering;
-+    // }
-+    // END android-removed
- 
-     public void writeObject(ObjectOutputStream out)
-         throws IOException
-     {
--        if (pkcs12Ordering.size() == 0)
-+        if (pkcs12.size() == 0)
-         {
-             out.writeObject(new Hashtable());
-             out.writeObject(new Vector());
-@@ -92,7 +103,7 @@
-                 DERObjectIdentifier    oid = (DERObjectIdentifier)e.nextElement();
- 
-                 aOut.writeObject(oid);
--                aOut.writeObject(pkcs12Attributes.get(oid));
-+                aOut.writeObject(pkcs12.get(oid));
-             }
- 
-             out.writeObject(bOut.toByteArray());
-@@ -106,8 +117,11 @@
- 
-         if (obj instanceof Hashtable)
-         {
--            this.pkcs12Attributes = (Hashtable)obj;
--            this.pkcs12Ordering = (Vector)in.readObject();
-+            // BEGIN android-changed
-+            // we only write out Hashtable/Vector in empty case
-+            in.readObject(); // consume empty Vector
-+            this.pkcs12 = new OrderedTable();
-+            // END android-changed
-         }
-         else
-         {
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPath.java bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPath.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPath.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPath.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPath.java	2011-05-23 18:37:28.000000000 +0000
 @@ -33,7 +33,9 @@
  import org.bouncycastle.asn1.pkcs.ContentInfo;
  import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -10803,7 +8709,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPath.java
              throw new CertificateEncodingException("unsupported encoding: " + encoding);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2011-05-23 18:37:28.000000000 +0000
 @@ -1,5 +1,8 @@
  package org.bouncycastle.jce.provider;
  
@@ -10870,7 +8776,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXCertPathValid
          // (b)
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXNameConstraintValidator.java bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXNameConstraintValidator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXNameConstraintValidator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXNameConstraintValidator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/PKIXNameConstraintValidator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -1533,7 +1533,9 @@
          for (Enumeration e = permitted.getObjects(); e.hasMoreElements();)
          {
@@ -10884,7 +8790,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/PKIXNameConstrain
                  subtreesMap.put(tagNo, new HashSet());
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/WrapCipherSpi.java bcprov-jdk16-146/org/bouncycastle/jce/provider/WrapCipherSpi.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/WrapCipherSpi.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/WrapCipherSpi.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/WrapCipherSpi.java	2011-05-23 18:37:28.000000000 +0000
 @@ -22,8 +22,10 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -11016,7 +8922,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/WrapCipherSpi.jav
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509CertificateObject.java bcprov-jdk16-146/org/bouncycastle/jce/provider/X509CertificateObject.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509CertificateObject.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/X509CertificateObject.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/X509CertificateObject.java	2011-05-23 18:37:28.000000000 +0000
 @@ -520,12 +520,20 @@
          return JDKKeyFactory.createPublicKeyFromPublicKeyInfo(c.getSubjectPublicKeyInfo());
      }
@@ -11050,7 +8956,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509CertificateOb
              signature = Signature.getInstance(sigName, BouncyCastleProvider.PROVIDER_NAME);
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509SignatureUtil.java bcprov-jdk16-146/org/bouncycastle/jce/provider/X509SignatureUtil.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509SignatureUtil.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/X509SignatureUtil.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/X509SignatureUtil.java	2011-05-23 18:37:28.000000000 +0000
 @@ -25,7 +25,9 @@
  
  class X509SignatureUtil
@@ -11143,7 +9049,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/X509SignatureUtil
              return digestAlgOID.getId();            
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/EC.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/EC.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/EC.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/EC.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/EC.java	2011-05-23 18:37:28.000000000 +0000
 @@ -4,8 +4,10 @@
  
  import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -11275,7 +9181,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/EC.jav
          private void addSignatureAlgorithm(
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECUtil.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/ECUtil.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECUtil.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/ECUtil.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/ECUtil.java	2011-05-23 18:37:28.000000000 +0000
 @@ -1,10 +1,14 @@
  package org.bouncycastle.jce.provider.asymmetric.ec;
  
@@ -11362,7 +9268,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECU
          return name;
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/KeyAgreement.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyAgreement.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/KeyAgreement.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyAgreement.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyAgreement.java	2011-05-23 18:37:28.000000000 +0000
 @@ -24,20 +24,26 @@
  import org.bouncycastle.crypto.CipherParameters;
  import org.bouncycastle.crypto.DerivationFunction;
@@ -11690,7 +9596,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Key
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/KeyPairGenerator.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyPairGenerator.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/KeyPairGenerator.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyPairGenerator.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/KeyPairGenerator.java	2011-05-23 18:37:28.000000000 +0000
 @@ -10,10 +10,14 @@
  import java.util.Hashtable;
  
@@ -11889,7 +9795,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Key
 +}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java	2011-05-23 18:37:28.000000000 +0000
 @@ -18,15 +18,21 @@
  import org.bouncycastle.crypto.DSA;
  import org.bouncycastle.crypto.Digest;
@@ -12118,7 +10024,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Sig
 +}
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/AES.java bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/AES.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/AES.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/AES.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/AES.java	2011-05-23 18:37:28.000000000 +0000
 @@ -13,8 +13,10 @@
  import org.bouncycastle.crypto.CipherKeyGenerator;
  import org.bouncycastle.crypto.engines.AESFastEngine;
@@ -12483,7 +10389,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/AES.jav
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/ARC4.java bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/ARC4.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/ARC4.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/ARC4.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/ARC4.java	2011-05-23 18:37:28.000000000 +0000
 @@ -27,7 +27,9 @@
      {
          public KeyGen()
@@ -12497,7 +10403,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/ARC4.ja
  
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/Blowfish.java bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/Blowfish.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/Blowfish.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/Blowfish.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/Blowfish.java	2011-05-23 18:37:28.000000000 +0000
 @@ -57,7 +57,9 @@
          public Mappings()
          {
@@ -12511,7 +10417,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/Blowfis
              put("AlgorithmParameters.BLOWFISH", "org.bouncycastle.jce.provider.symmetric.Blowfish$AlgParams");
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/DESede.java bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/DESede.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/DESede.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/DESede.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/jce/provider/symmetric/DESede.java	2011-05-23 18:37:28.000000000 +0000
 @@ -14,11 +14,15 @@
  import org.bouncycastle.crypto.KeyGenerationParameters;
  import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -12677,7 +10583,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/symmetric/DESede.
  }
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/openssl/PEMUtilities.java bcprov-jdk16-146/org/bouncycastle/openssl/PEMUtilities.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/openssl/PEMUtilities.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/openssl/PEMUtilities.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/openssl/PEMUtilities.java	2011-05-23 18:37:28.000000000 +0000
 @@ -45,10 +45,12 @@
          PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes192_CBC);
          PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes256_CBC);
@@ -12697,7 +10603,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/openssl/PEMUtilities.java bcpr
      static int getKeySize(String algorithm)
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/x509/X509Util.java bcprov-jdk16-146/org/bouncycastle/x509/X509Util.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/x509/X509Util.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/x509/X509Util.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/x509/X509Util.java	2011-05-23 18:37:28.000000000 +0000
 @@ -44,14 +44,18 @@
      
      static
@@ -12859,7 +10765,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/x509/X509Util.java bcprov-jdk1
      
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java bcprov-jdk16-146/org/bouncycastle/x509/extension/X509ExtensionUtil.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2011-02-23 20:08:56.000000000 +0000
-+++ bcprov-jdk16-146/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2011-05-19 22:33:02.000000000 +0000
++++ bcprov-jdk16-146/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2011-05-23 18:37:28.000000000 +0000
 @@ -62,7 +62,9 @@
              {
                  GeneralName genName = GeneralName.getInstance(it.nextElement());
