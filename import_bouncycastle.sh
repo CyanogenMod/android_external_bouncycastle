@@ -104,7 +104,7 @@ function import() {
 
   cd $BOUNCYCASTLE_DIR
 
-  cp -f LICENSE.html ../NOTICE
+  sed 's/<p>/& <BR>/g' LICENSE.html | html2text -width 102 -nobs -ascii > ../NOTICE
   touch ../MODULE_LICENSE_BSD_LIKE
 
   cd ..
