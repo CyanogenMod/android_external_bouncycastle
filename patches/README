@@ -35,3 +35,4 @@ Other performance (both speed and memory) changes:
 
 Other security changes:
 - blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi
+- blacklist compromised DigiNotar Root CA by public key to block cross-signed intermediates
