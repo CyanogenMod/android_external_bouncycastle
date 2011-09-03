@@ -76,6 +76,14 @@ public class PKIXCertPathValidatorSpi
         // Issuer: CN=Entrust.net
         {(byte)0xe2, (byte)0x3b, (byte)0x8d, (byte)0x10, (byte)0x5f, (byte)0x87, (byte)0x71, (byte)0x0a, (byte)0x68, (byte)0xd9,
          (byte)0x24, (byte)0x80, (byte)0x50, (byte)0xeb, (byte)0xef, (byte)0xc6, (byte)0x27, (byte)0xbe, (byte)0x4c, (byte)0xa6},
+        // Subject: CN=DigiNotar PKIoverheid CA Organisatie - G2
+        // Issuer: CN=Staat der Nederlanden Organisatie CA - G2
+        {(byte)0x7b, (byte)0x2e, (byte)0x16, (byte)0xbc, (byte)0x39, (byte)0xbc, (byte)0xd7, (byte)0x2b, (byte)0x45, (byte)0x6e,
+         (byte)0x9f, (byte)0x05, (byte)0x5d, (byte)0x1d, (byte)0xe6, (byte)0x15, (byte)0xb7, (byte)0x49, (byte)0x45, (byte)0xdb},
+        // Subject: CN=DigiNotar PKIoverheid CA Overheid en Bedrijven
+        // Issuer: CN=Staat der Nederlanden Overheid CA
+        {(byte)0xe8, (byte)0xf9, (byte)0x12, (byte)0x00, (byte)0xc6, (byte)0x5c, (byte)0xee, (byte)0x16, (byte)0xe0, (byte)0x39,
+         (byte)0xb9, (byte)0xf8, (byte)0x83, (byte)0x84, (byte)0x16, (byte)0x61, (byte)0x63, (byte)0x5f, (byte)0x81, (byte)0xc5},
     };
 
     private static boolean isPublicKeyBlackListed(PublicKey publicKey) {
