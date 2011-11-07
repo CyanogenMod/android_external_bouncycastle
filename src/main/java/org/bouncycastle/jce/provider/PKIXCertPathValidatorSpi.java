@@ -59,8 +59,8 @@ public class PKIXCertPathValidatorSpi
         new BigInteger(1, new byte[] {(byte)0x3e,(byte)0x75,(byte)0xce,(byte)0xd4,(byte)0x6b,(byte)0x69,(byte)0x30,(byte)0x21,(byte)0x21,(byte)0x88,(byte)0x30,(byte)0xae,(byte)0x86,(byte)0xa8,(byte)0x2a,(byte)0x71})
     ));
 
-    // From http://src.chromium.org/viewvc/chrome/branches/782/src/net/base/x509_certificate.cc?r1=98750&r2=98749&pathrev=98750
     private static final byte[][] PUBLIC_KEY_SHA1_BLACKLIST = {
+        // From http://src.chromium.org/viewvc/chrome/branches/782/src/net/base/x509_certificate.cc?r1=98750&r2=98749&pathrev=98750
         // C=NL, O=DigiNotar, CN=DigiNotar Root CA/emailAddress=info@diginotar.nl
         {(byte)0x41, (byte)0x0f, (byte)0x36, (byte)0x36, (byte)0x32, (byte)0x58, (byte)0xf3, (byte)0x0b, (byte)0x34, (byte)0x7d,
          (byte)0x12, (byte)0xce, (byte)0x48, (byte)0x63, (byte)0xe4, (byte)0x33, (byte)0x43, (byte)0x78, (byte)0x06, (byte)0xa8},
@@ -80,6 +80,12 @@ public class PKIXCertPathValidatorSpi
         // Issuer: CN=Staat der Nederlanden Overheid CA
         {(byte)0xe8, (byte)0xf9, (byte)0x12, (byte)0x00, (byte)0xc6, (byte)0x5c, (byte)0xee, (byte)0x16, (byte)0xe0, (byte)0x39,
          (byte)0xb9, (byte)0xf8, (byte)0x83, (byte)0x84, (byte)0x16, (byte)0x61, (byte)0x63, (byte)0x5f, (byte)0x81, (byte)0xc5},
+
+        // From http://src.chromium.org/viewvc/chrome?view=rev&revision=108479
+        // Subject: O=Digicert Sdn. Bhd.
+        // Issuer: CN=GTE CyberTrust Global Root
+        {(byte)0x01, (byte)0x29, (byte)0xbc, (byte)0xd5, (byte)0xb4, (byte)0x48, (byte)0xae, (byte)0x8d, (byte)0x24, (byte)0x96,
+         (byte)0xd1, (byte)0xc3, (byte)0xe1, (byte)0x97, (byte)0x23, (byte)0x91, (byte)0x90, (byte)0x88, (byte)0xe1, (byte)0x52},
     };
 
     private static boolean isPublicKeyBlackListed(PublicKey publicKey) {
