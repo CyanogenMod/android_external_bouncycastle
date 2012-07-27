@@ -144,8 +144,9 @@ public class CertBlacklist {
         String pubkeyBlacklist = readBlacklist(path);
         if (!pubkeyBlacklist.equals("")) {
             for (String value : pubkeyBlacklist.split(",")) {
+                value = value.trim();
                 if (isPubkeyHash(value)) {
-                    bl.add(Hex.decode(value));
+                    bl.add(value.getBytes());
                 } else {
                     System.logW("Tried to blacklist invalid pubkey " + value);
                 }
@@ -161,7 +162,12 @@ public class CertBlacklist {
         digest.update(encoded, 0, encoded.length);
         byte[] out = new byte[digest.getDigestSize()];
         digest.doFinal(out, 0);
-        return pubkeyBlacklist.contains(out);
+        for (byte[] blacklisted : pubkeyBlacklist) {
+            if (Arrays.equals(blacklisted, Hex.encode(out))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isSerialNumberBlackListed(BigInteger serial) {
