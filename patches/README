@@ -30,6 +30,7 @@ Other performance (both speed and memory) and correctness changes:
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
 - Added DSA support to JDKKeyManager.engineGetKeySpec
+- Fixed CertBlacklist to do a by-value comparison of public keys
 
 Other security changes:
 - Blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi
