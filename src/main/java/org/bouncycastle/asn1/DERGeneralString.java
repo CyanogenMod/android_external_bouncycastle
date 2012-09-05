@@ -2,10 +2,14 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 public class DERGeneralString 
-    extends ASN1Object implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
-    private String string;
+    private byte[] string;
 
     public static DERGeneralString getInstance(
         Object obj) 
@@ -23,7 +27,7 @@ public class DERGeneralString
         ASN1TaggedObject obj, 
         boolean explicit) 
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERGeneralString)
         {
@@ -35,60 +39,60 @@ public class DERGeneralString
         }
     }
 
-    public DERGeneralString(byte[] string) 
+    DERGeneralString(byte[] string)
     {
-        char[] cs = new char[string.length];
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-        this.string = new String(cs);
+        this.string = string;
     }
 
     public DERGeneralString(String string) 
     {
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
     
     public String getString() 
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     public byte[] getOctets() 
     {
-        char[] cs = string.toCharArray();
-        byte[] bs = new byte[cs.length];
-        for (int i = 0; i != cs.length; i++) 
-        {
-            bs[i] = (byte) cs[i];
-        }
-        return bs;
+        return Arrays.clone(string);
     }
-    
-    void encode(DEROutputStream out) 
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
+    }
+
+    void encode(ASN1OutputStream out)
         throws IOException 
     {
-        out.writeEncoded(GENERAL_STRING, this.getOctets());
+        out.writeEncoded(BERTags.GENERAL_STRING, string);
     }
     
     public int hashCode() 
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
     
-    boolean asn1Equals(DERObject o)
+    boolean asn1Equals(ASN1Primitive o)
     {
         if (!(o instanceof DERGeneralString)) 
         {
             return false;
         }
-        DERGeneralString s = (DERGeneralString) o;
-        return this.getString().equals(s.getString());
+        DERGeneralString s = (DERGeneralString)o;
+
+        return Arrays.areEqual(string, s.string);
     }
 }

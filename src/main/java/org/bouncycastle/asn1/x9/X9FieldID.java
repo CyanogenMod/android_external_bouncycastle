@@ -2,12 +2,12 @@ package org.bouncycastle.asn1.x9;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -15,11 +15,11 @@ import org.bouncycastle.asn1.DERSequence;
  * X9.62, for further details.
  */
 public class X9FieldID
-    extends ASN1Encodable
+    extends ASN1Object
     implements X9ObjectIdentifiers
 {
-    private DERObjectIdentifier     id;
-    private DERObject               parameters;
+    private ASN1ObjectIdentifier     id;
+    private ASN1Primitive parameters;
 
     /**
      * Constructor for elliptic curves over prime fields
@@ -29,7 +29,7 @@ public class X9FieldID
     public X9FieldID(BigInteger primeP)
     {
         this.id = prime_field;
-        this.parameters = new DERInteger(primeP);
+        this.parameters = new ASN1Integer(primeP);
     }
 
     /**
@@ -51,20 +51,20 @@ public class X9FieldID
     {
         this.id = characteristic_two_field;
         ASN1EncodableVector fieldIdParams = new ASN1EncodableVector();
-        fieldIdParams.add(new DERInteger(m));
+        fieldIdParams.add(new ASN1Integer(m));
         
         if (k2 == 0) 
         {
             fieldIdParams.add(tpBasis);
-            fieldIdParams.add(new DERInteger(k1));
+            fieldIdParams.add(new ASN1Integer(k1));
         } 
         else 
         {
             fieldIdParams.add(ppBasis);
             ASN1EncodableVector pentanomialParams = new ASN1EncodableVector();
-            pentanomialParams.add(new DERInteger(k1));
-            pentanomialParams.add(new DERInteger(k2));
-            pentanomialParams.add(new DERInteger(k3));
+            pentanomialParams.add(new ASN1Integer(k1));
+            pentanomialParams.add(new ASN1Integer(k2));
+            pentanomialParams.add(new ASN1Integer(k3));
             fieldIdParams.add(new DERSequence(pentanomialParams));
         }
         
@@ -74,16 +74,16 @@ public class X9FieldID
     public X9FieldID(
         ASN1Sequence  seq)
     {
-        this.id = (DERObjectIdentifier)seq.getObjectAt(0);
-        this.parameters = (DERObject)seq.getObjectAt(1);
+        this.id = (ASN1ObjectIdentifier)seq.getObjectAt(0);
+        this.parameters = (ASN1Primitive)seq.getObjectAt(1);
     }
 
-    public DERObjectIdentifier getIdentifier()
+    public ASN1ObjectIdentifier getIdentifier()
     {
         return id;
     }
 
-    public DERObject getParameters()
+    public ASN1Primitive getParameters()
     {
         return parameters;
     }
@@ -97,7 +97,7 @@ public class X9FieldID
      *  }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

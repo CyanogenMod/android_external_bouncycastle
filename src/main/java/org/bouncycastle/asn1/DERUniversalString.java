@@ -3,12 +3,14 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+
 /**
  * DER UniversalString object.
  */
 public class DERUniversalString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     private static final char[]  table = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
     private byte[] string;
@@ -42,7 +44,7 @@ public class DERUniversalString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERUniversalString)
         {
@@ -99,26 +101,36 @@ public class DERUniversalString
         return string;
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
+    }
+
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(UNIVERSAL_STRING, this.getOctets());
+        out.writeEncoded(BERTags.UNIVERSAL_STRING, this.getOctets());
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERUniversalString))
         {
             return false;
         }
 
-        return this.getString().equals(((DERUniversalString)o).getString());
+        return Arrays.areEqual(string, ((DERUniversalString)o).string);
     }
     
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 }

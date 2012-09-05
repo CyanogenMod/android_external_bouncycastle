@@ -15,16 +15,27 @@ public class DEROctetString
     }
 
     public DEROctetString(
-        DEREncodable  obj)
+        ASN1Encodable obj)
+        throws IOException
     {
-        super(obj);
+        super(obj.toASN1Primitive().getEncoded(ASN1Encoding.DER));
+    }
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(OCTET_STRING, string);
+        out.writeEncoded(BERTags.OCTET_STRING, string);
     }
 
     static void encode(
@@ -32,6 +43,6 @@ public class DEROctetString
         byte[]          bytes)
         throws IOException
     {
-        derOut.writeEncoded(DERTags.OCTET_STRING, bytes);
+        derOut.writeEncoded(BERTags.OCTET_STRING, bytes);
     }
 }

@@ -1,12 +1,14 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.OpenSSLDigest;
+// END android-changed
 
 /**
  * The SubjectKeyIdentifier object.
@@ -15,7 +17,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
  * </pre>
  */
 public class SubjectKeyIdentifier
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private byte[] keyidentifier;
 
@@ -33,47 +35,24 @@ public class SubjectKeyIdentifier
         {
             return (SubjectKeyIdentifier)obj;
         }
-        
-        if (obj instanceof SubjectPublicKeyInfo) 
+        else if (obj != null)
         {
-            return new SubjectKeyIdentifier((SubjectPublicKeyInfo)obj);
-        }
-        
-        if (obj instanceof ASN1OctetString) 
-        {
-            return new SubjectKeyIdentifier((ASN1OctetString)obj);
+            return new SubjectKeyIdentifier(ASN1OctetString.getInstance(obj));
         }
 
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
-        }
-
-        throw new IllegalArgumentException("Invalid SubjectKeyIdentifier: " + obj.getClass().getName());
+        return null;
     }
-    
+
     public SubjectKeyIdentifier(
         byte[] keyid)
     {
-        this.keyidentifier=keyid;
+        this.keyidentifier = keyid;
     }
 
-    public SubjectKeyIdentifier(
-        ASN1OctetString  keyid)
+    protected SubjectKeyIdentifier(
+        ASN1OctetString keyid)
     {
-        this.keyidentifier=keyid.getOctets();
-    }
-
-    /**
-     * Calculates the keyidentifier using a SHA1 hash over the BIT STRING
-     * from SubjectPublicKeyInfo as defined in RFC3280.
-     *
-     * @param spki the subject public key info.
-     */
-    public SubjectKeyIdentifier(
-        SubjectPublicKeyInfo    spki)
-    {
-        this.keyidentifier = getDigest(spki);
+        this.keyidentifier = keyid.getOctets();
     }
 
     public byte[] getKeyIdentifier()
@@ -81,9 +60,23 @@ public class SubjectKeyIdentifier
         return keyidentifier;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return new DEROctetString(keyidentifier);
+    }
+
+
+    /**
+     * Calculates the keyidentifier using a SHA1 hash over the BIT STRING
+     * from SubjectPublicKeyInfo as defined in RFC3280.
+     *
+     * @param spki the subject public key info.
+     * @deprecated
+     */
+    public SubjectKeyIdentifier(
+        SubjectPublicKeyInfo    spki)
+    {
+        this.keyidentifier = getDigest(spki);
     }
 
     /**
@@ -95,6 +88,7 @@ public class SubjectKeyIdentifier
      * </pre>
      * @param keyInfo the key info object containing the subjectPublicKey field.
      * @return the key identifier.
+     * @deprecated use org.bouncycastle.cert.X509ExtensionUtils.createSubjectKeyIdentifier
      */
     public static SubjectKeyIdentifier createSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {
@@ -110,6 +104,7 @@ public class SubjectKeyIdentifier
      * </pre>
      * @param keyInfo the key info object containing the subjectPublicKey field.
      * @return the key identifier.
+     * @deprecated use org.bouncycastle.cert.X509ExtensionUtils.createTruncatedSubjectKeyIdentifier
      */
     public static SubjectKeyIdentifier createTruncatedSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {
@@ -126,7 +121,9 @@ public class SubjectKeyIdentifier
 
     private static byte[] getDigest(SubjectPublicKeyInfo spki)
     {
-        Digest digest = new SHA1Digest();
+        // BEGIN android-changed
+        Digest digest = new OpenSSLDigest.SHA1();
+        // END android-changed
         byte[]  resBuf = new byte[digest.getDigestSize()];
 
         byte[] bytes = spki.getPublicKeyData().getBytes();

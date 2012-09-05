@@ -21,8 +21,8 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -30,7 +30,9 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
@@ -164,8 +166,8 @@ class X509Util
         return new RSASSAPSSparams(
             hashAlgId,
             new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hashAlgId),
-            new DERInteger(saltSize),
-            new DERInteger(1));
+            new ASN1Integer(saltSize),
+            new ASN1Integer(1));
     }
 
     static DERObjectIdentifier getAlgorithmOID(
@@ -194,7 +196,7 @@ class X509Util
 
         if (params.containsKey(algorithmName))
         {
-            return new AlgorithmIdentifier(sigOid, (DEREncodable)params.get(algorithmName));
+            return new AlgorithmIdentifier(sigOid, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {
@@ -265,7 +267,7 @@ class X509Util
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }
@@ -297,7 +299,7 @@ class X509Util
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }

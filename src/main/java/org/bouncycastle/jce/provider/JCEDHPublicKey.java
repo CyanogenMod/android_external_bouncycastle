@@ -19,6 +19,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.DHDomainParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 public class JCEDHPublicKey
     implements DHPublicKey
@@ -66,7 +67,7 @@ public class JCEDHPublicKey
         DERInteger              derY;
         try
         {
-            derY = (DERInteger)info.getPublicKey();
+            derY = (DERInteger)info.parsePublicKey();
         }
         catch (IOException e)
         {
@@ -76,12 +77,12 @@ public class JCEDHPublicKey
         this.y = derY.getValue();
 
         ASN1Sequence seq = ASN1Sequence.getInstance(info.getAlgorithmId().getParameters());
-        DERObjectIdentifier id = info.getAlgorithmId().getObjectId();
+        DERObjectIdentifier id = info.getAlgorithmId().getAlgorithm();
 
         // we need the PKCS check to handle older keys marked with the X9 oid.
         if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement) || isPKCSParam(seq))
         {
-            DHParameter             params = new DHParameter(seq);
+            DHParameter             params = DHParameter.getInstance(seq);
 
             if (params.getL() != null)
             {
@@ -118,12 +119,10 @@ public class JCEDHPublicKey
     {
         if (info != null)
         {
-            return info.getDEREncoded();
+            return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
         }
 
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(y));
-
-        return info.getDEREncoded();
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL())), new DERInteger(y));
     }
 
     public DHParameterSpec getParams()

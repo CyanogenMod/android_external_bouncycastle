@@ -1,16 +1,17 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPrivateCrtKeySpec;
+
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 /**
  * A provider representation for a RSA private key, with CRT factors included.
@@ -87,15 +88,16 @@ public class JCERSAPrivateCrtKey
      */
     JCERSAPrivateCrtKey(
         PrivateKeyInfo  info)
+        throws IOException
     {
-        this(new RSAPrivateKeyStructure((ASN1Sequence)info.getPrivateKey()));
+        this(org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(info.parsePrivateKey()));
     }
 
     /**
      * construct an RSA key from a ASN.1 RSA private key object.
      */
     JCERSAPrivateCrtKey(
-        RSAPrivateKeyStructure  key)
+        RSAPrivateKey  key)
     {
         this.modulus = key.getModulus();
         this.publicExponent = key.getPublicExponent();
@@ -126,10 +128,8 @@ public class JCERSAPrivateCrtKey
     public byte[] getEncoded()
     {
         // BEGIN android-changed
-        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPrivateKeyStructure(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()).getDERObject());
+        return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPrivateKey(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()));
         // END android-changed
-
-        return info.getDEREncoded();
     }
 
     /**

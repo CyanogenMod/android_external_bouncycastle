@@ -45,7 +45,91 @@ The following steps are recommended for porting new Bouncy Castle versions.
 
 7) Run tests to make sure things are working:
 
-     See external/openssl/README.android for test instructions
+     Some suggested tests by area:
+     - java.security.Provider
+       libcore/luni/src/test/java/libcore/java/security/ProviderTest.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/ProviderTest.java
+     - java.security.AlgorithmParameterGenerator
+       libcore/luni/src/test/java/libcore/java/security/OldAlgorithmParameterGeneratorTest.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParameterGeneratorTestDH.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParameterGeneratorTestDSA.java
+     - java.security.AlgorithmParameters
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestDSA.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestAES.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestDH.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestDESede.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestDES.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/AlgorithmParametersTestOAEP.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/AlgorithmParametersTest.java
+     - java.security.cert.CertPathBuilder
+       libcore/luni/src/test/java/tests/targets/security/cert/CertPathBuilderTestPKIX.java
+     - java.security.cert.CertPathValidator
+       libcore/luni/src/test/java/tests/targets/security/cert/CertPathValidatorTestPKIX.java
+     - java.security.cert.CertStore
+       libcore/luni/src/test/java/tests/security/cert/CertStoreSpiTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertStore2Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertStore1Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertStoreExceptionTest.java
+     - java.security.cert.CertificateFactory
+       libcore/luni/src/test/java/libcore/java/security/cert/CertificateFactoryTest.java
+       libcore/luni/src/test/java/tests/targets/security/cert/CertificateFactoryTestX509.java
+     - javax.crypto.Cipher
+       libcore/luni/src/test/java/libcore/javax/crypto/CipherTest.java
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/CipherTest.java
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/NullCipherTest.java
+     - javax.crypto.KeyAgreement
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/KeyAgreementTest.java
+     - java.security.KeyFactory
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyFactoryTestDH.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyFactoryTestDSA.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyFactoryTestRSA.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/KeyFactoryTest.java
+     - javax.crypto.KeyGenerator
+       libcore/luni/src/test/java/libcore/javax/crypto/KeyGeneratorTest.java
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/KeyGeneratorTest.java
+     - javax.net.ssl.KeyManagerFactory
+       libcore/luni/src/test/java/libcore/javax/net/ssl/KeyManagerFactoryTest.java
+     - java.security.KeyPairGenerator
+       libcore/luni/src/test/java/libcore/java/security/KeyPairGeneratorTest.java
+       libcore/luni/src/test/java/libcore/java/security/OldKeyPairGeneratorTestDH.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyPairGeneratorTestRSA.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyPairGeneratorTestDSA.java
+       libcore/luni/src/test/java/libcore/javax/crypto/spec/KeyPairGeneratorTestDH.java
+       libcore/luni/src/test/java/tests/security/interfaces/DSAKeyPairGeneratorTest.java
+     - java.security.KeyStore
+       libcore/luni/src/test/java/libcore/java/security/KeyStoreTest.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/KeyStoreTest.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/KeyStore2Test.java
+     - javax.crypto.Mac
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/MacTest.java
+     - java.security.MessageDigest
+       libcore/luni/src/test/java/libcore/java/security/MessageDigestTest.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestMD2.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestMD5.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestSHA256.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestSHA1.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestSHA512.java
+       libcore/luni/src/test/java/tests/targets/security/MessageDigestTestSHA384.java
+     - javax.net.ssl.SSLContext
+       libcore/luni/src/test/java/libcore/javax/net/ssl/SSLContextTest.java
+     - javax.crypto.SecretKeyFactory
+       libcore/luni/src/test/java/libcore/javax/crypto/SecretKeyFactoryTest.java
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/SecretKeyFactoryTest.java
+     - java.security.SecureRandom
+       libcore/luni/src/test/java/libcore/java/security/SecureRandomTest.java
+       libcore/luni/src/test/java/tests/java/security/SecureRandomTest.java
+       libcore/luni/src/test/java/tests/targets/security/SecureRandomTestSHA1PRNG.java
+     - java.security.Signature
+       libcore/luni/src/test/java/libcore/java/security/SignatureTest.java
+       libcore/luni/src/test/java/org/apache/harmony/xnet/provider/jsse/OpenSSLSignatureTest.java
+       libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SignatureTest.java
+       libcore/luni/src/test/java/tests/targets/security/SignatureTestMD2withRSA.java
+     - javax.net.ssl.TrustManagerFactory
+       libcore/luni/src/test/java/libcore/javax/net/ssl/TrustManagerFactoryTest.java
+     - javax.net.ssl.SSLSocket and javax.net.ssl.SSLEngine (which touch on Cipher, MessageDigest, Signature)
+       libcore/luni/src/test/java/libcore/javax/net/ssl/
+     - Test Android additions to bouncycastle such as org.bouncycastle.crypto.digests.OpenSSLDigest and org.bouncycastle.jce.provider.CertBlacklist
+       libcore/luni/src/test/java/com/android/org/bouncycastle/
 
 8) Do a full build before checking in:
 

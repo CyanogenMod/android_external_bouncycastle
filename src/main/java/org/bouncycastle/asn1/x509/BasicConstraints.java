@@ -1,23 +1,23 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
-import java.math.BigInteger;
-
 public class BasicConstraints
-    extends ASN1Encodable
+    extends ASN1Object
 {
     // BEGIN android-changed
     DERBoolean  cA = DERBoolean.FALSE;
     // END android-changed
-    DERInteger  pathLenConstraint = null;
+    ASN1Integer  pathLenConstraint = null;
 
     public static BasicConstraints getInstance(
         ASN1TaggedObject obj,
@@ -29,25 +29,23 @@ public class BasicConstraints
     public static BasicConstraints getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof BasicConstraints)
+        if (obj instanceof BasicConstraints)
         {
             return (BasicConstraints)obj;
         }
-
-        if (obj instanceof ASN1Sequence)
-        {
-            return new BasicConstraints((ASN1Sequence)obj);
-        }
-
         if (obj instanceof X509Extension)
         {
             return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
+        if (obj != null)
+        {
+            return new BasicConstraints(ASN1Sequence.getInstance(obj));
+        }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
-    public BasicConstraints(
+    private BasicConstraints(
         ASN1Sequence   seq)
     {
         if (seq.size() == 0)
@@ -64,42 +62,19 @@ public class BasicConstraints
             else
             {
                 this.cA = null;
-                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(0));
+                this.pathLenConstraint = ASN1Integer.getInstance(seq.getObjectAt(0));
             }
             if (seq.size() > 1)
             {
                 if (this.cA != null)
                 {
-                    this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                    this.pathLenConstraint = ASN1Integer.getInstance(seq.getObjectAt(1));
                 }
                 else
                 {
                     throw new IllegalArgumentException("wrong sequence in constructor");
                 }
             }
-        }
-    }
-
-    /**
-     * @deprecated use one of the other two unambigous constructors.
-     * @param cA
-     * @param pathLenConstraint
-     */
-    public BasicConstraints(
-        boolean cA,
-        int     pathLenConstraint)
-    {
-        if (cA)
-        {
-            // BEGIN android-changed
-            this.cA = DERBoolean.getInstance(cA);
-            // END android-changed
-            this.pathLenConstraint = new DERInteger(pathLenConstraint);
-        }
-        else
-        {
-            this.cA = null;
-            this.pathLenConstraint = null;
         }
     }
 
@@ -130,7 +105,7 @@ public class BasicConstraints
         // BEGIN android-changed
         this.cA = DERBoolean.TRUE;
         // END android-changed
-        this.pathLenConstraint = new DERInteger(pathLenConstraint);
+        this.pathLenConstraint = new ASN1Integer(pathLenConstraint);
     }
 
     public boolean isCA()
@@ -157,7 +132,7 @@ public class BasicConstraints
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

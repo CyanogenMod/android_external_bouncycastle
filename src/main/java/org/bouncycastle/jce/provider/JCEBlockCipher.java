@@ -11,6 +11,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -29,7 +30,6 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.engines.GOST28147Engine;
 // END android-removed
@@ -44,7 +44,9 @@ import org.bouncycastle.crypto.modes.CTSBlockCipher;
 // import org.bouncycastle.crypto.modes.EAXBlockCipher;
 // END android-removed
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
-import org.bouncycastle.crypto.modes.GOFBBlockCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.modes.GOFBBlockCipher;
+// END android-removed
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
@@ -65,11 +67,17 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 // import org.bouncycastle.crypto.params.ParametersWithSBox;
 // import org.bouncycastle.crypto.params.RC2Parameters;
 // import org.bouncycastle.crypto.params.RC5Parameters;
+// END android-removed
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
+// BEGIN android-removed
 // import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 // END android-removed
+import org.bouncycastle.jce.spec.RepeatedSecretKeySpec;
 import org.bouncycastle.util.Strings;
 
-public class JCEBlockCipher extends WrapCipherSpi
+public class JCEBlockCipher
+    extends CipherSpi
     implements PBE
 {
     //
@@ -100,6 +108,8 @@ public class JCEBlockCipher extends WrapCipherSpi
     private String                  pbeAlgorithm = null;
     
     private String                  modeName = null;
+
+    private AlgorithmParameters engineParams;
 
     protected JCEBlockCipher(
         BlockCipher engine)
@@ -272,12 +282,14 @@ public class JCEBlockCipher extends WrapCipherSpi
             cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
                         new SICBlockCipher(baseEngine)));
         }
-        else if (modeName.startsWith("GOFB"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-                        new GOFBBlockCipher(baseEngine)));
-        }
+        // BEGIN android-removed
+        // else if (modeName.startsWith("GOFB"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+        //                 new GOFBBlockCipher(baseEngine)));
+        // }
+        // END android-removed
         else if (modeName.startsWith("CTS"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -396,9 +408,9 @@ public class JCEBlockCipher extends WrapCipherSpi
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
         //
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getOID() != null)
             {
@@ -444,8 +456,16 @@ public class JCEBlockCipher extends WrapCipherSpi
                     throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                 }
 
-                param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
-                ivParam = (ParametersWithIV)param;
+                if (key instanceof RepeatedSecretKeySpec)
+                {
+                    param = new ParametersWithIV(null, p.getIV());
+                    ivParam = (ParametersWithIV)param;
+                }
+                else
+                {
+                    param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
+                    ivParam = (ParametersWithIV)param;
+                }
             }
             else
             {
@@ -857,7 +877,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new CBCBlockCipher(new RC2Engine()));
         }
     }
-    
+
     /**
      * PBEWithSHA1AndDES
      */
@@ -882,30 +902,8 @@ public class JCEBlockCipher extends WrapCipherSpi
         }
     }
 
-    /**
-     * PBEWithSHAAnd3-KeyTripleDES-CBC
-     */
-    static public class PBEWithSHAAndDES3Key
-        extends JCEBlockCipher
-    {
-        public PBEWithSHAAndDES3Key()
-        {
-            super(new CBCBlockCipher(new DESedeEngine()));
-        }
-    }
 
-    /**
-     * PBEWithSHAAnd2-KeyTripleDES-CBC
-     */
-    static public class PBEWithSHAAndDES2Key
-        extends JCEBlockCipher
-    {
-        public PBEWithSHAAndDES2Key()
-        {
-            super(new CBCBlockCipher(new DESedeEngine()));
-        }
-    }
-    
+
     /**
      * PBEWithSHAAnd128BitRC2-CBC
      */
@@ -929,7 +927,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new CBCBlockCipher(new RC2Engine()));
         }
     }
-    
+
     /**
      * PBEWithSHAAndTwofish-CBC
      */
@@ -941,7 +939,7 @@ public class JCEBlockCipher extends WrapCipherSpi
             super(new CBCBlockCipher(new TwofishEngine()));
         }
     }
-    
+
     /**
      * PBEWithAES-CBC
      */

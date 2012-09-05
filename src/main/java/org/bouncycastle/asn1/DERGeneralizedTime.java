@@ -7,25 +7,33 @@ import java.util.Date;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * Generalized time object.
  */
 public class DERGeneralizedTime
-    extends ASN1Object
+    extends ASN1Primitive
 {
-    String      time;
+    private byte[]      time;
 
     /**
      * return a generalized time from the passed in object
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERGeneralizedTime getInstance(
+    public static ASN1GeneralizedTime getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERGeneralizedTime)
+        if (obj == null || obj instanceof ASN1GeneralizedTime)
         {
-            return (DERGeneralizedTime)obj;
+            return (ASN1GeneralizedTime)obj;
+        }
+
+        if (obj instanceof DERGeneralizedTime)
+        {
+            return new ASN1GeneralizedTime(((DERGeneralizedTime)obj).time);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -40,11 +48,11 @@ public class DERGeneralizedTime
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
      */
-    public static DERGeneralizedTime getInstance(
+    public static ASN1GeneralizedTime getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERGeneralizedTime)
         {
@@ -52,7 +60,7 @@ public class DERGeneralizedTime
         }
         else
         {
-            return new DERGeneralizedTime(((ASN1OctetString)o).getOctets());
+            return new ASN1GeneralizedTime(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -68,7 +76,7 @@ public class DERGeneralizedTime
     public DERGeneralizedTime(
         String  time)
     {
-        this.time = time;
+        this.time = Strings.toByteArray(time);
         try
         {
             this.getDate();
@@ -80,7 +88,7 @@ public class DERGeneralizedTime
     }
 
     /**
-     * base constructer from a java.util.date object
+     * base constructor from a java.util.date object
      */
     public DERGeneralizedTime(
         Date time)
@@ -89,23 +97,13 @@ public class DERGeneralizedTime
 
         dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
 
-        this.time = dateF.format(time);
+        this.time = Strings.toByteArray(dateF.format(time));
     }
 
     DERGeneralizedTime(
         byte[]  bytes)
     {
-        //
-        // explicitly convert to characters
-        //
-        char[]  dateC = new char[bytes.length];
-
-        for (int i = 0; i != dateC.length; i++)
-        {
-            dateC[i] = (char)(bytes[i] & 0xff);
-        }
-
-        this.time = new String(dateC);
+        this.time = bytes;
     }
 
     /**
@@ -114,7 +112,7 @@ public class DERGeneralizedTime
      */
     public String getTimeString()
     {
-        return time;
+        return Strings.fromByteArray(time);
     }
     
     /**
@@ -131,39 +129,41 @@ public class DERGeneralizedTime
      */
     public String getTime()
     {
+        String stime = Strings.fromByteArray(time);
+
         //
         // standardise the format.
         //             
-        if (time.charAt(time.length() - 1) == 'Z')
+        if (stime.charAt(stime.length() - 1) == 'Z')
         {
-            return time.substring(0, time.length() - 1) + "GMT+00:00";
+            return stime.substring(0, stime.length() - 1) + "GMT+00:00";
         }
         else
         {
-            int signPos = time.length() - 5;
-            char sign = time.charAt(signPos);
+            int signPos = stime.length() - 5;
+            char sign = stime.charAt(signPos);
             if (sign == '-' || sign == '+')
             {
-                return time.substring(0, signPos)
+                return stime.substring(0, signPos)
                     + "GMT"
-                    + time.substring(signPos, signPos + 3)
+                    + stime.substring(signPos, signPos + 3)
                     + ":"
-                    + time.substring(signPos + 3);
+                    + stime.substring(signPos + 3);
             }
             else
             {
-                signPos = time.length() - 3;
-                sign = time.charAt(signPos);
+                signPos = stime.length() - 3;
+                sign = stime.charAt(signPos);
                 if (sign == '-' || sign == '+')
                 {
-                    return time.substring(0, signPos)
+                    return stime.substring(0, signPos)
                         + "GMT"
-                        + time.substring(signPos)
+                        + stime.substring(signPos)
                         + ":00";
                 }
             }
         }            
-        return time + calculateGMTOffset();
+        return stime + calculateGMTOffset();
     }
 
     private String calculateGMTOffset()
@@ -208,9 +208,10 @@ public class DERGeneralizedTime
         throws ParseException
     {
         SimpleDateFormat dateF;
-        String d = time;
+        String stime = Strings.fromByteArray(time);
+        String d = stime;
 
-        if (time.endsWith("Z"))
+        if (stime.endsWith("Z"))
         {
             if (hasFractionalSeconds())
             {
@@ -223,7 +224,7 @@ public class DERGeneralizedTime
 
             dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
         }
-        else if (time.indexOf('-') > 0 || time.indexOf('+') > 0)
+        else if (stime.indexOf('-') > 0 || stime.indexOf('+') > 0)
         {
             d = this.getTime();
             if (hasFractionalSeconds())
@@ -287,43 +288,51 @@ public class DERGeneralizedTime
 
     private boolean hasFractionalSeconds()
     {
-        return time.indexOf('.') == 14;
-    }
-
-    private byte[] getOctets()
-    {
-        char[]  cs = time.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
+        for (int i = 0; i != time.length; i++)
         {
-            bs[i] = (byte)cs[i];
+            if (time[i] == '.')
+            {
+                if (i == 14)
+                {
+                    return true;
+                }
+            }
         }
-
-        return bs;
+        return false;
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        int length = time.length;
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream  out)
         throws IOException
     {
-        out.writeEncoded(GENERALIZED_TIME, this.getOctets());
+        out.writeEncoded(BERTags.GENERALIZED_TIME, time);
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if (!(o instanceof DERGeneralizedTime))
         {
             return false;
         }
 
-        return time.equals(((DERGeneralizedTime)o).time);
+        return Arrays.areEqual(time, ((DERGeneralizedTime)o).time);
     }
     
     public int hashCode()
     {
-        return time.hashCode();
+        return Arrays.hashCode(time);
     }
 }
