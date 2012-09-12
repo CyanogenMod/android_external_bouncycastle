@@ -5,10 +5,10 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -148,7 +148,7 @@ public class IETFUtils
             }
         }
 
-        return ASN1Object.fromByteArray(data);
+        return ASN1Primitive.fromByteArray(data);
     }
 
     public static void appendTypeAndValue(
@@ -190,7 +190,14 @@ public class IETFUtils
         }
         else
         {
-            vBuf.append("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
+            try
+            {
+                vBuf.append("#" + bytesToString(Hex.encode(value.toASN1Primitive().getEncoded(ASN1Encoding.DER))));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("Other value has no encoded form");
+            }
         }
 
         int     end = vBuf.length();
@@ -242,7 +249,7 @@ public class IETFUtils
 
         if (value.length() > 0 && value.charAt(0) == '#')
         {
-            DERObject obj = decodeObject(value);
+            ASN1Primitive obj = decodeObject(value);
 
             if (obj instanceof ASN1String)
             {
@@ -255,11 +262,11 @@ public class IETFUtils
         return value;
     }
 
-    private static ASN1Object decodeObject(String oValue)
+    private static ASN1Primitive decodeObject(String oValue)
     {
         try
         {
-            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+            return ASN1Primitive.fromByteArray(Hex.decode(oValue.substring(1)));
         }
         catch (IOException e)
         {

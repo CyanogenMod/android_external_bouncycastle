@@ -2,14 +2,17 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * DER VisibleString object.
  */
 public class DERVisibleString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
-    String  string;
+    private byte[]  string;
 
     /**
      * return a Visible String from the passed in object.
@@ -22,16 +25,6 @@ public class DERVisibleString
         if (obj == null || obj instanceof DERVisibleString)
         {
             return (DERVisibleString)obj;
-        }
-
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERVisibleString(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -50,23 +43,25 @@ public class DERVisibleString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        ASN1Primitive o = obj.getObject();
+
+        if (explicit || o instanceof DERVisibleString)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERVisibleString(ASN1OctetString.getInstance(o).getOctets());
+        }
     }
 
     /**
      * basic constructor - byte encoded string.
      */
-    public DERVisibleString(
+    DERVisibleString(
         byte[]   string)
     {
-        char[]  cs = new char[string.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-
-        this.string = new String(cs);
+        this.string = string;
     }
 
     /**
@@ -75,52 +70,54 @@ public class DERVisibleString
     public DERVisibleString(
         String   string)
     {
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     public byte[] getOctets()
     {
-        char[]  cs = string.toCharArray();
-        byte[]  bs = new byte[cs.length];
+        return Arrays.clone(string);
+    }
 
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
+    boolean isConstructed()
+    {
+        return false;
+    }
 
-        return bs;
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(VISIBLE_STRING, this.getOctets());
+        out.writeEncoded(BERTags.VISIBLE_STRING, this.string);
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERVisibleString))
         {
             return false;
         }
 
-        return this.getString().equals(((DERVisibleString)o).getString());
+        return Arrays.areEqual(string, ((DERVisibleString)o).string);
     }
     
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 }

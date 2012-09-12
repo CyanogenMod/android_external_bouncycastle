@@ -16,7 +16,6 @@ Other performance (both speed and memory) and correctness changes:
 - singleton DERNull (BouncyCastle now does this but we make constructor private to be sure)
 - similarly made DERBoolean constructor private and moved to DERBoolean.{getInstance,TRUE,FALSE}
 - removed use of Boolean constructor
-- DERPrintableString interns its internal String values
 - DERObjectIdentifier interns its internal String indentifer value
 - changed uses of 'new Integer' to 'Integer.valueOf'
 - X509CertificateObject.getEncoded caches its result
@@ -29,7 +28,6 @@ Other performance (both speed and memory) and correctness changes:
 - Fixed cut & paste instanceof error in EncryptedPrivateKeyInfo
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
-- Added DSA support to JDKKeyManager.engineGetKeySpec
 - Fixed CertBlacklist to do a by-value comparison of public keys
 
 Other security changes:

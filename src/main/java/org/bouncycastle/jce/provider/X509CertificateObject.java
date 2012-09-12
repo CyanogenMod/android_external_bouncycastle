@@ -30,12 +30,13 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -44,12 +45,14 @@ import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
 import org.bouncycastle.asn1.misc.VerisignCzagExtension;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
@@ -79,7 +82,7 @@ public class X509CertificateObject
 
             if (bytes != null)
             {
-                basicConstraints = BasicConstraints.getInstance(ASN1Object.fromByteArray(bytes));
+                basicConstraints = BasicConstraints.getInstance(ASN1Primitive.fromByteArray(bytes));
             }
         }
         catch (Exception e)
@@ -92,7 +95,7 @@ public class X509CertificateObject
             byte[] bytes = this.getExtensionBytes("2.5.29.15");
             if (bytes != null)
             {
-                DERBitString    bits = DERBitString.getInstance(ASN1Object.fromByteArray(bytes));
+                DERBitString    bits = DERBitString.getInstance(ASN1Primitive.fromByteArray(bytes));
 
                 bytes = bits.getBytes();
                 int length = (bytes.length * 8) - bits.getPadBits();
@@ -148,7 +151,14 @@ public class X509CertificateObject
 
     public Principal getIssuerDN()
     {
-        return new X509Principal(c.getIssuer());
+        try
+        {
+            return new X509Principal(X500Name.getInstance(c.getIssuer().getEncoded()));
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public X500Principal getIssuerX500Principal()
@@ -170,7 +180,7 @@ public class X509CertificateObject
 
     public Principal getSubjectDN()
     {
-        return new X509Principal(c.getSubject());
+        return new X509Principal(X500Name.getInstance(c.getSubject().toASN1Primitive()));
     }
 
     public X500Principal getSubjectX500Principal()
@@ -205,7 +215,7 @@ public class X509CertificateObject
     {
         try
         {
-            return c.getTBSCertificate().getEncoded(ASN1Encodable.DER);
+            return c.getTBSCertificate().getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {
@@ -268,7 +278,14 @@ public class X509CertificateObject
     {
         if (c.getSignatureAlgorithm().getParameters() != null)
         {
-            return c.getSignatureAlgorithm().getParameters().getDERObject().getDEREncoded();
+            try
+            {
+                return c.getSignatureAlgorithm().getParameters().toASN1Primitive().getEncoded(ASN1Encoding.DER);
+            }
+            catch (IOException e)
+            {
+                return null;
+            }
         }
         else
         {
@@ -517,7 +534,14 @@ public class X509CertificateObject
 
     public PublicKey getPublicKey()
     {
-        return JDKKeyFactory.createPublicKeyFromPublicKeyInfo(c.getSubjectPublicKeyInfo());
+        try
+        {
+            return BouncyCastleProvider.getPublicKey(c.getSubjectPublicKeyInfo());
+        }
+        catch (IOException e)
+        {
+            return null;   // should never happen...
+        }
     }
 
     // BEGIN android-changed
@@ -530,7 +554,7 @@ public class X509CertificateObject
         {
             // BEGIN android-changed
             if (encoded == null) {
-                encoded = c.getEncoded(ASN1Encodable.DER);
+                encoded = c.getEncoded(ASN1Encoding.DER);
             }
             return encoded;
             // END android-changed
@@ -599,13 +623,13 @@ public class X509CertificateObject
     }
 
     public void setBagAttribute(
-        DERObjectIdentifier oid,
-        DEREncodable        attribute)
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable        attribute)
     {
         attrCarrier.setBagAttribute(oid, attribute);
     }
 
-    public DEREncodable getBagAttribute(
+    public ASN1Encodable getBagAttribute(
         DERObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);
@@ -668,11 +692,11 @@ public class X509CertificateObject
                     buf.append("                       critical(").append(ext.isCritical()).append(") ");
                     try
                     {
-                        if (oid.equals(X509Extensions.BasicConstraints))
+                        if (oid.equals(X509Extension.basicConstraints))
                         {
-                            buf.append(new BasicConstraints((ASN1Sequence)dIn.readObject())).append(nl);
+                            buf.append(BasicConstraints.getInstance(dIn.readObject())).append(nl);
                         }
-                        else if (oid.equals(X509Extensions.KeyUsage))
+                        else if (oid.equals(X509Extension.keyUsage))
                         {
                             buf.append(new KeyUsage((DERBitString)dIn.readObject())).append(nl);
                         }
@@ -719,7 +743,7 @@ public class X509CertificateObject
     {
         Signature   signature;
         String      sigName = X509SignatureUtil.getSignatureName(c.getSignatureAlgorithm());
-
+        
         try
         {
             signature = Signature.getInstance(sigName, BouncyCastleProvider.PROVIDER_NAME);
@@ -755,7 +779,7 @@ public class X509CertificateObject
             throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
         }
 
-        DEREncodable params = c.getSignatureAlgorithm().getParameters();
+        ASN1Encodable params = c.getSignatureAlgorithm().getParameters();
 
         // TODO This should go after the initVerify?
         X509SignatureUtil.setSignatureParameters(signature, params);
@@ -766,7 +790,7 @@ public class X509CertificateObject
 
         if (!signature.verify(this.getSignature()))
         {
-            throw new InvalidKeyException("Public key presented not for certificate signature");
+            throw new SignatureException("certificate does not verify with supplied key");
         }
     }
 

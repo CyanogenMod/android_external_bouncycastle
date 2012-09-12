@@ -2,16 +2,17 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 
 /**
  * DER UTF8String object.
  */
 public class DERUTF8String
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
-    String string;
+    private byte[]  string;
 
     /**
      * return an UTF8 string from the passed in object.
@@ -45,7 +46,7 @@ public class DERUTF8String
         ASN1TaggedObject obj,
         boolean explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERUTF8String)
         {
@@ -60,16 +61,9 @@ public class DERUTF8String
     /**
      * basic constructor - byte encoded string.
      */
-    public DERUTF8String(byte[] string)
+    DERUTF8String(byte[] string)
     {
-        try
-        {
-            this.string = Strings.fromUTF8ByteArray(string);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
-            throw new IllegalArgumentException("UTF8 encoding invalid");
-        }
+        this.string = string;
     }
 
     /**
@@ -77,25 +71,25 @@ public class DERUTF8String
      */
     public DERUTF8String(String string)
     {
-        this.string = string;
+        this.string = Strings.toUTF8ByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromUTF8ByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 
-    boolean asn1Equals(DERObject o)
+    boolean asn1Equals(ASN1Primitive o)
     {
         if (!(o instanceof DERUTF8String))
         {
@@ -104,12 +98,23 @@ public class DERUTF8String
 
         DERUTF8String s = (DERUTF8String)o;
 
-        return this.getString().equals(s.getString());
+        return Arrays.areEqual(string, s.string);
     }
 
-    void encode(DEROutputStream out)
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
         throws IOException
     {
-        out.writeEncoded(UTF8_STRING, Strings.toUTF8ByteArray(string));
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
+    }
+
+    void encode(ASN1OutputStream out)
+        throws IOException
+    {
+        out.writeEncoded(BERTags.UTF8_STRING, string);
     }
 }

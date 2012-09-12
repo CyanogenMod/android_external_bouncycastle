@@ -14,22 +14,19 @@ import org.bouncycastle.crypto.Mac;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.MD2Digest;
 // import org.bouncycastle.crypto.digests.MD4Digest;
-// END android-removed
-import org.bouncycastle.crypto.digests.MD5Digest;
-// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-// END android-removed
-import org.bouncycastle.crypto.digests.SHA1Digest;
-// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA1Digest;
 // import org.bouncycastle.crypto.digests.SHA224Digest;
-// END android-removed
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA256Digest;
+// import org.bouncycastle.crypto.digests.SHA384Digest;
+// import org.bouncycastle.crypto.digests.SHA512Digest;
 // import org.bouncycastle.crypto.digests.TigerDigest;
 // END android-removed
+// BEGIN android-added
+import org.bouncycastle.crypto.digests.OpenSSLDigest;
+// END android-added
 import org.bouncycastle.crypto.engines.DESEngine;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.engines.RC2Engine;
@@ -37,7 +34,6 @@ import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
-// import org.bouncycastle.crypto.macs.GOST28147Mac;
 // END android-removed
 import org.bouncycastle.crypto.macs.HMac;
 // BEGIN android-removed
@@ -47,6 +43,8 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -87,9 +85,9 @@ public class JCEMac
             throw new InvalidKeyException("key is null");
         }
         
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getParam() != null)
             {
@@ -171,6 +169,18 @@ public class JCEMac
     // }
     //
     // /**
+    //  * DES 64 bit MAC
+    //  */
+    // public static class DES64
+    //     extends JCEMac
+    // {
+    //     public DES64()
+    //     {
+    //         super(new CBCBlockCipherMac(new DESEngine(), 64));
+    //     }
+    // }
+    //
+    // /**
     //  * RC2
     //  */
     // public static class RC2
@@ -182,17 +192,6 @@ public class JCEMac
     //     }
     // }
     //
-    // /**
-    //  * GOST28147
-    //  */
-    // public static class GOST28147
-    //     extends JCEMac
-    // {
-    //     public GOST28147()
-    //     {
-    //         super(new GOST28147Mac());
-    //     }
-    // }
     //
     //
     //
@@ -211,14 +210,7 @@ public class JCEMac
     // /**
     //  * RC2CFB8
     //  */
-    // public static class RC2CFB8
-    //     extends JCEMac
-    // {
-    //     public RC2CFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new RC2Engine()));
-    //     }
-    // }
+    //
     //
     // /**
     //  * DES9797Alg3with7816-4Padding
@@ -277,10 +269,12 @@ public class JCEMac
     {
         public MD5()
         {
-            super(new HMac(new MD5Digest()));
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.MD5()));
+            // END android-changed
         }
     }
-    
+
     /**
      * SHA1 HMac
      */
@@ -289,10 +283,12 @@ public class JCEMac
     {
         public SHA1()
         {
-            super(new HMac(new SHA1Digest()));
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.SHA1()));
+            // END android-changed
         }
     }
-    
+
     // BEGIN android-removed
     // /**
     //  * SHA-224 HMac
@@ -315,10 +311,12 @@ public class JCEMac
     {
         public SHA256()
         {
-            super(new HMac(new SHA256Digest()));
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.SHA256()));
+            // END android-changed
         }
     }
-    
+
     /**
      * SHA-384 HMac
      */
@@ -327,10 +325,12 @@ public class JCEMac
     {
         public SHA384()
         {
-            super(new HMac(new SHA384Digest()));
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.SHA384()));
+            // END android-changed
         }
     }
-    
+
     // BEGIN android-removed
     // public static class OldSHA384
     //     extends JCEMac
@@ -350,9 +350,12 @@ public class JCEMac
     {
         public SHA512()
         {
-            super(new HMac(new SHA512Digest()));
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.SHA512()));
+            // END android-changed
         }
     }
+
     
     // BEGIN android-removed
     // /**
@@ -421,7 +424,7 @@ public class JCEMac
     //     }
     // }
     // END android-removed
-    
+
     /**
      * PBEWithHmacSHA
      */
@@ -430,10 +433,12 @@ public class JCEMac
     {
         public PBEWithSHA()
         {
-            super(new HMac(new SHA1Digest()), PKCS12, SHA1, 160);
+            // BEGIN android-changed
+            super(new HMac(new OpenSSLDigest.SHA1()), PKCS12, SHA1, 160);
+            // END android-changed
         }
     }
-    
+
     // BEGIN android-removed
     //  /**
     //   * PBEWithHmacTiger

@@ -1,6 +1,9 @@
 package org.bouncycastle.jce;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 // BEGIN android-removed
@@ -9,9 +12,6 @@ import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * a table of locally supported named curves.
@@ -33,7 +33,7 @@ public class ECNamedCurveTable
         {
             try
             {
-                ecP = X962NamedCurves.getByOID(new DERObjectIdentifier(name));
+                ecP = X962NamedCurves.getByOID(new ASN1ObjectIdentifier(name));
             }
             catch (IllegalArgumentException e)
             {
@@ -48,7 +48,7 @@ public class ECNamedCurveTable
             {
                 try
                 {
-                    ecP = SECNamedCurves.getByOID(new DERObjectIdentifier(name));
+                    ecP = SECNamedCurves.getByOID(new ASN1ObjectIdentifier(name));
                 }
                 catch (IllegalArgumentException e)
                 {
@@ -65,7 +65,7 @@ public class ECNamedCurveTable
         //     {
         //         try
         //         {
-        //             ecP = TeleTrusTNamedCurves.getByOID(new DERObjectIdentifier(name));
+        //             ecP = TeleTrusTNamedCurves.getByOID(new ASN1ObjectIdentifier(name));
         //         }
         //         catch (IllegalArgumentException e)
         //         {

@@ -32,23 +32,31 @@ public class HMac
     {
         blockLengths = new Hashtable();
         
-        blockLengths.put("GOST3411", Integer.valueOf(32));
-        
-        blockLengths.put("MD2", Integer.valueOf(16));
-        blockLengths.put("MD4", Integer.valueOf(64));
+        // BEGIN android-removed
+        // blockLengths.put("GOST3411", Integer.valueOf(32));
+        //
+        // blockLengths.put("MD2", Integer.valueOf(16));
+        // blockLengths.put("MD4", Integer.valueOf(64));
+        // END android-removed
         blockLengths.put("MD5", Integer.valueOf(64));
         
-        blockLengths.put("RIPEMD128", Integer.valueOf(64));
-        blockLengths.put("RIPEMD160", Integer.valueOf(64));
+        // BEGIN android-removed
+        // blockLengths.put("RIPEMD128", Integer.valueOf(64));
+        // blockLengths.put("RIPEMD160", Integer.valueOf(64));
+        // END android-removed
         
         blockLengths.put("SHA-1", Integer.valueOf(64));
-        blockLengths.put("SHA-224", Integer.valueOf(64));
+        // BEGIN android-removed
+        // blockLengths.put("SHA-224", Integer.valueOf(64));
+        // END android-removed
         blockLengths.put("SHA-256", Integer.valueOf(64));
         blockLengths.put("SHA-384", Integer.valueOf(128));
         blockLengths.put("SHA-512", Integer.valueOf(128));
         
-        blockLengths.put("Tiger", Integer.valueOf(64));
-        blockLengths.put("Whirlpool", Integer.valueOf(64));
+        // BEGIN android-removed
+        // blockLengths.put("Tiger", Integer.valueOf(64));
+        // blockLengths.put("Whirlpool", Integer.valueOf(64));
+        // END android-removed
     }
     
     private static int getByteLength(

@@ -2,14 +2,15 @@ package org.bouncycastle.asn1.x500;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 
 public class RDN
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private ASN1Set values;
 
@@ -35,8 +36,8 @@ public class RDN
     /**
      * Create a single valued RDN.
      *
-     * @param oid
-     * @param value
+     * @param oid RDN type.
+     * @param value RDN value.
      */
     public RDN(ASN1ObjectIdentifier oid, ASN1Encodable value)
     {
@@ -55,6 +56,8 @@ public class RDN
 
     /**
      * Create a multi-valued RDN.
+     *
+     * @param aAndVs attribute type/value pairs making up the RDN
      */
     public RDN(AttributeTypeAndValue[] aAndVs)
     {
@@ -64,6 +67,16 @@ public class RDN
     public boolean isMultiValued()
     {
         return this.values.size() > 1;
+    }
+
+    /**
+     * Return the number of AttributeTypeAndValue objects in this RDN,
+     *
+     * @return size of RDN, greater than 1 if multi-valued.
+     */
+    public int size()
+    {
+        return this.values.size();
     }
 
     public AttributeTypeAndValue getFirst()
@@ -97,9 +110,9 @@ public class RDN
      *        type     AttributeType,
      *        value    AttributeValue }
      * </pre>
-     * @return
+     * @return this object as an ASN1Primitive type
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return values;
     }

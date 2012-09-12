@@ -1,16 +1,18 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+
 /**
  * Generator for X.509 extensions
+ * @deprecated use org.bouncycastle.asn1.x509.ExtensionsGenerator
  */
 public class X509ExtensionsGenerator
 {
@@ -27,6 +29,28 @@ public class X509ExtensionsGenerator
     }
 
     /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public void addExtension(
+        DERObjectIdentifier oid,
+        boolean             critical,
+        ASN1Encodable       value)
+    {
+        addExtension(new ASN1ObjectIdentifier(oid.getId()), critical, value);
+    }
+
+    /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public void addExtension(
+        DERObjectIdentifier oid,
+        boolean             critical,
+        byte[]              value)
+    {
+        addExtension(new ASN1ObjectIdentifier(oid.getId()), critical, value);
+    }
+
+    /**
      * Add an extension with the given oid and the passed in value to be included
      * in the OCTET STRING associated with the extension.
      *
@@ -35,13 +59,13 @@ public class X509ExtensionsGenerator
      * @param value the ASN.1 object to be included in the extension.
      */
     public void addExtension(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         boolean             critical,
-        DEREncodable        value)
+        ASN1Encodable       value)
     {
         try
         {
-            this.addExtension(oid, critical, value.getDERObject().getEncoded(ASN1Encodable.DER));
+            this.addExtension(oid, critical, value.toASN1Primitive().getEncoded(ASN1Encoding.DER));
         }
         catch (IOException e)
         {
@@ -58,7 +82,7 @@ public class X509ExtensionsGenerator
      * @param value the byte array to be wrapped.
      */
     public void addExtension(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         boolean             critical,
         byte[]              value)
     {

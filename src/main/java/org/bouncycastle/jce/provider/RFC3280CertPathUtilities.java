@@ -28,13 +28,13 @@ import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -136,7 +136,7 @@ public class RFC3280CertPathUtilities
                                 .getEncoded())).getObjects();
                         while (e.hasMoreElements())
                         {
-                            vec.add((DEREncodable)e.nextElement());
+                            vec.add((ASN1Encodable)e.nextElement());
                         }
                     }
                     catch (IOException e)
@@ -179,11 +179,11 @@ public class RFC3280CertPathUtilities
                         }
                         for (int j = 0; j < genNames.length; j++)
                         {
-                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().getDERObject()).getObjects();
+                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().toASN1Primitive()).getObjects();
                             ASN1EncodableVector vec = new ASN1EncodableVector();
                             while (e.hasMoreElements())
                             {
-                                vec.add((DEREncodable)e.nextElement());
+                                vec.add((ASN1Encodable)e.nextElement());
                             }
                             vec.add(dpName.getName());
                             genNames[j] = new GeneralName(new X509Name(new DERSequence(vec)));
@@ -285,7 +285,7 @@ public class RFC3280CertPathUtilities
         X509CRL crl)
         throws AnnotatedException
     {
-        DERObject idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
+        ASN1Primitive idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
         boolean isIndirect = false;
         if (idp != null)
         {
@@ -306,7 +306,7 @@ public class RFC3280CertPathUtilities
                 {
                     try
                     {
-                        if (Arrays.areEqual(genNames[j].getName().getDERObject().getEncoded(), issuerBytes))
+                        if (Arrays.areEqual(genNames[j].getName().toASN1Primitive().getEncoded(), issuerBytes))
                         {
                             matchIssuer = true;
                         }
@@ -359,8 +359,7 @@ public class RFC3280CertPathUtilities
         // (d) (1)
         if (idp != null && idp.getOnlySomeReasons() != null && dp.getReasons() != null)
         {
-            return new ReasonsMask(dp.getReasons().intValue()).intersect(new ReasonsMask(idp.getOnlySomeReasons()
-                .intValue()));
+            return new ReasonsMask(dp.getReasons()).intersect(new ReasonsMask(idp.getOnlySomeReasons()));
         }
         // (d) (4)
         if ((idp == null || idp.getOnlySomeReasons() == null) && dp.getReasons() == null)
@@ -370,9 +369,9 @@ public class RFC3280CertPathUtilities
         // (d) (2) and (d)(3)
         return (dp.getReasons() == null
             ? ReasonsMask.allReasons
-            : new ReasonsMask(dp.getReasons().intValue())).intersect(idp == null
+            : new ReasonsMask(dp.getReasons())).intersect(idp == null
             ? ReasonsMask.allReasons
-            : new ReasonsMask(idp.getOnlySomeReasons().intValue()));
+            : new ReasonsMask(idp.getOnlySomeReasons()));
 
     }
 
@@ -787,7 +786,7 @@ public class RFC3280CertPathUtilities
             }
 
             // (c) (3)
-            DERObject completeKeyIdentifier = null;
+            ASN1Primitive completeKeyIdentifier = null;
             try
             {
                 completeKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -799,7 +798,7 @@ public class RFC3280CertPathUtilities
                     "Authority key identifier extension could not be extracted from complete CRL.", e);
             }
 
-            DERObject deltaKeyIdentifier = null;
+            ASN1Primitive deltaKeyIdentifier = null;
             try
             {
                 deltaKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -1656,7 +1655,7 @@ public class RFC3280CertPathUtilities
                 RFC3280CertPathUtilities.NAME_CONSTRAINTS));
             if (ncSeq != null)
             {
-                nc = new NameConstraints(ncSeq);
+                nc = NameConstraints.getInstance(ncSeq);
             }
         }
         catch (Exception e)
@@ -1975,7 +1974,7 @@ public class RFC3280CertPathUtilities
                  * omitted and a distribution point name of the certificate
                  * issuer.
                  */
-                DERObject issuer = null;
+                ASN1Primitive issuer = null;
                 try
                 {
                     issuer = new ASN1InputStream(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded())

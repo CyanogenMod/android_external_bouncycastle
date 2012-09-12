@@ -10,9 +10,7 @@ public class DERNull
 {
     public static final DERNull INSTANCE = new DERNull();
 
-    // BEGIN android-changed
     private static final byte[]  zeroBytes = new byte[0];
-    // END android-changed
 
     // BEGIN android-changed
     protected DERNull()
@@ -20,10 +18,20 @@ public class DERNull
     {
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 2;
+    }
+
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(NULL, zeroBytes);
+        out.writeEncoded(BERTags.NULL, zeroBytes);
     }
 }

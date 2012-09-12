@@ -2,18 +2,18 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.DigestInfo;
 
 public class MacData
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private static final BigInteger ONE = BigInteger.valueOf(1);
 
@@ -28,15 +28,15 @@ public class MacData
         {
             return (MacData)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new MacData((ASN1Sequence)obj);
+            return new MacData(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public MacData(
+    private MacData(
         ASN1Sequence seq)
     {
         this.digInfo = DigestInfo.getInstance(seq.getObjectAt(0));
@@ -45,7 +45,7 @@ public class MacData
 
         if (seq.size() == 3)
         {
-            this.iterationCount = ((DERInteger)seq.getObjectAt(2)).getValue();
+            this.iterationCount = ((ASN1Integer)seq.getObjectAt(2)).getValue();
         }
         else
         {
@@ -87,9 +87,9 @@ public class MacData
      *     -- Note: The default is for historic reasons and its use is deprecated. A
      *     -- higher value, like 1024 is recommended.
      * </pre>
-     * @return the basic DERObject construction.
+     * @return the basic ASN1Primitive construction.
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
@@ -98,7 +98,7 @@ public class MacData
         
         if (!iterationCount.equals(ONE))
         {
-            v.add(new DERInteger(iterationCount));
+            v.add(new ASN1Integer(iterationCount));
         }
 
         return new DERSequence(v);

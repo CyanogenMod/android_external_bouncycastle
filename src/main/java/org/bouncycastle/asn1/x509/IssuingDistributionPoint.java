@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
  * </pre>
  */
 public class IssuingDistributionPoint
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private DistributionPointName distributionPoint;
 
@@ -47,16 +47,16 @@ public class IssuingDistributionPoint
     public static IssuingDistributionPoint getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof IssuingDistributionPoint)
+        if (obj instanceof IssuingDistributionPoint)
         {
             return (IssuingDistributionPoint)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new IssuingDistributionPoint((ASN1Sequence)obj);
+            return new IssuingDistributionPoint(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     /**
@@ -127,9 +127,27 @@ public class IssuingDistributionPoint
     }
 
     /**
-     * Constructor from ASN1Sequence
+     * Shorthand Constructor from given details.
+     *
+     * @param distributionPoint
+     *            May contain an URI as pointer to most current CRL.
+     * @param indirectCRL
+     *            If <code>true</code> then the CRL contains revocation
+     *            information about certificates ssued by other CAs.
+     * @param onlyContainsAttributeCerts Covers revocation information for attribute certificates.
      */
     public IssuingDistributionPoint(
+        DistributionPointName distributionPoint,
+        boolean indirectCRL,
+        boolean onlyContainsAttributeCerts)
+    {
+        this(distributionPoint, false, false, null, indirectCRL, onlyContainsAttributeCerts);
+    }
+
+    /**
+     * Constructor from ASN1Sequence
+     */
+    private IssuingDistributionPoint(
         ASN1Sequence seq)
     {
         this.seq = seq;
@@ -202,7 +220,7 @@ public class IssuingDistributionPoint
         return onlySomeReasons;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return seq;
     }

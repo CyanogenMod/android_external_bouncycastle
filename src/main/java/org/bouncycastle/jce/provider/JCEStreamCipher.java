@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
@@ -37,9 +38,12 @@ import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCEStreamCipher
-    extends WrapCipherSpi implements PBE
+    extends CipherSpi
+    implements PBE
 {
     //
     // specs we can handle.
@@ -61,6 +65,8 @@ public class JCEStreamCipher
 
     private PBEParameterSpec        pbeSpec = null;
     private String                  pbeAlgorithm = null;
+
+    private AlgorithmParameters engineParams;
 
     protected JCEStreamCipher(
         StreamCipher engine,
@@ -171,9 +177,9 @@ public class JCEStreamCipher
             throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
         }
         
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getOID() != null)
             {
@@ -511,7 +517,7 @@ public class JCEStreamCipher
             super(new RC4Engine(), 0);
         }
     }
-    
+
     /**
      * PBEWithSHAAnd40BitRC4
      */

@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -10,6 +9,8 @@ import java.util.Enumeration;
 public class DERSet
     extends ASN1Set
 {
+    private int bodyLength = -1;
+
     /**
      * create an empty set
      */
@@ -21,18 +22,18 @@ public class DERSet
      * @param obj - a single object that makes up the set.
      */
     public DERSet(
-        DEREncodable   obj)
+        ASN1Encodable obj)
     {
-        this.addObject(obj);
+        super(obj);
     }
 
     /**
      * @param v - a vector of objects making up the set.
      */
     public DERSet(
-        ASN1EncodableVector   v)
+        ASN1EncodableVector v)
     {
-        this(v, true);
+        super(v, true);
     }
     
     /**
@@ -41,30 +42,42 @@ public class DERSet
     public DERSet(
         ASN1Encodable[]   a)
     {
-        for (int i = 0; i != a.length; i++)
-        {
-            this.addObject(a[i]);
-        }
-        
-        this.sort();
+        super(a, true);
     }
-    
-    /**
-     * @param v - a vector of objects making up the set.
-     */
+
     DERSet(
-        ASN1EncodableVector  v,
-        boolean              needsSorting)
+        ASN1EncodableVector v,
+        boolean                  doSort)
     {
-        for (int i = 0; i != v.size(); i++)
+        super(v, doSort);
+    }
+
+    private int getBodyLength()
+        throws IOException
+    {
+        if (bodyLength < 0)
         {
-            this.addObject(v.get(i));
+            int length = 0;
+
+            for (Enumeration e = this.getObjects(); e.hasMoreElements();)
+            {
+                Object    obj = e.nextElement();
+
+                length += ((ASN1Encodable)obj).toASN1Primitive().toDERObject().encodedLength();
+            }
+
+            bodyLength = length;
         }
 
-        if (needsSorting)
-        {
-            this.sort();
-        }
+        return bodyLength;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int length = getBodyLength();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
     }
 
     /*
@@ -72,29 +85,24 @@ public class DERSet
      * <p>
      * As DER requires the constructed, definite-length model to
      * be used for structured types, this varies slightly from the
-     * ASN.1 descriptions given. Rather than just outputing SET,
+     * ASN.1 descriptions given. Rather than just outputting SET,
      * we also have to specify CONSTRUCTED, and the objects length.
      */
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        // TODO Intermediate buffer could be avoided if we could calculate expected length
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-        Enumeration             e = this.getObjects();
+        ASN1OutputStream        dOut = out.getDERSubStream();
+        int                     length = getBodyLength();
 
-        while (e.hasMoreElements())
+        out.write(BERTags.SET | BERTags.CONSTRUCTED);
+        out.writeLength(length);
+
+        for (Enumeration e = this.getObjects(); e.hasMoreElements();)
         {
             Object    obj = e.nextElement();
 
-            dOut.writeObject(obj);
+            dOut.writeObject((ASN1Encodable)obj);
         }
-
-        dOut.close();
-
-        byte[]  bytes = bOut.toByteArray();
-
-        out.writeEncoded(SET | CONSTRUCTED, bytes);
     }
 }

@@ -54,12 +54,13 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.util.io.TeeOutputStream;
 
 public class JDKKeyStore
     extends KeyStoreSpi
     implements BCKeyStore
 {
-    private static final int    STORE_VERSION = 1;
+    private static final int    STORE_VERSION = 2;
 
     private static final int    STORE_SALT_SIZE = 20;
     private static final String STORE_CIPHER = "PBEWithSHAAndTwofish-CBC";
@@ -447,7 +448,6 @@ public class JDKKeyStore
         }
         catch (Exception e)
         {
-
             throw new IOException("Exception creating key: " + e.toString());
         }
     }
@@ -807,13 +807,19 @@ public class JDKKeyStore
 
         if (version != STORE_VERSION)
         {
-            if (version != 0)
+            if (version != 0 && version != 1)
             {
                 throw new IOException("Wrong version of key store.");
             }
         }
 
-        byte[]      salt = new byte[dIn.readInt()];
+        int saltLength = dIn.readInt();
+        if (saltLength <= 0)
+        {
+            throw new IOException("Invalid salt detected");
+        }
+
+        byte[]      salt = new byte[saltLength];
 
         dIn.readFully(salt);
 
@@ -833,7 +839,18 @@ public class JDKKeyStore
             PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
             // END android-changed
             pbeGen.init(passKey, salt, iterationCount);
-            CipherParameters macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+
+            CipherParameters macParams;
+
+            if (version != 2)
+            {
+                macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+            }
+            else
+            {
+                macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8);
+            }
+
             Arrays.fill(passKey, (byte)0);
 
             hMac.init(macParams);
@@ -884,21 +901,21 @@ public class JDKKeyStore
 
         // BEGIN android-changed
         HMac                    hMac = new HMac(new OpenSSLDigest.SHA1());
-        MacOutputStream         mOut = new MacOutputStream(dOut, hMac);
+        MacOutputStream         mOut = new MacOutputStream(hMac);
         PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
         // END android-changed
         byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
         pbeGen.init(passKey, salt, iterationCount);
 
-        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
+        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8));
 
         for (int i = 0; i != passKey.length; i++)
         {
             passKey[i] = 0;
         }
 
-        saveStore(mOut);
+        saveStore(new TeeOutputStream(dOut, mOut));
 
         byte[]  mac = new byte[hMac.getMacSize()];
 
@@ -911,7 +928,7 @@ public class JDKKeyStore
 
     /**
      * the BouncyCastle store. This wont work with the key tool as the
-     * store is stored encrypteed on disk, so the password is mandatory,
+     * store is stored encrypted on disk, so the password is mandatory,
      * however if you hard drive is in a bad part of town and you absolutely,
      * positively, don't want nobody peeking at your things, this is the
      * one to use, no problem! After all in a Bouncy Castle nothing can
@@ -939,7 +956,7 @@ public class JDKKeyStore
     
             if (version != STORE_VERSION)
             {
-                if (version != 0)
+                if (version != 0 && version != 1)
                 {
                     throw new IOException("Wrong version of key store.");
                 }
@@ -996,8 +1013,7 @@ public class JDKKeyStore
                 throw new IOException("KeyStore integrity check failed.");
             }
         }
-    
-    
+
         public void engineStore(OutputStream stream, char[] password) 
             throws IOException
         {
@@ -1017,18 +1033,16 @@ public class JDKKeyStore
     
             CipherOutputStream  cOut = new CipherOutputStream(dOut, cipher);
             // BEGIN android-changed
-            DigestOutputStream  dgOut = new DigestOutputStream(cOut, new OpenSSLDigest.SHA1());
+            DigestOutputStream  dgOut = new DigestOutputStream(new OpenSSLDigest.SHA1());
             // END android-changed
-            this.saveStore(dgOut);
     
-            Digest  dig = dgOut.getDigest();
-            byte[]  hash = new byte[dig.getDigestSize()];
+            this.saveStore(new TeeOutputStream(cOut, dgOut));
     
-            dig.doFinal(hash, 0);
-    
-            cOut.write(hash);
+            byte[]  dig = dgOut.getDigest();
+
+            cOut.write(dig);
     
             cOut.close();
         }
-    }    
+    }
 }

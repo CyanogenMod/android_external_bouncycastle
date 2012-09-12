@@ -9,7 +9,7 @@ import org.bouncycastle.util.Arrays;
  * Base class for an application specific object
  */
 public class DERApplicationSpecific 
-    extends ASN1Object
+    extends ASN1Primitive
 {
     private final boolean   isConstructed;
     private final int       tag;
@@ -34,7 +34,7 @@ public class DERApplicationSpecific
 
     public DERApplicationSpecific(
         int                  tag, 
-        DEREncodable         object) 
+        ASN1Encodable object)
         throws IOException 
     {
         this(true, tag, object);
@@ -43,12 +43,14 @@ public class DERApplicationSpecific
     public DERApplicationSpecific(
         boolean      explicit,
         int          tag,
-        DEREncodable object)
+        ASN1Encodable object)
         throws IOException
     {
-        byte[] data = object.getDERObject().getDEREncoded();
+        ASN1Primitive primitive = object.toASN1Primitive();
 
-        this.isConstructed = explicit;
+        byte[] data = primitive.getEncoded(ASN1Encoding.DER);
+
+        this.isConstructed = explicit || (primitive instanceof ASN1Set || primitive instanceof ASN1Sequence);
         this.tag = tag;
 
         if (explicit)
@@ -57,7 +59,7 @@ public class DERApplicationSpecific
         }
         else
         {
-            int lenBytes = getLengthOfLength(data);
+            int lenBytes = getLengthOfHeader(data);
             byte[] tmp = new byte[data.length - lenBytes];
             System.arraycopy(data, lenBytes, tmp, 0, tmp.length);
             this.octets = tmp;
@@ -74,7 +76,7 @@ public class DERApplicationSpecific
         {
             try
             {
-                bOut.write(((ASN1Encodable)vec.get(i)).getEncoded());
+                bOut.write(((ASN1Object)vec.get(i)).getEncoded(ASN1Encoding.DER));
             }
             catch (IOException e)
             {
@@ -84,16 +86,59 @@ public class DERApplicationSpecific
         this.octets = bOut.toByteArray();
     }
 
-    private int getLengthOfLength(byte[] data)
+    public static DERApplicationSpecific getInstance(Object obj)
     {
-        int count = 2;               // TODO: assumes only a 1 byte tag number
-
-        while((data[count - 1] & 0x80) != 0)
+        if (obj == null || obj instanceof DERApplicationSpecific)
         {
-            count++;
+            return (DERApplicationSpecific)obj;
+        }
+        else if (obj instanceof byte[])
+        {
+            try
+            {
+                return DERApplicationSpecific.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("failed to construct object from byte[]: " + e.getMessage());
+            }
+        }
+        else if (obj instanceof ASN1Encodable)
+        {
+            ASN1Primitive primitive = ((ASN1Encodable)obj).toASN1Primitive();
+
+            if (primitive instanceof ASN1Sequence)
+            {
+                return (DERApplicationSpecific)primitive;
+            }
         }
 
-        return count;
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+    }
+
+    private int getLengthOfHeader(byte[] data)
+    {
+        int length = data[1] & 0xff; // TODO: assumes 1 byte tag
+
+        if (length == 0x80)
+        {
+            return 2;      // indefinite-length encoding
+        }
+
+        if (length > 127)
+        {
+            int size = length & 0x7f;
+
+            // Note: The invalid long form "0xff" (see X.690 8.1.3.5c) will be caught here
+            if (size > 4)
+            {
+                throw new IllegalStateException("DER length more than 4 bytes: " + size);
+            }
+
+            return size + 2;
+        }
+
+        return 2;
     }
 
     public boolean isConstructed()
@@ -117,7 +162,7 @@ public class DERApplicationSpecific
      * @return  the resulting object
      * @throws IOException if reconstruction fails.
      */
-    public DERObject getObject() 
+    public ASN1Primitive getObject()
         throws IOException 
     {
         return new ASN1InputStream(getContents()).readObject();
@@ -130,7 +175,7 @@ public class DERApplicationSpecific
      * @return  the resulting object
      * @throws IOException if reconstruction fails.
      */
-    public DERObject getObject(int derTagNo)
+    public ASN1Primitive getObject(int derTagNo)
         throws IOException
     {
         if (derTagNo >= 0x1f)
@@ -141,30 +186,36 @@ public class DERApplicationSpecific
         byte[] orig = this.getEncoded();
         byte[] tmp = replaceTagNumber(derTagNo, orig);
 
-        if ((orig[0] & DERTags.CONSTRUCTED) != 0)
+        if ((orig[0] & BERTags.CONSTRUCTED) != 0)
         {
-            tmp[0] |= DERTags.CONSTRUCTED;
+            tmp[0] |= BERTags.CONSTRUCTED;
         }
 
         return new ASN1InputStream(tmp).readObject();
     }
-    
-    /* (non-Javadoc)
-     * @see org.bouncycastle.asn1.DERObject#encode(org.bouncycastle.asn1.DEROutputStream)
-     */
-    void encode(DEROutputStream out) throws IOException
+
+    int encodedLength()
+        throws IOException
     {
-        int classBits = DERTags.APPLICATION;
+        return StreamUtil.calculateTagLength(tag) + StreamUtil.calculateBodyLength(octets.length) + octets.length;
+    }
+
+    /* (non-Javadoc)
+     * @see org.bouncycastle.asn1.ASN1Primitive#encode(org.bouncycastle.asn1.DEROutputStream)
+     */
+    void encode(ASN1OutputStream out) throws IOException
+    {
+        int classBits = BERTags.APPLICATION;
         if (isConstructed)
         {
-            classBits |= DERTags.CONSTRUCTED; 
+            classBits |= BERTags.CONSTRUCTED;
         }
 
         out.writeEncoded(classBits, tag, octets);
     }
     
     boolean asn1Equals(
-        DERObject o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERApplicationSpecific))
         {

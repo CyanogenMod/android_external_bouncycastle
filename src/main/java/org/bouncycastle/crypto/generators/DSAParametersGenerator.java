@@ -1,8 +1,9 @@
 package org.bouncycastle.crypto.generators;
 
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.OpenSSLDigest;
+// END android-changed
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAValidationParameters;
 import org.bouncycastle.util.Arrays;
@@ -75,7 +76,9 @@ public class DSAParametersGenerator
         byte[]          part1 = new byte[20];
         byte[]          part2 = new byte[20];
         byte[]          u = new byte[20];
-        SHA1Digest      sha1 = new SHA1Digest();
+        // BEGIN android-changed
+        Digest          sha1 = new OpenSSLDigest.SHA1();
+        // END android-changed
         int             n = (L - 1) / 160;
         byte[]          w = new byte[L / 8];
 
@@ -166,7 +169,9 @@ public class DSAParametersGenerator
     {
 // A.1.1.2 Generation of the Probable Primes p and q Using an Approved Hash Function
         // FIXME This should be configurable (digest size in bits must be >= N)
-        Digest d = new SHA256Digest();
+        // BEGIN android-changed
+        Digest d = new OpenSSLDigest.SHA256();
+        // END android-changed
         int outlen = d.getDigestSize() * 8;
 
 // 1. Check that the (L, N) pair is in the list of acceptable (L, N pairs) (see Section 4.2). If
