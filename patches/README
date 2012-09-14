@@ -28,7 +28,7 @@ Other performance (both speed and memory) and correctness changes:
 - Fixed cut & paste instanceof error in EncryptedPrivateKeyInfo
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
-- Fixed CertBlacklist to do a by-value comparison of public keys
+- Fixed BaseKeyFactorySpi to convert all Exceptions to InvalidKeySpecException for KeyRepTest
 
 Other security changes:
 - Blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi
