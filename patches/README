@@ -1,6 +1,6 @@
-android.patch:
+bcprov.patch:
 
-patch against Bouncy Castle:
+patch against Bouncy Castle's bcprov:
 
 The main differences involve removing algorithms not included in the
 reference implementation (RI).  The libcore
@@ -36,3 +36,12 @@ Other security changes:
 
 Other changes:
 - Log entry and exit to DHParametersHelper.generateSafePrimes which has long, unpredictable runtime
+
+
+bcpkix.patch:
+
+patch against Bouncy Castle's bcpkix:
+
+The main differences involve:
+- removing algorithms not in our bcprov (MD2, MD4, SHA224, RIPEMD, GOST)
+- using the singleton DERNull.INSTANCE

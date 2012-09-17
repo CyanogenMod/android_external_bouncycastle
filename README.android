@@ -11,19 +11,24 @@ Porting New Versions of Bouncy Castle.
 The following steps are recommended for porting new Bouncy Castle versions.
 
 1) Retrieve the appropriate version of the Bouncy Castle source from
-   www.bouncycastle.org/latest_releases.html (in bcprov-jdk*-*.tar.gz
-   file). Check the checksum (found at http://bouncycastle.org/checksums.html) with:
+   www.bouncycastle.org/latest_releases.html (both bcprov-jdk*-*.tar.gz
+   and bcpkix-jdk*-*.tar.gz files).
+
+   Check the checksum (found at http://bouncycastle.org/checksums.html) with:
 
      md5sum bcprov-jdk*-*.tar.gz
      sha1sum bcprov-jdk*-*.tar.gz
+     md5sum bcpkix-jdk*-*.tar.gz
+     sha1sum bcpkix-jdk*-*.tar.gz
 
 2) Update the variables in bouncycastle.config and bouncycastle.version as appropriate.
    At the very least you will need to update the bouncycastle.version.
-   Similarly update ThirdPartyProject.prop.
 
 3) Run:
 
      ./import_bouncycastle.sh import bcprov-jdk*-*.tar.gz
+
+   Note the script expects to find the bcpkix-jdk*-*.tar.gz alongside the bcprov file.
 
 4) If there are any errors, then modify bouncycastle.config, bouncycastle.version
    and patches in patches/ as appropriate.  You might want to use:

@@ -15,12 +15,21 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-bouncycastle_src_files := $(call all-java-files-under,src/main/java)
+all_bcprov_src_files := $(call all-java-files-under,bcprov/src/main/java)
+
+android_bcprov_src_files := $(filter-out \
+ bcprov/src/main/java/org/bouncycastle/crypto/digests/AndroidDigestFactoryBouncyCastle.java, \
+ $(all_bcprov_src_files))
+
+ri_bcprov_src_files := $(filter-out \
+ bcprov/src/main/java/org/bouncycastle/crypto/digests/AndroidDigestFactoryOpenSSL.java \
+ bcprov/src/main/java/org/bouncycastle/crypto/digests/OpenSSLDigest.java, \
+ $(all_bcprov_src_files))
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := bouncycastle
 LOCAL_MODULE_TAGS := optional
-LOCAL_SRC_FILES := $(bouncycastle_src_files)
+LOCAL_SRC_FILES := $(android_bcprov_src_files)
 LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_JAVA_LIBRARIES := core
 LOCAL_NO_STANDARD_LIBRARIES := true
@@ -71,7 +80,7 @@ ifeq ($(WITH_HOST_DALVIK),true)
     include $(CLEAR_VARS)
     LOCAL_MODULE := bouncycastle-hostdex
     LOCAL_MODULE_TAGS := optional
-    LOCAL_SRC_FILES := $(bouncycastle_src_files)
+    LOCAL_SRC_FILES := $(android_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
     LOCAL_JAVA_LIBRARIES := core-hostdex
     LOCAL_NO_STANDARD_LIBRARIES := true
@@ -80,3 +89,20 @@ ifeq ($(WITH_HOST_DALVIK),true)
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     include $(BUILD_HOST_JAVA_LIBRARY)
 endif
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := bouncycastle-host
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := $(ri_bcprov_src_files)
+LOCAL_JAVACFLAGS := -encoding UTF-8
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_HOST_JAVA_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := bouncycastle-bcpkix-host
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := $(call all-java-files-under,bcpkix/src/main/java)
+LOCAL_JAVACFLAGS := -encoding UTF-8
+LOCAL_MODULE_TAGS := optional
+LOCAL_JAVA_LIBRARIES := bouncycastle-host
+include $(BUILD_HOST_JAVA_LIBRARY)
