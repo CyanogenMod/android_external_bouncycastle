@@ -9420,7 +9420,24 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECU
  import org.bouncycastle.asn1.x9.X962NamedCurves;
  import org.bouncycastle.asn1.x9.X9ECParameters;
  import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-@@ -167,14 +171,16 @@
+@@ -151,6 +155,16 @@
+                             k.getD(),
+                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
+         }
++// BEGIN android-added
++        else if (key instanceof java.security.interfaces.ECPrivateKey)
++        {
++            java.security.interfaces.ECPrivateKey privKey = (java.security.interfaces.ECPrivateKey)key;
++            ECParameterSpec s = EC5Util.convertSpec(privKey.getParams(), false);
++            return new ECPrivateKeyParameters(
++                            privKey.getS(),
++                            new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
++        }
++// END android-added
+                         
+         throw new InvalidKeyException("can't identify EC private key.");
+     }
+@@ -167,14 +181,16 @@
              {
                  oid = NISTNamedCurves.getOID(name);
              }
@@ -9445,7 +9462,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECU
          }
  
          return oid;
-@@ -192,10 +198,12 @@
+@@ -192,10 +208,12 @@
              {
                  params = NISTNamedCurves.getByOID(oid);
              }
@@ -9462,7 +9479,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/ECU
          }
  
          return params;
-@@ -213,14 +221,16 @@
+@@ -213,14 +231,16 @@
              {
                  name = NISTNamedCurves.getName(oid);
              }
@@ -10017,7 +10034,17 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Key
 diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java
 --- bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java	2011-02-23 20:08:56.000000000 +0000
 +++ bcprov-jdk16-146/org/bouncycastle/jce/provider/asymmetric/ec/Signature.java	2012-07-27 18:48:00.031478939 +0000
-@@ -18,15 +18,21 @@
+@@ -6,6 +6,9 @@
+ import java.security.PrivateKey;
+ import java.security.PublicKey;
+ import java.security.SecureRandom;
++// BEGIN android-added
++import java.security.interfaces.ECPrivateKey;
++// END android-added
+ import java.security.interfaces.ECPublicKey;
+ 
+ import org.bouncycastle.asn1.ASN1Encodable;
+@@ -18,15 +21,21 @@
  import org.bouncycastle.crypto.DSA;
  import org.bouncycastle.crypto.Digest;
  import org.bouncycastle.crypto.digests.NullDigest;
@@ -10042,7 +10069,33 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Sig
  import org.bouncycastle.jce.interfaces.ECKey;
  import org.bouncycastle.jce.provider.DSABase;
  import org.bouncycastle.jce.provider.DSAEncoder;
-@@ -122,14 +128,16 @@
+@@ -89,7 +98,25 @@
+         }
+         else
+         {
++// BEGIN android-added
++            try
++            {
++                if (privateKey instanceof ECPrivateKey)
++                {
++                    param = ECUtil.generatePrivateKeyParameter(privateKey);
++                }
++                else
++                {
++                    throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
++                }
++            }
++            catch (Exception e)
++            {
++// END android-added
+             throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
++// BEGIN android-added
++            }
++// END android-added
+         }
+ 
+         digest.reset();
+@@ -122,14 +149,16 @@
          }
      }
  
@@ -10067,7 +10120,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Sig
  
      static public class ecDSA256
          extends Signature
-@@ -158,86 +166,88 @@
+@@ -158,86 +187,88 @@
          }
      }
  
@@ -10236,7 +10289,7 @@ diff -Naur bcprov-jdk16-146.orig/org/bouncycastle/jce/provider/asymmetric/ec/Sig
  
      private static class StdDSAEncoder
          implements DSAEncoder
-@@ -331,4 +341,4 @@
+@@ -331,4 +362,4 @@
              return sig;
          }
      }
