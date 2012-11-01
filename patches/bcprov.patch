@@ -1503,7 +1503,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/E
  }
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/RSA.java bcprov-jdk15on-147/org/bouncycastle/jcajce/provider/asymmetric/RSA.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/RSA.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jcajce/provider/asymmetric/RSA.java	2012-09-19 21:17:12.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jcajce/provider/asymmetric/RSA.java	2012-11-01 06:02:09.000000000 +0000
 @@ -3,7 +3,9 @@
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
  import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -1595,7 +1595,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/R
  
              provider.addAlgorithm("KeyFactory.RSA", PREFIX + "KeyFactorySpi");
              provider.addAlgorithm("KeyPairGenerator.RSA", PREFIX + "KeyPairGeneratorSpi");
-@@ -68,101 +78,111 @@
+@@ -68,101 +78,117 @@
              registerOid(provider, PKCSObjectIdentifiers.rsaEncryption, "RSA", keyFact);
              registerOid(provider, X509ObjectIdentifiers.id_ea_rsa, "RSA", keyFact);
              registerOid(provider, PKCSObjectIdentifiers.id_RSAES_OAEP, "RSA", keyFact);
@@ -1648,11 +1648,6 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/R
 -            }
 -
 -            if (provider.hasAlgorithm("MessageDigest", "MD2"))
--            {
--                addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
--                provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
--                provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
--            }
 +            // BEGIN android-removed
 +            // registerOid(provider, PKCSObjectIdentifiers.id_RSASSA_PSS, "RSA", keyFact);
 +            //
@@ -1697,18 +1692,26 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jcajce/provider/asymmetric/R
 +            //     addDigestSignature(provider, "MD2", PREFIX + "DigestSignatureSpi$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
 +            // }
 +            //
-+            // if (provider.hasAlgorithm("MessageDigest", "MD2"))
++            // // BEGIN android-changed
++            // if (provider.hasAlgorithm("MessageDigest", "MD4"))
++            // // END android-changed
 +            // {
 +            //     addDigestSignature(provider, "MD4", PREFIX + "DigestSignatureSpi$MD4", PKCSObjectIdentifiers.md4WithRSAEncryption);
 +            // }
-+            //
-+            // if (provider.hasAlgorithm("MessageDigest", "MD2"))
-+            // {
-+            //     addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
-+            //     provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
-+            //     provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
-+            // }
 +            // END android-removed
++
++            // BEGIN android-changed
++            if (provider.hasAlgorithm("MessageDigest", "MD5"))
++            // END android-changed
+             {
+                 addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
+-                provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
+-                provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
++                // BEGIN android-removed
++                // provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
++                // provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
++                // END android-removed
+             }
  
              if (provider.hasAlgorithm("MessageDigest", "SHA1"))
              {

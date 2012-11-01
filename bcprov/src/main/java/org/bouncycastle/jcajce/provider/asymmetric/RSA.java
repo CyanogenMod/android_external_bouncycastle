@@ -122,18 +122,24 @@ public class RSA
             //     addDigestSignature(provider, "MD2", PREFIX + "DigestSignatureSpi$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
             // }
             //
-            // if (provider.hasAlgorithm("MessageDigest", "MD2"))
+            // // BEGIN android-changed
+            // if (provider.hasAlgorithm("MessageDigest", "MD4"))
+            // // END android-changed
             // {
             //     addDigestSignature(provider, "MD4", PREFIX + "DigestSignatureSpi$MD4", PKCSObjectIdentifiers.md4WithRSAEncryption);
             // }
-            //
-            // if (provider.hasAlgorithm("MessageDigest", "MD2"))
-            // {
-            //     addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
-            //     provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
-            //     provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
-            // }
             // END android-removed
+
+            // BEGIN android-changed
+            if (provider.hasAlgorithm("MessageDigest", "MD5"))
+            // END android-changed
+            {
+                addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
+                // BEGIN android-removed
+                // provider.addAlgorithm("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
+                // provider.addAlgorithm("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
+                // END android-removed
+            }
 
             if (provider.hasAlgorithm("MessageDigest", "SHA1"))
             {
