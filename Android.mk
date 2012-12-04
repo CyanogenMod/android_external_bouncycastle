@@ -82,8 +82,6 @@ ifeq ($(WITH_HOST_DALVIK),true)
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(android_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
-    LOCAL_JAVA_LIBRARIES := core-hostdex
-    LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_BUILD_HOST_DEX := true
     LOCAL_MODULE_TAGS := optional
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
