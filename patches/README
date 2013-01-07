@@ -29,6 +29,9 @@ Other performance (both speed and memory) and correctness changes:
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
 - Fixed BaseKeyFactorySpi to convert all Exceptions to InvalidKeySpecException for KeyRepTest
+- Added support for getSubjectAlternativeNames and getIssuerAlternativeNames to the JCE interface
+- Changed subjectAlternativeNames to match X509Certificate documentation's specified output
+- T61String are decoded as UTF-8 to match RI
 
 Other security changes:
 - Blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi

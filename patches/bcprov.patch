@@ -130,6 +130,28 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/asn1/DERPrintableString.java
  
      /**
       * return a printable string from the passed in object.
+diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/asn1/DERT61String.java bcprov-jdk15on-147/org/bouncycastle/asn1/DERT61String.java
+--- bcprov-jdk15on-147.orig/org/bouncycastle/asn1/DERT61String.java	2012-03-22 15:11:48.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/asn1/DERT61String.java	2013-01-07 18:47:22.698139708 +0000
+@@ -70,12 +70,16 @@
+     public DERT61String(
+         String   string)
+     {
+-        this.string = Strings.toByteArray(string);
++        // BEGIN android-changed
++        this.string = Strings.toUTF8ByteArray(string);
++        // END android-changed
+     }
+ 
+     public String getString()
+     {
+-        return Strings.fromByteArray(string);
++        // BEGIN android-changed
++        return Strings.fromUTF8ByteArray(string);
++        // END android-changed
+     }
+ 
+     public String toString()
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/asn1/cms/ContentInfo.java bcprov-jdk15on-147/org/bouncycastle/asn1/cms/ContentInfo.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/asn1/cms/ContentInfo.java	2012-03-22 15:11:48.000000000 +0000
 +++ bcprov-jdk15on-147/org/bouncycastle/asn1/cms/ContentInfo.java	2012-09-19 21:17:12.000000000 +0000
@@ -9592,8 +9614,28 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/PKIXNameConstra
                  subtreesMap.put(tagNo, new HashSet());
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509CertificateObject.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509CertificateObject.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java	2012-09-19 21:17:12.000000000 +0000
-@@ -544,12 +544,20 @@
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java	2013-01-07 18:47:22.718139825 +0000
+@@ -20,6 +20,9 @@
+ import java.security.cert.CertificateParsingException;
+ import java.security.cert.X509Certificate;
+ import java.util.ArrayList;
++// BEGIN android-added
++import java.util.Collection;
++// END android-added
+ import java.util.Collections;
+ import java.util.Date;
+ import java.util.Enumeration;
+@@ -57,6 +60,9 @@
+ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+ import org.bouncycastle.util.Arrays;
+ import org.bouncycastle.util.encoders.Hex;
++// BEGIN android-added
++import org.bouncycastle.x509.extension.X509ExtensionUtil;
++// END android-added
+ 
+ public class X509CertificateObject
+     extends X509Certificate
+@@ -544,12 +550,20 @@
          }
      }
  
@@ -9615,6 +9657,17 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509Certificate
          }
          catch (IOException e)
          {
+@@ -815,4 +829,10 @@
+         
+         return id1.getParameters().equals(id2.getParameters());
+     }
++    // BEGIN android-added
++    public Collection<List<?>> getSubjectAlternativeNames() throws CertificateParsingException
++    {
++        return X509ExtensionUtil.getSubjectAlternativeNames(this);
++    }
++    // END android-added
+ }
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509SignatureUtil.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509SignatureUtil.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509SignatureUtil.java	2012-03-22 15:11:48.000000000 +0000
 +++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509SignatureUtil.java	2012-09-19 21:17:12.000000000 +0000
@@ -9902,8 +9955,40 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/X509Util.java bcprov-jd
      
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2012-09-19 21:17:12.000000000 +0000
-@@ -62,7 +62,9 @@
++++ bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2013-01-08 00:14:18.800066480 +0000
+@@ -1,6 +1,10 @@
+ package org.bouncycastle.x509.extension;
+ 
+ import java.io.IOException;
++// BEGIN android-added
++import java.net.InetAddress;
++import java.net.UnknownHostException;
++// END android-added
+ import java.security.cert.CertificateParsingException;
+ import java.security.cert.X509Certificate;
+ import java.util.ArrayList;
+@@ -18,6 +22,9 @@
+ import org.bouncycastle.asn1.x500.X500Name;
+ import org.bouncycastle.asn1.x509.GeneralName;
+ import org.bouncycastle.asn1.x509.X509Extension;
++// BEGIN android-added
++import org.bouncycastle.asn1.x509.X509Name;
++// END android-added
+ 
+ 
+ public class X509ExtensionUtil
+@@ -52,7 +59,9 @@
+     {
+         if (extVal == null)
+         {
+-            return Collections.EMPTY_LIST;
++            // BEGIN android-changed
++            return null;
++            // END android-changed
+         }
+         try
+         {
+@@ -62,16 +71,23 @@
              {
                  GeneralName genName = GeneralName.getInstance(it.nextElement());
                  List list = new ArrayList();
@@ -9914,3 +9999,49 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509Extension
                  switch (genName.getTagNo())
                  {
                  case GeneralName.ediPartyName:
+                 case GeneralName.x400Address:
+                 case GeneralName.otherName:
+-                    list.add(genName.getName().toASN1Primitive());
++                    // BEGIN android-changed
++                    list.add(genName.getEncoded());
++                    // END android-changed
+                     break;
+                 case GeneralName.directoryName:
+-                    list.add(X500Name.getInstance(genName.getName()).toString());
++                    // BEGIN android-changed
++                    list.add(X509Name.getInstance(genName.getName()).toString(true,
++                            X509Name.DefaultSymbols));
++                    // END android-changed
+                     break;
+                 case GeneralName.dNSName:
+                 case GeneralName.rfc822Name:
+@@ -82,7 +98,16 @@
+                     list.add(ASN1ObjectIdentifier.getInstance(genName.getName()).getId());
+                     break;
+                 case GeneralName.iPAddress:
+-                    list.add(DEROctetString.getInstance(genName.getName()).getOctets());
++                    // BEGIN android-changed
++                    byte[] addrBytes = DEROctetString.getInstance(genName.getName()).getOctets();
++                    final String addr;
++                    try {
++                        addr = InetAddress.getByAddress(addrBytes).getHostAddress();
++                    } catch (UnknownHostException e) {
++                        continue;
++                    }
++                    list.add(addr);
++                    // END android-changed
+                     break;
+                 default:
+                     throw new IOException("Bad tag number: " + genName.getTagNo());
+@@ -90,6 +115,11 @@
+ 
+                 temp.add(list);
+             }
++            // BEGIN android-added
++            if (temp.size() == 0) {
++                return null;
++            }
++            // END android-added
+             return Collections.unmodifiableCollection(temp);
+         }
+         catch (Exception e)

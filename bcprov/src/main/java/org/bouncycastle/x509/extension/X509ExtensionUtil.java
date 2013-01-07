@@ -1,6 +1,10 @@
 package org.bouncycastle.x509.extension;
 
 import java.io.IOException;
+// BEGIN android-added
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+// END android-added
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -18,6 +22,9 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extension;
+// BEGIN android-added
+import org.bouncycastle.asn1.x509.X509Name;
+// END android-added
 
 
 public class X509ExtensionUtil
@@ -52,7 +59,9 @@ public class X509ExtensionUtil
     {
         if (extVal == null)
         {
-            return Collections.EMPTY_LIST;
+            // BEGIN android-changed
+            return null;
+            // END android-changed
         }
         try
         {
@@ -70,10 +79,15 @@ public class X509ExtensionUtil
                 case GeneralName.ediPartyName:
                 case GeneralName.x400Address:
                 case GeneralName.otherName:
-                    list.add(genName.getName().toASN1Primitive());
+                    // BEGIN android-changed
+                    list.add(genName.getEncoded());
+                    // END android-changed
                     break;
                 case GeneralName.directoryName:
-                    list.add(X500Name.getInstance(genName.getName()).toString());
+                    // BEGIN android-changed
+                    list.add(X509Name.getInstance(genName.getName()).toString(true,
+                            X509Name.DefaultSymbols));
+                    // END android-changed
                     break;
                 case GeneralName.dNSName:
                 case GeneralName.rfc822Name:
@@ -84,7 +98,16 @@ public class X509ExtensionUtil
                     list.add(ASN1ObjectIdentifier.getInstance(genName.getName()).getId());
                     break;
                 case GeneralName.iPAddress:
-                    list.add(DEROctetString.getInstance(genName.getName()).getOctets());
+                    // BEGIN android-changed
+                    byte[] addrBytes = DEROctetString.getInstance(genName.getName()).getOctets();
+                    final String addr;
+                    try {
+                        addr = InetAddress.getByAddress(addrBytes).getHostAddress();
+                    } catch (UnknownHostException e) {
+                        continue;
+                    }
+                    list.add(addr);
+                    // END android-changed
                     break;
                 default:
                     throw new IOException("Bad tag number: " + genName.getTagNo());
@@ -92,6 +115,11 @@ public class X509ExtensionUtil
 
                 temp.add(list);
             }
+            // BEGIN android-added
+            if (temp.size() == 0) {
+                return null;
+            }
+            // END android-added
             return Collections.unmodifiableCollection(temp);
         }
         catch (Exception e)
