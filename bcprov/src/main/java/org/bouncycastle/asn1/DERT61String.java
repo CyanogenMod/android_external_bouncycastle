@@ -70,12 +70,16 @@ public class DERT61String
     public DERT61String(
         String   string)
     {
-        this.string = Strings.toByteArray(string);
+        // BEGIN android-changed
+        this.string = Strings.toUTF8ByteArray(string);
+        // END android-changed
     }
 
     public String getString()
     {
-        return Strings.fromByteArray(string);
+        // BEGIN android-changed
+        return Strings.fromUTF8ByteArray(string);
+        // END android-changed
     }
 
     public String toString()
