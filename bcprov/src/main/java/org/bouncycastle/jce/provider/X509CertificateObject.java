@@ -20,6 +20,9 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+// BEGIN android-added
+import java.util.Collection;
+// END android-added
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -57,6 +60,9 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
+// BEGIN android-added
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+// END android-added
 
 public class X509CertificateObject
     extends X509Certificate
@@ -823,4 +829,10 @@ public class X509CertificateObject
         
         return id1.getParameters().equals(id2.getParameters());
     }
+    // BEGIN android-added
+    public Collection<List<?>> getSubjectAlternativeNames() throws CertificateParsingException
+    {
+        return X509ExtensionUtil.getSubjectAlternativeNames(this);
+    }
+    // END android-added
 }
