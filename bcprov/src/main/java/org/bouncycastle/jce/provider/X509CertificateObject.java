@@ -834,5 +834,9 @@ public class X509CertificateObject
     {
         return X509ExtensionUtil.getSubjectAlternativeNames(this);
     }
+    public Collection<List<?>> getIssuerAlternativeNames() throws CertificateParsingException
+    {
+        return X509ExtensionUtil.getIssuerAlternativeNames(this);
+    }
     // END android-added
 }
