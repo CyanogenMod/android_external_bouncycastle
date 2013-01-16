@@ -155,6 +155,21 @@ function regenerate() {
   generatepatch $patch $bouncycastle_dir $bouncycastle_dir_orig
 }
 
+function update_timestamps() {
+  declare -r git_dir="$1"
+  declare -r target_dir="$2"
+
+  echo -n "Restoring timestamps for ${target_dir}... "
+
+  find "$git_dir" -type f -print0 | while IFS= read -r -d $'\0' file; do
+    file_rev="$(git rev-list -n 1 HEAD "$file")"
+    file_time="$(git show --pretty=format:%ai --abbrev-commit "$file_rev" | head -n 1)"
+    touch -d "$file_time" "${target_dir}${file#$git_dir}"
+  done
+
+  echo "done."
+}
+
 function generate() {
   declare -r patch=$1
   declare -r bouncycastle_source=$2
@@ -172,6 +187,7 @@ function generate() {
     echo "Restoring $i"
     rm -r $bouncycastle_dir/$i
     cp -rf $bouncycastle_out_dir/src/main/java/$i $bouncycastle_dir/$i
+    update_timestamps $bouncycastle_out_dir/src/main/java/$i $bouncycastle_dir/$i
   done
 
   generatepatch $patch $bouncycastle_dir $bouncycastle_dir_orig
