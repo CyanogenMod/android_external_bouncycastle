@@ -9612,7 +9612,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/PKIXNameConstra
                  subtreesMap.put(tagNo, new HashSet());
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509CertificateObject.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509CertificateObject.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java	2013-01-07 18:41:42.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/X509CertificateObject.java	2013-01-16 18:17:43.000000000 +0000
 @@ -20,6 +20,9 @@
  import java.security.cert.CertificateParsingException;
  import java.security.cert.X509Certificate;
@@ -9655,7 +9655,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509Certificate
          }
          catch (IOException e)
          {
-@@ -815,4 +829,10 @@
+@@ -815,4 +829,14 @@
          
          return id1.getParameters().equals(id2.getParameters());
      }
@@ -9663,6 +9663,10 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/X509Certificate
 +    public Collection<List<?>> getSubjectAlternativeNames() throws CertificateParsingException
 +    {
 +        return X509ExtensionUtil.getSubjectAlternativeNames(this);
++    }
++    public Collection<List<?>> getIssuerAlternativeNames() throws CertificateParsingException
++    {
++        return X509ExtensionUtil.getIssuerAlternativeNames(this);
 +    }
 +    // END android-added
  }
@@ -9953,7 +9957,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/X509Util.java bcprov-jd
      
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2013-01-07 18:41:42.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/x509/extension/X509ExtensionUtil.java	2013-01-16 18:17:43.000000000 +0000
 @@ -1,6 +1,10 @@
  package org.bouncycastle.x509.extension;
  
@@ -10013,7 +10017,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509Extension
                      break;
                  case GeneralName.dNSName:
                  case GeneralName.rfc822Name:
-@@ -82,7 +98,16 @@
+@@ -82,14 +98,30 @@
                      list.add(ASN1ObjectIdentifier.getInstance(genName.getName()).getId());
                      break;
                  case GeneralName.iPAddress:
@@ -10031,9 +10035,12 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/x509/extension/X509Extension
                      break;
                  default:
                      throw new IOException("Bad tag number: " + genName.getTagNo());
-@@ -90,6 +115,11 @@
+                 }
  
-                 temp.add(list);
+-                temp.add(list);
++                // BEGIN android-changed
++                temp.add(Collections.unmodifiableList(list));
++                // END android-changed
              }
 +            // BEGIN android-added
 +            if (temp.size() == 0) {
