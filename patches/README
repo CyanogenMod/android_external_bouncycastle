@@ -48,3 +48,14 @@ patch against Bouncy Castle's bcpkix:
 The main differences involve:
 - removing algorithms not in our bcprov (MD2, MD4, SHA224, RIPEMD, GOST)
 - using the singleton DERNull.INSTANCE
+
+
+CipherSpi-engineWrap.patch:
+
+Fixes from upstream BouncyCastle repository for:
+    https://code.google.com/p/android/issues/detail?id=41405
+
+"added wrap/unwrap support back in."
+    http://www.bouncycastle.org/viewcvs/viewcvs.cgi/java/crypto/src/org/bouncycastle/jce/provider/JCEBlockCipher.java?r1=1.31&r2=1.32&view=patch
+"fix for JCEStreamCipher PBE wrapping"
+    http://www.bouncycastle.org/viewcvs/viewcvs.cgi/java/crypto/src/org/bouncycastle/jce/provider/JCEStreamCipher.java?r1=1.15&r2=1.16&view=patch

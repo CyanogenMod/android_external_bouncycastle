@@ -235,7 +235,7 @@ function applypatches () {
   # Apply appropriate patches
   for i in $bouncycastle_patches; do
     echo "Applying patch $i"
-    patch -p1 < ../$i || die "Could not apply patches/$i. Fix source and run: $0 regenerate patches/$i"
+    patch -p1 < ../$i || die "Could not apply patches/$i. Fix source and run: $0 regenerate $i"
 
     # make sure no unneeded sources got into the patch
     problem=0
