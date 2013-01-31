@@ -91,9 +91,7 @@ public class JCERSAPublicKey
 
     public byte[] getEncoded()
     {
-        // BEGIN android-changed
         return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(getModulus(), getPublicExponent()));
-        // END android-changed
     }
 
     public int hashCode()

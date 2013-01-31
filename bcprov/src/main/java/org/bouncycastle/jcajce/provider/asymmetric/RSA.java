@@ -122,17 +122,13 @@ public class RSA
             //     addDigestSignature(provider, "MD2", PREFIX + "DigestSignatureSpi$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
             // }
             //
-            // // BEGIN android-changed
             // if (provider.hasAlgorithm("MessageDigest", "MD4"))
-            // // END android-changed
             // {
             //     addDigestSignature(provider, "MD4", PREFIX + "DigestSignatureSpi$MD4", PKCSObjectIdentifiers.md4WithRSAEncryption);
             // }
             // END android-removed
 
-            // BEGIN android-changed
             if (provider.hasAlgorithm("MessageDigest", "MD5"))
-            // END android-changed
             {
                 addDigestSignature(provider, "MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
                 // BEGIN android-removed

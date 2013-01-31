@@ -26,6 +26,7 @@ import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.OutputLengthException;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
@@ -726,29 +727,23 @@ public class BaseBlockCipher
         int     inputOffset,
         int     inputLen,
         byte[]  output,
-        int     outputOffset) 
+        int     outputOffset)
         throws IllegalBlockSizeException, BadPaddingException, ShortBufferException
     {
-        // BEGIN android-note
-        // added ShortBufferException to the throws statement
-        // END android-note
-        int     len = 0;
-
-        // BEGIN android-added
-        int outputLen = cipher.getOutputSize(inputLen);
-
-        if (outputLen + outputOffset > output.length) {
-            throw new ShortBufferException("need at least " + outputLen + " bytes");
-        }
-        // BEGIN android-added
-        if (inputLen != 0)
-        {
-                len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
-        }
-
         try
         {
+            int     len = 0;
+
+            if (inputLen != 0)
+            {
+                    len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+            }
+
             return (len + cipher.doFinal(output, outputOffset + len));
+        }
+        catch (OutputLengthException e)
+        {
+            throw new ShortBufferException(e.getMessage());
         }
         catch (DataLengthException e)
         {

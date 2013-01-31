@@ -103,14 +103,21 @@ public abstract class PBEParametersGenerator
     public static byte[] PKCS5PasswordToBytes(
         char[]  password)
     {
-        byte[]  bytes = new byte[password.length];
-
-        for (int i = 0; i != bytes.length; i++)
+        if (password != null)
         {
-            bytes[i] = (byte)password[i];
-        }
+            byte[]  bytes = new byte[password.length];
 
-        return bytes;
+            for (int i = 0; i != bytes.length; i++)
+            {
+                bytes[i] = (byte)password[i];
+            }
+
+            return bytes;
+        }
+        else
+        {
+            return new byte[0];
+        }
     }
 
     /**
@@ -136,7 +143,6 @@ public abstract class PBEParametersGenerator
     public static byte[] PKCS12PasswordToBytes(
         char[]  password)
     {
-        // BEGIN android-changed
         if (password != null && password.length > 0)
         {
                                        // +1 for extra 2 pad bytes.
@@ -154,6 +160,5 @@ public abstract class PBEParametersGenerator
         {
             return new byte[0];
         }
-        // END android-changed
     }
 }

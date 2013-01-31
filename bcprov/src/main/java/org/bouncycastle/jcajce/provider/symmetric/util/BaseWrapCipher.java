@@ -307,12 +307,7 @@ public abstract class BaseWrapCipher
         byte[]  wrappedKey,
         String  wrappedKeyAlgorithm,
         int     wrappedKeyType)
-    // BEGIN android-removed
-    // throws InvalidKeyException
-    // END android-removed
-    // BEGIN android-added
     throws InvalidKeyException, NoSuchAlgorithmException
-    // END android-added
     {
         byte[] encoded;
         try
@@ -346,9 +341,9 @@ public abstract class BaseWrapCipher
         else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
         {
             /*
-                 * The caller doesn't know the algorithm as it is part of
-                 * the encrypted data.
-                 */
+             * The caller doesn't know the algorithm as it is part of
+             * the encrypted data.
+             */
             try
             {
                 PrivateKeyInfo       in = PrivateKeyInfo.getInstance(encoded);
@@ -388,12 +383,6 @@ public abstract class BaseWrapCipher
             {
                 throw new InvalidKeyException("Unknown key type " + e.getMessage());
             }
-            // BEGIN android-removed
-            // catch (NoSuchAlgorithmException e)
-            // {
-            //     throw new InvalidKeyException("Unknown key type " + e.getMessage());
-            // }
-            // END android-removed
             catch (InvalidKeySpecException e2)
             {
                 throw new InvalidKeyException("Unknown key type " + e2.getMessage());

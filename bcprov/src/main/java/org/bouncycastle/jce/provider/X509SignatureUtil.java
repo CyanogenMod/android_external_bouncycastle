@@ -27,9 +27,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 class X509SignatureUtil
 {
-    // BEGIN android-changed
     private static final ASN1Null       derNull = DERNull.INSTANCE;
-    // END android-changed
     
     static void setSignatureParameters(
         Signature signature,

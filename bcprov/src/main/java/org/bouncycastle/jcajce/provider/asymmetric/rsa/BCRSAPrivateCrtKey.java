@@ -127,9 +127,7 @@ public class BCRSAPrivateCrtKey
      */
     public byte[] getEncoded()
     {
-        // BEGIN android-changed
         return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPrivateKey(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()));
-        // END android-changed
     }
 
     /**

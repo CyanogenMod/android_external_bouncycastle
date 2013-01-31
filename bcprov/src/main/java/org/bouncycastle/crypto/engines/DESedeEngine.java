@@ -2,6 +2,9 @@ package org.bouncycastle.crypto.engines;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
+// BEGIN android-added
+import org.bouncycastle.crypto.OutputLengthException;
+// END android-added
 import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
@@ -99,7 +102,9 @@ public class DESedeEngine
 
         if ((outOff + BLOCK_SIZE) > out.length)
         {
-            throw new DataLengthException("output buffer too short");
+            // BEGIN android-changed
+            throw new OutputLengthException("output buffer too short");
+            // END android-changed
         }
 
         byte[] temp = new byte[BLOCK_SIZE];

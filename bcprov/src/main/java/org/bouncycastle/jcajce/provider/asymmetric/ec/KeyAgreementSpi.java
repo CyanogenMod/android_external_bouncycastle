@@ -43,6 +43,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey;
 // import org.bouncycastle.jce.interfaces.MQVPrivateKey;
 // import org.bouncycastle.jce.interfaces.MQVPublicKey;
 // END android-removed
+import org.bouncycastle.util.Integers;
 
 /**
  * Diffie-Hellman key agreement using elliptic curve keys, ala IEEE P1363
@@ -58,11 +59,9 @@ public class KeyAgreementSpi
 
     static
     {
-        // BEGIN android-changed
-        Integer i128 = Integer.valueOf(128);
-        Integer i192 = Integer.valueOf(192);
-        Integer i256 = Integer.valueOf(256);
-        // END android-changed
+        Integer i128 = Integers.valueOf(128);
+        Integer i192 = Integers.valueOf(192);
+        Integer i256 = Integers.valueOf(256);
 
         algorithms.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), i128);
         algorithms.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), i192);
@@ -137,7 +136,7 @@ public class KeyAgreementSpi
         // else
         // END android-removed
         {
-            if (!(key instanceof ECPublicKey))
+            if (!(key instanceof PublicKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
                     + getSimpleName(ECPublicKey.class) + " for doPhase");
@@ -268,7 +267,7 @@ public class KeyAgreementSpi
         // else
         // END android-removed
         {
-            if (!(key instanceof ECPrivateKey))
+            if (!(key instanceof PrivateKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
                     + getSimpleName(ECPrivateKey.class) + " for initialisation");

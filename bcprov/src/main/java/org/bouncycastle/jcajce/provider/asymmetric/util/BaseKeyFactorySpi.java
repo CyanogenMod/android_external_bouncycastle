@@ -27,9 +27,7 @@ public abstract class BaseKeyFactorySpi
             {
                 return generatePrivate(PrivateKeyInfo.getInstance(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
             }
-            // BEGIN android-changed
             catch (Exception e)
-            // END android-changed
             {
                 throw new InvalidKeySpecException("encoded key spec not recognised");
             }
@@ -50,9 +48,7 @@ public abstract class BaseKeyFactorySpi
             {
                 return generatePublic(SubjectPublicKeyInfo.getInstance(((X509EncodedKeySpec)keySpec).getEncoded()));
             }
-            // BEGIN android-changed
             catch (Exception e)
-            // END android-changed
             {
                 throw new InvalidKeySpecException("encoded key spec not recognised");
             }

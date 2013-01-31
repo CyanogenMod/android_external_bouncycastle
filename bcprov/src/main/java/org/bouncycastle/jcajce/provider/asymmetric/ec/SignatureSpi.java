@@ -5,10 +5,6 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-// BEGIN android-added
-import java.security.interfaces.ECPrivateKey;
-// END android-added
-import java.security.interfaces.ECPublicKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -16,7 +12,6 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
@@ -39,8 +34,6 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 // END android-removed
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSABase;
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSAEncoder;
-import org.bouncycastle.jce.interfaces.ECKey;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class SignatureSpi
     extends DSABase
@@ -53,34 +46,7 @@ public class SignatureSpi
     protected void engineInitVerify(PublicKey publicKey)
         throws InvalidKeyException
     {
-        CipherParameters param;
-
-        if (publicKey instanceof ECPublicKey)
-        {
-            param = ECUtil.generatePublicKeyParameter(publicKey);
-        }
-        else
-        {
-            try
-            {
-                byte[] bytes = publicKey.getEncoded();
-
-                publicKey = BouncyCastleProvider.getPublicKey(SubjectPublicKeyInfo.getInstance(bytes));
-
-                if (publicKey instanceof ECPublicKey)
-                {
-                    param = ECUtil.generatePublicKeyParameter(publicKey);
-                }
-                else
-                {
-                    throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
-                }
-            }
-            catch (Exception e)
-            {
-                throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
-            }
-        }
+        CipherParameters param = ECUtil.generatePublicKeyParameter(publicKey);
 
         digest.reset();
         signer.init(false, param);
@@ -90,34 +56,7 @@ public class SignatureSpi
         PrivateKey privateKey)
         throws InvalidKeyException
     {
-        CipherParameters param;
-
-        if (privateKey instanceof ECKey)
-        {
-            param = ECUtil.generatePrivateKeyParameter(privateKey);
-        }
-        else
-        {
-// BEGIN android-added
-            try
-            {
-                if (privateKey instanceof ECPrivateKey)
-                {
-                    param = ECUtil.generatePrivateKeyParameter(privateKey);
-                }
-                else
-                {
-                    throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
-                }
-            }
-            catch (Exception e)
-            {
-// END android-added
-            throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
-// BEGIN android-added
-            }
-// END android-added
-        }
+        CipherParameters param = ECUtil.generatePrivateKeyParameter(privateKey);
 
         digest.reset();
 
