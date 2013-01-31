@@ -11,6 +11,9 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -46,7 +49,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.47";
+    private static String info = "BouncyCastle Security Provider v1.48";
 
     // BEGIN android-changed
     //     this constant should be final
@@ -88,7 +91,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] ASYMMETRIC_CIPHERS =
     {
         // BEGIN android-removed
-        // "DSA", "DH", "EC", "RSA", "GOST", "ECGOST", "ElGamal"
+        // "DSA", "DH", "EC", "RSA", "GOST", "ECGOST", "ElGamal", "DSTU4145"
         // END android-removed
         // BEGIN android-added
         "DSA", "DH", "EC", "RSA",
@@ -102,7 +105,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] DIGESTS =
     {
         // BEGIN android-removed
-        // "GOST3411", "MD2", "MD4", "MD5", "SHA1", "RIPEMD128", "RIPEMD160", "RIPEMD256", "RIPEMD320", "SHA224", "SHA256", "SHA384", "SHA512", "Tiger", "Whirlpool"
+        // "GOST3411", "MD2", "MD4", "MD5", "SHA1", "RIPEMD128", "RIPEMD160", "RIPEMD256", "RIPEMD320", "SHA224", "SHA256", "SHA384", "SHA512", "SHA3", "Tiger", "Whirlpool"
         // END android-removed
         // BEGIN android-added
         "MD5", "SHA1", "SHA256", "SHA384", "SHA512",
@@ -116,7 +119,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.47, info);
+        super(PROVIDER_NAME, 1.48, info);
 
         AccessController.doPrivileged(new PrivilegedAction()
         {
@@ -277,11 +280,8 @@ public final class BouncyCastleProvider extends Provider
         // cipher engines
         //
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
-        
 
         // BEGIN android-removed
-        // put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
-        // put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         // put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         // put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
         // END android-removed
@@ -416,6 +416,8 @@ public final class BouncyCastleProvider extends Provider
         put("SecretKeyFactory.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And256BitAESCBCOpenSSL");
 
         // BEGIN android-removed
+        // put("SecretKeyFactory." + CryptoProObjectIdentifiers.gostR3411, "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithGOST3411");
+        //
         // put("Alg.Alias.SecretKeyFactory.PBE", "PBE/PKCS5");
         //
         // put("Alg.Alias.SecretKeyFactory.BROKENPBEWITHMD5ANDDES", "PBE/PKCS5");
@@ -530,7 +532,6 @@ public final class BouncyCastleProvider extends Provider
                 }
                 catch (Exception e)
                 {   // this should never ever happen!!
-e.printStackTrace();
                     throw new InternalError("cannot create instance of "
                         + packageName + names[i] + "$Mappings : " + e);
                 }
@@ -593,11 +594,6 @@ e.printStackTrace();
     public void addKeyInfoConverter(ASN1ObjectIdentifier oid, AsymmetricKeyInfoConverter keyInfoConverter)
     {
         keyInfoConverters.put(oid, keyInfoConverter);
-    }
-
-    public AsymmetricKeyInfoConverter getConverter(ASN1ObjectIdentifier oid)
-    {
-        return (AsymmetricKeyInfoConverter)keyInfoConverters.get(oid);
     }
 
     public static PublicKey getPublicKey(SubjectPublicKeyInfo publicKeyInfo)

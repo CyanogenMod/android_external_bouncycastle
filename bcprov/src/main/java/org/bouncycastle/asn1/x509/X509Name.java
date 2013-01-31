@@ -706,9 +706,7 @@ public class X509Name
 
             if (index == -1)
             {
-                // BEGIN android-changed
                 throw new IllegalArgumentException("badly formatted directory string");
-                // END android-changed
             }
 
             String              name = token.substring(0, index);

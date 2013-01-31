@@ -144,31 +144,21 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         //
         // explicit params
         //
-        // BEGIN android-changed
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA1WITHRSAANDMGF1", createPSSParams(sha1AlgId, 20));
 
         // BEGIN android-removed
-        // // BEGIN android-changed
         // AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
-        // // END android-changed
         // params.put("SHA224WITHRSAANDMGF1", createPSSParams(sha224AlgId, 28));
         // END android-removed
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA256WITHRSAANDMGF1", createPSSParams(sha256AlgId, 32));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA384WITHRSAANDMGF1", createPSSParams(sha384AlgId, 48));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA512WITHRSAANDMGF1", createPSSParams(sha512AlgId, 64));
 
         //
@@ -223,9 +213,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
 
         if (pkcs15RsaEncryption.contains(sigOID))
         {
-            // BEGIN android-changed
             encAlgId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
-            // END android-changed
         }
         else
         {
@@ -238,9 +226,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         }
         else
         {
-            // BEGIN android-changed
             digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigOID), DERNull.INSTANCE);
-            // END android-changed
         }
 
         return sigAlgId;

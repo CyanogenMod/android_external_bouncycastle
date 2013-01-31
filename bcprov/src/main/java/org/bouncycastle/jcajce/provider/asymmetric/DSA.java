@@ -53,6 +53,7 @@ public class DSA
             provider.addAlgorithm("Alg.Alias.Signature.DSAWITHSHA1", "SHA1withDSA");
             provider.addAlgorithm("Alg.Alias.Signature.SHA1WithDSA", "SHA1withDSA");
             provider.addAlgorithm("Alg.Alias.Signature.DSAWithSHA1", "SHA1withDSA");
+
             provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "SHA1withDSA");
             // END android-changed
 
@@ -60,6 +61,10 @@ public class DSA
 
             for (int i = 0; i != DSAUtil.dsaOids.length; i++)
             {
+                // BEGIN android-changed
+                provider.addAlgorithm("Alg.Alias.Signature." + DSAUtil.dsaOids[i], "SHA1withDSA");
+                // END android-changed
+
                 registerOid(provider, DSAUtil.dsaOids[i], "DSA", keyFact);
                 registerOidAlgorithmParameters(provider, DSAUtil.dsaOids[i], "DSA");
             }

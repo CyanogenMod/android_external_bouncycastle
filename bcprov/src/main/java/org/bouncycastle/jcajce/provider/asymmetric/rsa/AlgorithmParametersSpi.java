@@ -55,15 +55,11 @@ public abstract class AlgorithmParametersSpi
         {
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
                                                             DigestFactory.getOID(currentSpec.getDigestAlgorithm()),
-                                                            // BEGIN android-changed
                                                             DERNull.INSTANCE);
-                                                            // END android-changed
             MGF1ParameterSpec mgfSpec = (MGF1ParameterSpec)currentSpec.getMGFParameters();
             AlgorithmIdentifier maskGenAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_mgf1,
-                                                            // BEGIN android-changed
                                                             new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), DERNull.INSTANCE));
-                                                            // END android-changed
             PSource.PSpecified      pSource = (PSource.PSpecified)currentSpec.getPSource();
             AlgorithmIdentifier pSourceAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(pSource.getValue()));
@@ -174,15 +170,11 @@ public abstract class AlgorithmParametersSpi
             PSSParameterSpec pssSpec = currentSpec;
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
                                                 DigestFactory.getOID(pssSpec.getDigestAlgorithm()),
-                                                // BEGIN android-changed
                                                 DERNull.INSTANCE);
-                                                // END android-changed
             MGF1ParameterSpec mgfSpec = (MGF1ParameterSpec)pssSpec.getMGFParameters();
             AlgorithmIdentifier maskGenAlgorithm = new AlgorithmIdentifier(
                                                 PKCSObjectIdentifiers.id_mgf1,
-                                                // BEGIN android-changed
                                                 new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), DERNull.INSTANCE));
-                                                // END android-changed
             RSASSAPSSparams pssP = new RSASSAPSSparams(hashAlgorithm, maskGenAlgorithm, new ASN1Integer(pssSpec.getSaltLength()), new ASN1Integer(pssSpec.getTrailerField()));
             
             return pssP.getEncoded("DER");

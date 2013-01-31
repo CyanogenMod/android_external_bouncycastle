@@ -8,6 +8,7 @@ import javax.crypto.spec.PBEParameterSpec;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.digests.GOST3411Digest;
 // import org.bouncycastle.crypto.digests.MD2Digest;
 // import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -40,6 +41,7 @@ public interface PBE
     static final int        SHA256      = 4;
     // BEGIN android-removed
     // static final int        MD2         = 5;
+    // static final int        GOST3411    = 6;
     // END android-removed
 
     static final int        PKCS5S1     = 0;
@@ -117,6 +119,11 @@ public interface PBE
                     generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA256());
                     // END android-changed
                     break;
+                // BEGIN android-removed
+                // case GOST3411:
+                //     generator = new PKCS12ParametersGenerator(new GOST3411Digest());
+                //     break;
+                // END android-removed
                 default:
                     throw new IllegalStateException("unknown digest scheme for PBE encryption.");
                 }

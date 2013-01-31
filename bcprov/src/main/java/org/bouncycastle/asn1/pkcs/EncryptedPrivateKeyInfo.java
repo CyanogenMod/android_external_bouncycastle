@@ -37,13 +37,10 @@ public class EncryptedPrivateKeyInfo
     public static EncryptedPrivateKeyInfo getInstance(
         Object  obj)
     {
-        // BEGIN android-changed
-        //     fix copy and paste error in instanceof call
         if (obj instanceof EncryptedPrivateKeyInfo)
         {
             return (EncryptedPrivateKeyInfo)obj;
         }
-        // END android-changed
         else if (obj != null)
         { 
             return new EncryptedPrivateKeyInfo(ASN1Sequence.getInstance(obj));

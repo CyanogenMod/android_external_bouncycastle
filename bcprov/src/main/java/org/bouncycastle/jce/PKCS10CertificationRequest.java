@@ -213,31 +213,21 @@ public class PKCS10CertificationRequest
         //
         // explicit params
         //
-        // BEGIN android-changed
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
 
         // BEGIN android-removed
-        // // BEGIN android-changed
         // AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
-        // // END android-changed
         // params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
         // END android-removed
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA384WITHRSAANDMGF1", creatPSSParams(sha384AlgId, 48));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA512WITHRSAANDMGF1", creatPSSParams(sha512AlgId, 64));
     }
 
@@ -441,20 +431,21 @@ public class PKCS10CertificationRequest
                 InvalidKeyException
     {
         SubjectPublicKeyInfo    subjectPKInfo = reqInfo.getSubjectPublicKeyInfo();
-        X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
-        AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithmId();
+
         
         try
         {
+            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+            AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithm();
             try
             {
                 if (provider == null)
                 {
-                    return KeyFactory.getInstance(keyAlg.getObjectId().getId()).generatePublic(xspec);
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId()).generatePublic(xspec);
                 }
                 else
                 {
-                    return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId(), provider).generatePublic(xspec);
                 }
             }
             catch (NoSuchAlgorithmException e)
@@ -480,6 +471,10 @@ public class PKCS10CertificationRequest
             }
         }
         catch (InvalidKeySpecException e)
+        {
+            throw new InvalidKeyException("error decoding public key");
+        }
+        catch (IOException e)
         {
             throw new InvalidKeyException("error decoding public key");
         }

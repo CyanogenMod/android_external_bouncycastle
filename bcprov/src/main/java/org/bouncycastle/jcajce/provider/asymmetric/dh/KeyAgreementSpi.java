@@ -16,6 +16,7 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.params.DESParameters;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.Strings;
 
 /**
@@ -35,12 +36,10 @@ public class KeyAgreementSpi
 
     static
     {
-        // BEGIN android-changed
-        Integer i64 = Integer.valueOf(64);
-        Integer i192 = Integer.valueOf(192);
-        Integer i128 = Integer.valueOf(128);
-        Integer i256 = Integer.valueOf(256);
-        // END android-changed
+        Integer i64 = Integers.valueOf(64);
+        Integer i192 = Integers.valueOf(192);
+        Integer i128 = Integers.valueOf(128);
+        Integer i256 = Integers.valueOf(256);
 
         algorithms.put("DES", i64);
         algorithms.put("DESEDE", i192);
