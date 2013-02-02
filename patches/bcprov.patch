@@ -6821,8 +6821,8 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/BouncyCastlePro
  
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertBlacklist.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/CertBlacklist.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertBlacklist.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/CertBlacklist.java	2012-09-17 23:04:47.000000000 +0000
-@@ -0,0 +1,216 @@
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/CertBlacklist.java	2013-01-16 01:38:43.000000000 +0000
+@@ -0,0 +1,224 @@
 +/*
 + * Copyright (C) 2012 The Android Open Source Project
 + *
@@ -6960,7 +6960,9 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertBlacklist.j
 +            new BigInteger("d7558fdaf5f1105bb213282b707729a3", 16),
 +            new BigInteger("f5c86af36162f13a64f54f6dc9587c06", 16),
 +            new BigInteger("392a434f0e07df1f8aa305de34e0c229", 16),
-+            new BigInteger("3e75ced46b693021218830ae86a82a71", 16)
++            new BigInteger("3e75ced46b693021218830ae86a82a71", 16),
++            new BigInteger("864", 16),
++            new BigInteger("827", 16)
 +        ));
 +
 +        // attempt to augment it with values taken from gservices
@@ -7001,7 +7003,13 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertBlacklist.j
 +            // From http://src.chromium.org/viewvc/chrome?view=rev&revision=108479
 +            // Subject: O=Digicert Sdn. Bhd.
 +            // Issuer: CN=GTE CyberTrust Global Root
-+            "0129bcd5b448ae8d2496d1c3e19723919088e152".getBytes()
++            "0129bcd5b448ae8d2496d1c3e19723919088e152".getBytes(),
++            // Subject: CN=e-islem.kktcmerkezbankasi.org/emailAddress=ileti@kktcmerkezbankasi.org
++            // Issuer: CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri
++            "5f3ab33d55007054bc5e3e5553cd8d8465d77c61".getBytes(),
++            // Subject: CN=*.EGO.GOV.TR 93
++            // Issuer: CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri
++            "783333c9687df63377efceddd82efa9101913e8e".getBytes()
 +        ));
 +
 +        // attempt to augment it with values taken from gservices
@@ -7211,7 +7219,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertPathValidat
          CRLDistPoint crldp, ExtendedPKIXParameters pkixParams)
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java	2012-09-17 23:04:47.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java	2013-01-23 01:01:51.954749668 +0000
 @@ -18,8 +18,10 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -8750,7 +8758,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCESecretKeyFac
  }
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java	2012-09-17 23:04:47.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java	2013-01-23 01:01:51.984750196 +0000
 @@ -14,20 +14,26 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
