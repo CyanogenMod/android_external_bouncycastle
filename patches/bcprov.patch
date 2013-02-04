@@ -7221,7 +7221,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/CertPathValidat
          CRLDistPoint crldp, ExtendedPKIXParameters pkixParams)
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEBlockCipher.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java	2012-09-17 23:04:47.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEBlockCipher.java	2013-01-23 01:01:51.954749668 +0000
 @@ -18,8 +18,10 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -8760,7 +8760,7 @@ diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCESecretKeyFac
  }
 diff -Naur bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java
 --- bcprov-jdk15on-147.orig/org/bouncycastle/jce/provider/JCEStreamCipher.java	2012-03-22 15:11:48.000000000 +0000
-+++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java	2012-09-17 23:04:47.000000000 +0000
++++ bcprov-jdk15on-147/org/bouncycastle/jce/provider/JCEStreamCipher.java	2013-01-23 01:01:51.984750196 +0000
 @@ -14,20 +14,26 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
