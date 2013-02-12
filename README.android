@@ -76,9 +76,33 @@ The following steps are recommended for porting new Bouncy Castle versions.
        libcore/luni/src/test/java/tests/security/cert/CertStore2Test.java
        libcore/luni/src/test/java/tests/security/cert/CertStore1Test.java
        libcore/luni/src/test/java/tests/security/cert/CertStoreExceptionTest.java
+     - java.security.cert.Certificate
+       libcore/luni/src/test/java/libcore/java/security/cert/X509CertificateTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/X509CertificateTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateCertificateRepTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateTest.java
+       libcore/luni/src/test/java/tests/security/cert/X509Certificate2Test.java
+       libcore/luni/src/test/java/tests/targets/security/cert/CertificateTest.java
      - java.security.cert.CertificateFactory
        libcore/luni/src/test/java/libcore/java/security/cert/CertificateFactoryTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateFactory1Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateFactory2Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateFactory3Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateFactory4Test.java
        libcore/luni/src/test/java/tests/targets/security/cert/CertificateFactoryTestX509.java
+     - java.security.cert.CertificateFactorySpi
+       libcore/luni/src/test/java/tests/security/cert/CertificateFactorySpiTest.java
+     - java.security.cert.CRL
+       libcore/luni/src/test/java/libcore/java/security/cert/X509CRLSelectorTest.java
+       libcore/luni/src/test/java/libcore/java/security/cert/X509CRLTest.java
+       libcore/luni/src/test/java/tests/security/cert/CRLTest.java
+       libcore/luni/src/test/java/tests/security/cert/X509CRL2Test.java
+       libcore/luni/src/test/java/tests/security/cert/X509CRLEntryTest.java
+       libcore/luni/src/test/java/tests/security/cert/X509CRLSelector2Test.java
+       libcore/luni/src/test/java/tests/security/cert/X509CRLSelectorTest.java
+       libcore/luni/src/test/java/tests/security/cert/X509CRLTest.java
+     - javax.security.cert.Certificate
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateTest.java
      - java.security.CodeSigner
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/CodeSignerTest.java
      - javax.crypto.Cipher
@@ -222,6 +246,19 @@ The following steps are recommended for porting new Bouncy Castle versions.
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SignatureExceptionTest.java
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/UnrecoverableEntryExceptionTest.java
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/UnrecoverableKeyExceptionTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateEncodingExceptionTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateExceptionTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateExpiredExceptionTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateNotYetValidExceptionTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/cert/CertificateParsingExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CRLExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateEncodingException2Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateEncodingExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateException2Test.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateExpiredExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateNotYetValidExceptionTest.java
+       libcore/luni/src/test/java/tests/security/cert/CertificateParsingExceptionTest.java
 
 
 8) Do a full build before checking in:

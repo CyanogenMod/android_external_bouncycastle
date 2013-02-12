@@ -27,6 +27,18 @@ public class DERT61String
             return (DERT61String)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERT61String)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -70,16 +82,12 @@ public class DERT61String
     public DERT61String(
         String   string)
     {
-        // BEGIN android-changed
         this.string = Strings.toUTF8ByteArray(string);
-        // END android-changed
     }
 
     public String getString()
     {
-        // BEGIN android-changed
         return Strings.fromUTF8ByteArray(string);
-        // END android-changed
     }
 
     public String toString()

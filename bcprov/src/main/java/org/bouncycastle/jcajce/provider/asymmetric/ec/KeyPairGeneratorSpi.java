@@ -30,6 +30,7 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Integers;
 
 public abstract class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
@@ -57,15 +58,13 @@ public abstract class KeyPairGeneratorSpi
         static {
             ecParameters = new Hashtable();
 
-            // BEGIN android-changed
-            ecParameters.put(Integer.valueOf(192), new ECGenParameterSpec("prime192v1")); // a.k.a P-192
-            ecParameters.put(Integer.valueOf(239), new ECGenParameterSpec("prime239v1"));
-            ecParameters.put(Integer.valueOf(256), new ECGenParameterSpec("prime256v1")); // a.k.a P-256
+            ecParameters.put(Integers.valueOf(192), new ECGenParameterSpec("prime192v1")); // a.k.a P-192
+            ecParameters.put(Integers.valueOf(239), new ECGenParameterSpec("prime239v1"));
+            ecParameters.put(Integers.valueOf(256), new ECGenParameterSpec("prime256v1")); // a.k.a P-256
 
-            ecParameters.put(Integer.valueOf(224), new ECGenParameterSpec("P-224"));
-            ecParameters.put(Integer.valueOf(384), new ECGenParameterSpec("P-384"));
-            ecParameters.put(Integer.valueOf(521), new ECGenParameterSpec("P-521"));
-            // END android-changed
+            ecParameters.put(Integers.valueOf(224), new ECGenParameterSpec("P-224"));
+            ecParameters.put(Integers.valueOf(384), new ECGenParameterSpec("P-384"));
+            ecParameters.put(Integers.valueOf(521), new ECGenParameterSpec("P-521"));
         }
 
         public EC()
@@ -96,9 +95,7 @@ public abstract class KeyPairGeneratorSpi
             // BEGIN android-added
             }
             // END android-added
-            // BEGIN android-changed
-            ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(Integer.valueOf(strength));
-            // END android-changed
+            ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(Integers.valueOf(strength));
 
             if (ecParams != null)
             {
@@ -252,15 +249,7 @@ public abstract class KeyPairGeneratorSpi
         {
             if (!initialised)
             {
-                // BEGIN android-removed
-                // throw new IllegalStateException("EC Key Pair Generator not initialised");
-                // END android-removed
-                // BEGIN android-added
-                /*
-                 * KeyPairGenerator documentation says that a default initialization must be provided
-                 */
-                initialize(192, random);
-                // END android-added
+                initialize(strength, new SecureRandom());
             }
 
             AsymmetricCipherKeyPair     pair = engine.generateKeyPair();

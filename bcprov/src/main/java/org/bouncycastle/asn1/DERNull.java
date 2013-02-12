@@ -12,6 +12,9 @@ public class DERNull
 
     private static final byte[]  zeroBytes = new byte[0];
 
+    /**
+     * @deprecated use DERNull.INSTANCE
+     */
     // BEGIN android-changed
     protected DERNull()
     // END android-changed

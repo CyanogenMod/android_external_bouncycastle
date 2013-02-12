@@ -11,7 +11,6 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -78,9 +77,7 @@ public class JCERSAPrivateKey
 
     public byte[] getEncoded()
     {
-        // BEGIN android-changed
         return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new org.bouncycastle.asn1.pkcs.RSAPrivateKey(getModulus(), ZERO, getPrivateExponent(), ZERO, ZERO, ZERO, ZERO, ZERO));
-        // END android-changed
     }
 
     public boolean equals(Object o)
@@ -114,7 +111,7 @@ public class JCERSAPrivateKey
     }
 
     public ASN1Encodable getBagAttribute(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);
     }

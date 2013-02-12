@@ -89,9 +89,7 @@ public class BCRSAPublicKey
 
     public byte[] getEncoded()
     {
-        // BEGIN android-changed
         return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new org.bouncycastle.asn1.pkcs.RSAPublicKey(getModulus(), getPublicExponent()));
-        // END android-changed
     }
 
     public int hashCode()

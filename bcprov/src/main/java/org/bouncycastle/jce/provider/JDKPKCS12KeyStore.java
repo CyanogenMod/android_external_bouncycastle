@@ -45,7 +45,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERNull;
@@ -66,9 +66,9 @@ import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
@@ -260,14 +260,6 @@ public class JDKPKCS12KeyStore
                 chainCerts.remove(new CertId(c.getPublicKey()));
             }
         }
-
-        // BEGIN android-removed
-        // Only throw if there is a problem removing, not if missing
-        // if (c == null && k == null)
-        // {
-        //     throw new KeyStoreException("no such entry as " + alias);
-        // }
-        // END android-removed
     }
 
     /**
@@ -360,7 +352,7 @@ public class JDKPKCS12KeyStore
                 X509Certificate     x509c = (X509Certificate)c;
                 Certificate         nextC = null;
 
-                byte[]  bytes = x509c.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+                byte[]  bytes = x509c.getExtensionValue(Extension.authorityKeyIdentifier.getId());
                 if (bytes != null)
                 {
                     try
@@ -370,7 +362,7 @@ public class JDKPKCS12KeyStore
                         byte[] authBytes = ((ASN1OctetString)aIn.readObject()).getOctets();
                         aIn = new ASN1InputStream(authBytes);
 
-                        AuthorityKeyIdentifier id = AuthorityKeyIdentifier.getInstance((ASN1Sequence)aIn.readObject());
+                        AuthorityKeyIdentifier id = AuthorityKeyIdentifier.getInstance(aIn.readObject());
                         if (id.getKeyIdentifier() != null)
                         {
                             nextC = (Certificate)chainCerts.get(new CertId(id.getKeyIdentifier()));
@@ -442,14 +434,14 @@ public class JDKPKCS12KeyStore
     
     public Date engineGetCreationDate(String alias) 
     {
-        // BEGIN android-added
-        if (alias == null) {
+        if (alias == null)
+        {
             throw new NullPointerException("alias == null");
         }
-        if (keys.get(alias) == null && certs.get(alias) == null) {
+        if (keys.get(alias) == null && certs.get(alias) == null)
+        {
             return null;
         }
-        // END android-added
         return new Date();
     }
 
@@ -508,11 +500,11 @@ public class JDKPKCS12KeyStore
         Certificate[]   chain) 
         throws KeyStoreException
     {
-        // BEGIN android-added
-        if (!(key instanceof PrivateKey)) {
+        if (!(key instanceof PrivateKey))
+        {
             throw new KeyStoreException("PKCS12 does not support non-PrivateKeys");
         }
-        // END android-added
+
         if ((key instanceof PrivateKey) && (chain == null))
         {
             throw new KeyStoreException("no certificate chain for private key");
@@ -524,18 +516,15 @@ public class JDKPKCS12KeyStore
         }
 
         keys.put(alias, key);
-        // BEGIN android-added
-        if (chain != null) {
-        // END android-added
-        certs.put(alias, chain[0]);
-
-        for (int i = 0; i != chain.length; i++)
+        if (chain != null)
         {
-            chainCerts.put(new CertId(chain[i].getPublicKey()), chain[i]);
+            certs.put(alias, chain[0]);
+
+            for (int i = 0; i != chain.length; i++)
+            {
+                chainCerts.put(new CertId(chain[i].getPublicKey()), chain[i]);
+            }
         }
-        // BEGIN android-added
-        }
-        // END android-added
     }
 
     public int engineSize() 
@@ -1244,7 +1233,7 @@ public class JDKPKCS12KeyStore
         }
 
         byte[]                    keySEncoded = new DERSequence(keyS).getEncoded(ASN1Encoding.DER);
-        BERConstructedOctetString keyString = new BERConstructedOctetString(keySEncoded);
+        BEROctetString keyString = new BEROctetString(keySEncoded);
 
         //
         // certificate processing
@@ -1468,7 +1457,7 @@ public class JDKPKCS12KeyStore
 
         byte[]          certSeqEncoded = new DERSequence(certSeq).getEncoded(ASN1Encoding.DER);
         byte[]          certBytes = cryptData(true, cAlgId, password, false, certSeqEncoded);
-        EncryptedData   cInfo = new EncryptedData(data, cAlgId, new BERConstructedOctetString(certBytes));
+        EncryptedData   cInfo = new EncryptedData(data, cAlgId, new BEROctetString(certBytes));
 
         ContentInfo[] info = new ContentInfo[]
         {
@@ -1493,7 +1482,7 @@ public class JDKPKCS12KeyStore
 
         byte[]              pkg = bOut.toByteArray();
 
-        ContentInfo         mainInfo = new ContentInfo(data, new BERConstructedOctetString(pkg));
+        ContentInfo         mainInfo = new ContentInfo(data, new BEROctetString(pkg));
 
         //
         // create the mac
@@ -1511,9 +1500,7 @@ public class JDKPKCS12KeyStore
         {
             byte[] res = calculatePbeMac(id_SHA1, mSalt, itCount, password, false, data);
 
-            // BEGIN android-changed
             AlgorithmIdentifier     algId = new AlgorithmIdentifier(id_SHA1, DERNull.INSTANCE);
-            // END android-changed
             DigestInfo              dInfo = new DigestInfo(algId, res);
 
             mData = new MacData(dInfo, mSalt, itCount);
@@ -1606,9 +1593,7 @@ public class JDKPKCS12KeyStore
 
         public void put(String key, Object value)
         {
-            // BEGIN android-changed
             String lower = (key == null) ? null : Strings.toLowerCase(key);
-            // END android-changed
             String k = (String)keys.get(lower);
             if (k != null)
             {
@@ -1626,9 +1611,7 @@ public class JDKPKCS12KeyStore
 
         public Object remove(String alias)
         {
-            // BEGIN android-changed
             String k = (String)keys.remove(alias == null ? null : Strings.toLowerCase(alias));
-            // END android-changed
             if (k == null)
             {
                 return null;
@@ -1639,9 +1622,7 @@ public class JDKPKCS12KeyStore
 
         public Object get(String alias)
         {
-            // BEGIN android-changed
             String k = (String)keys.get(alias == null ? null : Strings.toLowerCase(alias));
-            // END android-changed
             if (k == null)
             {
                 return null;

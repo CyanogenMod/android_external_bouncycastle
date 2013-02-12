@@ -15,23 +15,15 @@ RI:
 Other performance (both speed and memory) and correctness changes:
 - singleton DERNull (BouncyCastle now does this but we make constructor private to be sure)
 - similarly made DERBoolean constructor private and moved to DERBoolean.{getInstance,TRUE,FALSE}
-- removed use of Boolean constructor
+- removed use of Boolean constructor (not-upstreamable due to J2ME requirement upstream)
 - DERObjectIdentifier interns its internal String indentifer value
-- changed uses of 'new Integer' to 'Integer.valueOf'
+- changed uses of 'new Integer' to 'Integers.valueOf'
 - X509CertificateObject.getEncoded caches its result
 - removed references to SecretKeyFactory.PBE/PKCS5 SecretKeyFactory.PBE/PKCS12
 - OpenSSLDigest uses NativeCrypto JNI API
-- KeyStoreSpis made more tolerant of non-existant and null aliases
-- PKCS12 KeyStore.getCreationDate tries to mimic RI behavior on null and missing aliases
-- Make PKCS12 KeyStore throw error when setting non-PrivateKey, instead of on get
-- Make PKCS12 KeyStore tolerate setting with an empty certificate chain
-- Fixed cut & paste instanceof error in EncryptedPrivateKeyInfo
+- JDKKeyStore made more tolerant of non-existant aliases
 - Make BouncyCastleProvider.PROVIDER_NAME final
 - Added wrapper for SecretKeyFactory.PBKDF2WithHmacSHA1
-- Fixed BaseKeyFactorySpi to convert all Exceptions to InvalidKeySpecException for KeyRepTest
-- Added support for getSubjectAlternativeNames and getIssuerAlternativeNames to the JCE interface
-- Changed subjectAlternativeNames to match X509Certificate documentation's specified output
-- T61String are decoded as UTF-8 to match RI
 
 Other security changes:
 - Blacklist fraudulent Comodo certificates in PKIXCertPathValidatorSpi
@@ -48,14 +40,3 @@ patch against Bouncy Castle's bcpkix:
 The main differences involve:
 - removing algorithms not in our bcprov (MD2, MD4, SHA224, RIPEMD, GOST)
 - using the singleton DERNull.INSTANCE
-
-
-CipherSpi-engineWrap.patch:
-
-Fixes from upstream BouncyCastle repository for:
-    https://code.google.com/p/android/issues/detail?id=41405
-
-"added wrap/unwrap support back in."
-    http://www.bouncycastle.org/viewcvs/viewcvs.cgi/java/crypto/src/org/bouncycastle/jce/provider/JCEBlockCipher.java?r1=1.31&r2=1.32&view=patch
-"fix for JCEStreamCipher PBE wrapping"
-    http://www.bouncycastle.org/viewcvs/viewcvs.cgi/java/crypto/src/org/bouncycastle/jce/provider/JCEStreamCipher.java?r1=1.15&r2=1.16&view=patch
