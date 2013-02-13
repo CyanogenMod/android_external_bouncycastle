@@ -135,7 +135,9 @@ public class CertBlacklist {
             new BigInteger("d7558fdaf5f1105bb213282b707729a3", 16),
             new BigInteger("f5c86af36162f13a64f54f6dc9587c06", 16),
             new BigInteger("392a434f0e07df1f8aa305de34e0c229", 16),
-            new BigInteger("3e75ced46b693021218830ae86a82a71", 16)
+            new BigInteger("3e75ced46b693021218830ae86a82a71", 16),
+            new BigInteger("864", 16),
+            new BigInteger("827", 16)
         ));
 
         // attempt to augment it with values taken from gservices
@@ -176,7 +178,13 @@ public class CertBlacklist {
             // From http://src.chromium.org/viewvc/chrome?view=rev&revision=108479
             // Subject: O=Digicert Sdn. Bhd.
             // Issuer: CN=GTE CyberTrust Global Root
-            "0129bcd5b448ae8d2496d1c3e19723919088e152".getBytes()
+            "0129bcd5b448ae8d2496d1c3e19723919088e152".getBytes(),
+            // Subject: CN=e-islem.kktcmerkezbankasi.org/emailAddress=ileti@kktcmerkezbankasi.org
+            // Issuer: CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri
+            "5f3ab33d55007054bc5e3e5553cd8d8465d77c61".getBytes(),
+            // Subject: CN=*.EGO.GOV.TR 93
+            // Issuer: CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri
+            "783333c9687df63377efceddd82efa9101913e8e".getBytes()
         ));
 
         // attempt to augment it with values taken from gservices
