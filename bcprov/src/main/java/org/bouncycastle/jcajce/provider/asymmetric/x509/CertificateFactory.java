@@ -334,7 +334,9 @@ public class CertificateFactory
 
     public Iterator engineGetCertPathEncodings()
     {
-        return null; // TODO: PKIXCertPath.certPathEncodings.iterator();
+        // BEGIN android-changed
+        return PKIXCertPath.certPathEncodings.iterator();
+        // END android-changed
     }
 
     public CertPath engineGenerateCertPath(
