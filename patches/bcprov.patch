@@ -3051,9 +3051,23 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/u
                                      };
  
  
+diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/x509/CertificateFactory.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/x509/CertificateFactory.java
+--- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/x509/CertificateFactory.java	2013-02-10 00:37:58.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/x509/CertificateFactory.java	2013-02-21 00:01:31.000000000 +0000
+@@ -334,7 +334,9 @@
+ 
+     public Iterator engineGetCertPathEncodings()
+     {
+-        return null; // TODO: PKIXCertPath.certPathEncodings.iterator();
++        // BEGIN android-changed
++        return PKIXCertPath.certPathEncodings.iterator();
++        // END android-changed
+     }
+ 
+     public CertPath engineGenerateCertPath(
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/x509/PKIXCertPath.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/x509/PKIXCertPath.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/x509/PKIXCertPath.java	2013-02-10 00:37:58.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/x509/PKIXCertPath.java	2012-09-17 23:04:47.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/x509/PKIXCertPath.java	2013-02-21 00:01:31.000000000 +0000
 @@ -36,7 +36,9 @@
  import org.bouncycastle.asn1.pkcs.SignedData;
  import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -3065,7 +3079,18 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/x
  
  /**
   * CertPath implementation for X.509 certificates.
-@@ -298,27 +300,29 @@
+@@ -51,7 +53,9 @@
+     {
+         List encodings = new ArrayList();
+         encodings.add("PkiPath");
+-        encodings.add("PEM");
++        // BEGIN android-removed
++        // encodings.add("PEM");
++        // END android-removed
+         encodings.add("PKCS7");
+         certPathEncodings = Collections.unmodifiableList(encodings);
+     }
+@@ -298,27 +302,29 @@
              return toDEREncoded(new ContentInfo(
                      PKCSObjectIdentifiers.signedData, sd));
          }
