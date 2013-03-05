@@ -32,7 +32,7 @@ public class OpenSSLDigest implements ExtendedDigest {
     /**
      * Holds the EVP_MD for the hashing algorithm, e.g. EVP_get_digestbyname("sha1");
      */
-    private final int evp_md;
+    private final long evp_md;
 
     /**
      * Holds the output size of the message digest.
@@ -49,7 +49,7 @@ public class OpenSSLDigest implements ExtendedDigest {
      * lazily initialized to avoid having to reallocate on reset when
      * its unlikely to be reused.
      */
-    private int ctx;
+    private long ctx;
 
     /**
      * Holds a dummy buffer for writing single bytes to the digest.
@@ -60,7 +60,7 @@ public class OpenSSLDigest implements ExtendedDigest {
      * Creates a new OpenSSLMessageDigest instance for the given algorithm
      * name.
      */
-    private OpenSSLDigest(String algorithm, int evp_md, int size, int blockSize) {
+    private OpenSSLDigest(String algorithm, long evp_md, int size, int blockSize) {
         this.algorithm = algorithm;
         this.evp_md = evp_md;
         this.size = size;
@@ -99,7 +99,7 @@ public class OpenSSLDigest implements ExtendedDigest {
         return i;
     }
 
-    private int getCtx() {
+    private long getCtx() {
         if (ctx == 0) {
             ctx = NativeCrypto.EVP_DigestInit(evp_md);
         }
@@ -123,35 +123,35 @@ public class OpenSSLDigest implements ExtendedDigest {
     }
 
     public static class MD5 extends OpenSSLDigest {
-        private static final int EVP_MD = NativeCrypto.EVP_get_digestbyname("md5");
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("md5");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
         private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
         public MD5() { super("MD5", EVP_MD, SIZE, BLOCK_SIZE); }
     }
 
     public static class SHA1 extends OpenSSLDigest {
-        private static final int EVP_MD = NativeCrypto.EVP_get_digestbyname("sha1");
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha1");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
         private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
         public SHA1() { super("SHA-1", EVP_MD, SIZE, BLOCK_SIZE); }
     }
 
     public static class SHA256 extends OpenSSLDigest {
-        private static final int EVP_MD = NativeCrypto.EVP_get_digestbyname("sha256");
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha256");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
         private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
         public SHA256() { super("SHA-256", EVP_MD, SIZE, BLOCK_SIZE); }
     }
 
     public static class SHA384 extends OpenSSLDigest {
-        private static final int EVP_MD = NativeCrypto.EVP_get_digestbyname("sha384");
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha384");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
         private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
         public SHA384() { super("SHA-384", EVP_MD, SIZE, BLOCK_SIZE); }
     }
 
     public static class SHA512 extends OpenSSLDigest {
-        private static final int EVP_MD = NativeCrypto.EVP_get_digestbyname("sha512");
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha512");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
         private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
         public SHA512() { super("SHA-512", EVP_MD, SIZE, BLOCK_SIZE); }
