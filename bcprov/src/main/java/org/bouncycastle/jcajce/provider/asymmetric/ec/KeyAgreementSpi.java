@@ -221,6 +221,12 @@ public class KeyAgreementSpi
         SecureRandom            random) 
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
+        // BEGIN android-added
+        if (params != null)
+        {
+            throw new InvalidAlgorithmParameterException("No algorithm parameters supported");
+        }
+        // END android-added
         initFromKey(key);
     }
 
