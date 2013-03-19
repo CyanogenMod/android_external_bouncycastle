@@ -1954,7 +1954,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/e
          return name;
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java	2013-02-10 00:37:58.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java	2013-01-31 02:26:40.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java	2013-03-19 19:26:57.000000000 +0000
 @@ -23,20 +23,26 @@
  import org.bouncycastle.crypto.CipherParameters;
  import org.bouncycastle.crypto.DerivationFunction;
@@ -2121,7 +2121,20 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/e
          {
              // TODO Should we be ensuring the key is the right length?
          }
-@@ -219,35 +235,37 @@
+@@ -205,6 +221,12 @@
+         SecureRandom            random) 
+         throws InvalidKeyException, InvalidAlgorithmParameterException
+     {
++        // BEGIN android-added
++        if (params != null)
++        {
++            throw new InvalidAlgorithmParameterException("No algorithm parameters supported");
++        }
++        // END android-added
+         initFromKey(key);
+     }
+ 
+@@ -219,35 +241,37 @@
      private void initFromKey(Key key)
          throws InvalidKeyException
      {
@@ -2188,7 +2201,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/asymmetric/e
          {
              if (!(key instanceof PrivateKey))
              {
-@@ -278,39 +296,41 @@
+@@ -278,39 +302,41 @@
          }
      }
  
