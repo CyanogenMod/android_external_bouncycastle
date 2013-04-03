@@ -34,6 +34,18 @@ LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_JAVA_LIBRARIES := core
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+include $(BUILD_JAVA_LIBRARY)
+
+# non-jarjar version to build okhttp-tests
+include $(CLEAR_VARS)
+LOCAL_MODULE := bouncycastle-nojarjar
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := $(android_bcprov_src_files)
+LOCAL_JAVACFLAGS := -encoding UTF-8
+LOCAL_JAVA_LIBRARIES := core
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 include $(BUILD_JAVA_LIBRARY)
 
 # This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
@@ -85,6 +97,7 @@ ifeq ($(WITH_HOST_DALVIK),true)
     LOCAL_BUILD_HOST_DEX := true
     LOCAL_MODULE_TAGS := optional
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+    LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
     include $(BUILD_HOST_JAVA_LIBRARY)
 endif
 
@@ -94,6 +107,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(ri_bcprov_src_files)
 LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_MODULE_TAGS := optional
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -103,4 +117,5 @@ LOCAL_SRC_FILES := $(call all-java-files-under,bcpkix/src/main/java)
 LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_MODULE_TAGS := optional
 LOCAL_JAVA_LIBRARIES := bouncycastle-host
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 include $(BUILD_HOST_JAVA_LIBRARY)
