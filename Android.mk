@@ -40,6 +40,17 @@ LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 include $(BUILD_JAVA_LIBRARY)
 
+# non-jarjar version to build okhttp-tests
+include $(CLEAR_VARS)
+LOCAL_MODULE := bouncycastle-nojarjar
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := $(android_bcprov_src_files)
+LOCAL_JAVACFLAGS := -encoding UTF-8
+LOCAL_JAVA_LIBRARIES := core
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+include $(BUILD_JAVA_LIBRARY)
+
 # This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
 # Based on "Finding dead code" example in ProGuard manual at http://proguard.sourceforge.net/
 .PHONY: bouncycastle-proguard-deadcode
