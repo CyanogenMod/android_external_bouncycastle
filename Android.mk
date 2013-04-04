@@ -46,7 +46,7 @@ LOCAL_JAVACFLAGS := -encoding UTF-8
 LOCAL_JAVA_LIBRARIES := core
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-include $(BUILD_JAVA_LIBRARY)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
 # Based on "Finding dead code" example in ProGuard manual at http://proguard.sourceforge.net/
