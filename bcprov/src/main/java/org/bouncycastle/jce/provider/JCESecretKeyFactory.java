@@ -558,12 +558,17 @@ public class JCESecretKeyFactory
        }
    }
     // BEGIN android-added
-    static public class PBKDF2WithHmacSHA1
+    static public class PBKDF2WithHmacSHA1Base
         extends JCESecretKeyFactory
     {
-        public PBKDF2WithHmacSHA1()
+        int mScheme;
+
+        protected PBKDF2WithHmacSHA1Base(
+            String               algName,
+            int scheme)
         {
-            super("PBKDF2WithHmacSHA1", PKCSObjectIdentifiers.id_PBKDF2);
+            super(algName, PKCSObjectIdentifiers.id_PBKDF2);
+            this.mScheme = scheme;
         }
 
         protected SecretKey engineGenerateSecret(
@@ -596,16 +601,34 @@ public class JCESecretKeyFactory
                     throw new IllegalArgumentException("password empty");
                 }
 
-                int scheme = PKCS5S2;
                 int digest = SHA1;
                 int keySize = pbeSpec.getKeyLength();
                 int ivSize = -1;
-                CipherParameters param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
-                
-                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
+
+                CipherParameters param = Util.makePBEMacParameters(pbeSpec, mScheme, digest, keySize);
+
+                return new BCPBEKey(this.algName, this.algOid, mScheme, digest, keySize, ivSize, pbeSpec, param);
             }
-            
+
             throw new InvalidKeySpecException("Invalid KeySpec");
+        }
+    }
+
+    static public class PBKDF2WithHmacSHA1
+        extends PBKDF2WithHmacSHA1Base
+    {
+        public PBKDF2WithHmacSHA1()
+        {
+            super("PBKDF2WithHmacSHA1", PBKDF2);
+        }
+    }
+
+    static public class BrokenPBKDF2WithHmacSHA1
+        extends PBKDF2WithHmacSHA1Base
+    {
+        public BrokenPBKDF2WithHmacSHA1()
+        {
+            super("BrokenPBKDF2WithHmacSHA1", PKCS5S2);
         }
     }
     // END android-added
