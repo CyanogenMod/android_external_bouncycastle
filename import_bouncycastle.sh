@@ -163,6 +163,11 @@ function update_timestamps() {
 
   find "$git_dir" -type f -print0 | while IFS= read -r -d $'\0' file; do
     file_rev="$(git rev-list -n 1 HEAD "$file")"
+    if [ "$file_rev" == "" ]; then
+      echo
+      echo -n "WARNING: No file revision for file $file..."
+      continue
+    fi
     file_time="$(git show --pretty=format:%ai --abbrev-commit "$file_rev" | head -n 1)"
     touch -d "$file_time" "${target_dir}${file#$git_dir}"
   done
