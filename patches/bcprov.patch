@@ -130,6 +130,28 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/asn1/DERPrintableString.java
  
      /**
       * return a printable string from the passed in object.
+diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/asn1/DERT61String.java bcprov-jdk15on-148/org/bouncycastle/asn1/DERT61String.java
+--- bcprov-jdk15on-148.orig/org/bouncycastle/asn1/DERT61String.java	2013-02-10 00:37:58.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/asn1/DERT61String.java	2013-01-31 02:26:40.000000000 +0000
+@@ -82,12 +82,16 @@
+     public DERT61String(
+         String   string)
+     {
+-        this.string = Strings.toUTF8ByteArray(string);
++        // BEGIN android-changed
++        this.string = Strings.toByteArray(string);
++        // END android-changed
+     }
+ 
+     public String getString()
+     {
+-        return Strings.fromUTF8ByteArray(string);
++        // BEGIN android-changed
++        return Strings.fromByteArray(string);
++        // END android-changed
+     }
+ 
+     public String toString()
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/asn1/cms/ContentInfo.java bcprov-jdk15on-148/org/bouncycastle/asn1/cms/ContentInfo.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/asn1/cms/ContentInfo.java	2013-02-10 00:37:58.000000000 +0000
 +++ bcprov-jdk15on-148/org/bouncycastle/asn1/cms/ContentInfo.java	2012-09-17 23:04:47.000000000 +0000
