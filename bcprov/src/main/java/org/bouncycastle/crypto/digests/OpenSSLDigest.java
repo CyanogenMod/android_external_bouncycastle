@@ -16,7 +16,7 @@
 
 package org.bouncycastle.crypto.digests;
 
-import org.apache.harmony.xnet.provider.jsse.NativeCrypto;
+import com.android.org.conscrypt.NativeCrypto;
 import org.bouncycastle.crypto.ExtendedDigest;
 
 /**
