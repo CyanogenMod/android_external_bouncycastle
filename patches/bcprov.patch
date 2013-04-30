@@ -532,7 +532,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/crypto/digests/AndroidDigest
 +}
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java bcprov-jdk15on-148/org/bouncycastle/crypto/digests/OpenSSLDigest.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2013-02-28 01:42:11.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2013-04-24 05:37:59.000000000 +0000
 @@ -0,0 +1,159 @@
 +/*
 + * Copyright (C) 2008 The Android Open Source Project
@@ -552,7 +552,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/crypto/digests/OpenSSLDigest
 +
 +package org.bouncycastle.crypto.digests;
 +
-+import org.apache.harmony.xnet.provider.jsse.NativeCrypto;
++import com.android.org.conscrypt.NativeCrypto;
 +import org.bouncycastle.crypto.ExtendedDigest;
 +
 +/**
