@@ -34,15 +34,18 @@ public final class AndroidDigestFactory {
         try {
             factoryImplementationClass = Class.forName(OpenSSLFactoryClassName);
             // Double check for NativeCrypto in case we are running on RI for testing
-            Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto");
+            Class.forName("com.android.org.conscrypt.NativeCrypto");
         } catch (ClassNotFoundException e1) {
             try {
                 factoryImplementationClass = Class.forName(BouncyCastleFactoryClassName);
             } catch (ClassNotFoundException e2) {
-                throw new AssertionError("Failed to load AndroidDigestFactoryInterface "
+                AssertionError e = new AssertionError("Failed to load "
+                                         + "AndroidDigestFactoryInterface "
                                          + "implementation. Looked for "
                                          + OpenSSLFactoryClassName + " and "
                                          + BouncyCastleFactoryClassName);
+                e.initCause(e1);
+                throw e;
             }
         }
         if (!AndroidDigestFactoryInterface.class.isAssignableFrom(factoryImplementationClass)) {
