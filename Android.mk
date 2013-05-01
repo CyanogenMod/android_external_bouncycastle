@@ -57,7 +57,7 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 bouncycastle-proguard-deadcode: $(full_classes_compiled_jar) $(full_java_libs)
 	$(PROGUARD) \
 		-injars $(full_classes_compiled_jar) \
-		-libraryjars "$(call normalize-path-list,$(addsuffix (!org/bouncycastle/**.class,!org/apache/harmony/xnet/provider/jsse/OpenSSLMessageDigest.class),$(full_java_libs)))" \
+		-libraryjars "$(call normalize-path-list,$(addsuffix (!org/bouncycastle/**.class,!com/android/org/conscrypt/OpenSSLMessageDigest.class),$(full_java_libs)))" \
 		-dontoptimize \
 		-dontobfuscate \
 		-dontpreverify \
