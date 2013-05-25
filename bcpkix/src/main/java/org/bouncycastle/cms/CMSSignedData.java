@@ -9,34 +9,28 @@ import java.security.Provider;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.Certificate;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
+// BEGIN android-removed
+// import org.bouncycastle.cert.jcajce.JcaCertStoreBuilder;
+// END android-removed
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509Store;
@@ -311,207 +305,200 @@ public class CMSSignedData
     {
         if (attributeStore == null)
         {
-            attributeStore = HELPER.createAttributeStore(type, provider, signedData.getCertificates());
+            attributeStore = HELPER.createAttributeStore(type, provider, this.getAttributeCertificates());
         }
 
         return attributeStore;
     }
 
-    /**
-     * return a X509Store containing the public key certificates, if any, contained
-     * in this message.
-     *
-     * @param type type of store to create
-     * @param provider name of provider to use
-     * @return a store of public key certificates
-     * @exception NoSuchProviderException if the provider requested isn't available.
-     * @exception NoSuchStoreException if the store type isn't available.
-     * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use base Store returning method
-     */
-    public X509Store getCertificates(
-        String type,
-        String provider)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
-    {
-        return getCertificates(type, CMSUtils.getProvider(provider));
-    }
+    // BEGIN android-removed
+    // /**
+    //  * return a X509Store containing the public key certificates, if any, contained
+    //  * in this message.
+    //  *
+    //  * @param type type of store to create
+    //  * @param provider name of provider to use
+    //  * @return a store of public key certificates
+    //  * @exception NoSuchProviderException if the provider requested isn't available.
+    //  * @exception NoSuchStoreException if the store type isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the X509Store
+    //  * @deprecated use base Store returning method
+    //  */
+    // public X509Store getCertificates(
+    //     String type,
+    //     String provider)
+    //     throws NoSuchStoreException, NoSuchProviderException, CMSException
+    // {
+    //     return getCertificates(type, CMSUtils.getProvider(provider));
+    // }
+    //
+    // /**
+    //  * return a X509Store containing the public key certificates, if any, contained
+    //  * in this message.
+    //  *
+    //  * @param type type of store to create
+    //  * @param provider provider to use
+    //  * @return a store of public key certificates
+    //  * @exception NoSuchStoreException if the store type isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the X509Store
+    //  * @deprecated use base Store returning method
+    //  */
+    // public X509Store getCertificates(
+    //     String type,
+    //     Provider provider)
+    //     throws NoSuchStoreException, CMSException
+    // {
+    //     if (certificateStore == null)
+    //     {
+    //         certificateStore = HELPER.createCertificateStore(type, provider, this.getCertificates());
+    //     }
+    //
+    //     return certificateStore;
+    // }
+    //
+    // /**
+    //  * return a X509Store containing CRLs, if any, contained
+    //  * in this message.
+    //  *
+    //  * @param type type of store to create
+    //  * @param provider name of provider to use
+    //  * @return a store of CRLs
+    //  * @exception NoSuchProviderException if the provider requested isn't available.
+    //  * @exception NoSuchStoreException if the store type isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the X509Store
+    //  * @deprecated use base Store returning method
+    //  */
+    // public X509Store getCRLs(
+    //     String type,
+    //     String provider)
+    //     throws NoSuchStoreException, NoSuchProviderException, CMSException
+    // {
+    //     return getCRLs(type, CMSUtils.getProvider(provider));
+    // }
+    //
+    // /**
+    //  * return a X509Store containing CRLs, if any, contained
+    //  * in this message.
+    //  *
+    //  * @param type type of store to create
+    //  * @param provider provider to use
+    //  * @return a store of CRLs
+    //  * @exception NoSuchStoreException if the store type isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the X509Store
+    //  * @deprecated use base Store returning method
+    //  */
+    // public X509Store getCRLs(
+    //     String type,
+    //     Provider provider)
+    //     throws NoSuchStoreException, CMSException
+    // {
+    //     if (crlStore == null)
+    //     {
+    //         crlStore = HELPER.createCRLsStore(type, provider, getCRLs());
+    //     }
+    //
+    //     return crlStore;
+    // }
+    //
+    // /**
+    //  * return a CertStore containing the certificates and CRLs associated with
+    //  * this message.
+    //  *
+    //  * @exception NoSuchProviderException if the provider requested isn't available.
+    //  * @exception NoSuchAlgorithmException if the cert store isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the CertStore
+    //  * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
+    //  */
+    // public CertStore getCertificatesAndCRLs(
+    //     String  type,
+    //     String  provider)
+    //     throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    // {
+    //     return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
+    // }
+    //
+    // /**
+    //  * return a CertStore containing the certificates and CRLs associated with
+    //  * this message.
+    //  *
+    //  * @exception NoSuchAlgorithmException if the cert store isn't available.
+    //  * @exception CMSException if a general exception prevents creation of the CertStore
+    //  * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
+    //  */
+    // public CertStore getCertificatesAndCRLs(
+    //     String  type,
+    //     Provider  provider)
+    //     throws NoSuchAlgorithmException, CMSException
+    // {
+    //     try
+    //     {
+    //         JcaCertStoreBuilder certStoreBuilder = new JcaCertStoreBuilder().setType(type);
+    //
+    //         if (provider != null)
+    //         {
+    //             certStoreBuilder.setProvider(provider);
+    //         }
+    //
+    //         certStoreBuilder.addCertificates(this.getCertificates());
+    //         certStoreBuilder.addCRLs(this.getCRLs());
+    //
+    //         return certStoreBuilder.build();
+    //     }
+    //     catch (NoSuchAlgorithmException e)
+    //     {
+    //         throw e;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         throw new CMSException("exception creating CertStore: " + e.getMessage(), e);
+    //     }
+    // }
+    // END android-removed
 
     /**
-     * return a X509Store containing the public key certificates, if any, contained
-     * in this message.
+     * Return any X.509 certificate objects in this SignedData structure as a Store of X509CertificateHolder objects.
      *
-     * @param type type of store to create
-     * @param provider provider to use
-     * @return a store of public key certificates
-     * @exception NoSuchStoreException if the store type isn't available.
-     * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use base Store returning method
+     * @return a Store of X509CertificateHolder objects.
      */
-    public X509Store getCertificates(
-        String type,
-        Provider provider)
-        throws NoSuchStoreException, CMSException
-    {
-        if (certificateStore == null)
-        {
-            certificateStore = HELPER.createCertificateStore(type, provider, signedData.getCertificates());
-        }
-
-        return certificateStore;
-    }
-
-    /**
-     * return a X509Store containing CRLs, if any, contained
-     * in this message.
-     *
-     * @param type type of store to create
-     * @param provider name of provider to use
-     * @return a store of CRLs
-     * @exception NoSuchProviderException if the provider requested isn't available.
-     * @exception NoSuchStoreException if the store type isn't available.
-     * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use base Store returning method
-     */
-    public X509Store getCRLs(
-        String type,
-        String provider)
-        throws NoSuchStoreException, NoSuchProviderException, CMSException
-    {
-        return getCRLs(type, CMSUtils.getProvider(provider));
-    }
-
-    /**
-     * return a X509Store containing CRLs, if any, contained
-     * in this message.
-     *
-     * @param type type of store to create
-     * @param provider provider to use
-     * @return a store of CRLs
-     * @exception NoSuchStoreException if the store type isn't available.
-     * @exception CMSException if a general exception prevents creation of the X509Store
-     * @deprecated use base Store returning method
-     */
-    public X509Store getCRLs(
-        String type,
-        Provider provider)
-        throws NoSuchStoreException, CMSException
-    {
-        if (crlStore == null)
-        {
-            crlStore = HELPER.createCRLsStore(type, provider, signedData.getCRLs());
-        }
-
-        return crlStore;
-    }
-  
-    /**
-     * return a CertStore containing the certificates and CRLs associated with
-     * this message.
-     *
-     * @exception NoSuchProviderException if the provider requested isn't available.
-     * @exception NoSuchAlgorithmException if the cert store isn't available.
-     * @exception CMSException if a general exception prevents creation of the CertStore
-     * @deprecated use base Store returning method
-     */
-    public CertStore getCertificatesAndCRLs(
-        String  type,
-        String  provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
-    {
-        return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
-    }
-
-    /**
-     * return a CertStore containing the certificates and CRLs associated with
-     * this message.
-     *
-     * @exception NoSuchAlgorithmException if the cert store isn't available.
-     * @exception CMSException if a general exception prevents creation of the CertStore
-     * @deprecated use base Store returning method
-     */
-    public CertStore getCertificatesAndCRLs(
-        String  type,
-        Provider  provider)
-        throws NoSuchAlgorithmException, CMSException
-    {
-        ASN1Set certSet = signedData.getCertificates();
-        ASN1Set crlSet = signedData.getCRLs();
-
-        return HELPER.createCertStore(type, provider, certSet, crlSet);
-    }
-
     public Store getCertificates()
     {
-        ASN1Set certSet = signedData.getCertificates();
-
-        if (certSet != null)
-        {
-            List    certList = new ArrayList(certSet.size());
-
-            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
-            {
-                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
-
-                if (obj instanceof ASN1Sequence)
-                {
-                    certList.add(new X509CertificateHolder(Certificate.getInstance(obj)));
-                }
-            }
-
-            return new CollectionStore(certList);
-        }
-
-        return new CollectionStore(new ArrayList());
+        return HELPER.getCertificates(signedData.getCertificates());
     }
 
+    /**
+     * Return any X.509 CRL objects in this SignedData structure as a Store of X509CRLHolder objects.
+     *
+     * @return a Store of X509CRLHolder objects.
+     */
     public Store getCRLs()
     {
-        ASN1Set crlSet = signedData.getCRLs();
-
-        if (crlSet != null)
-        {
-            List    crlList = new ArrayList(crlSet.size());
-
-            for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
-            {
-                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
-
-                if (obj instanceof ASN1Sequence)
-                {
-                    crlList.add(new X509CRLHolder(CertificateList.getInstance(obj)));
-                }
-            }
-
-            return new CollectionStore(crlList);
-        }
-
-        return new CollectionStore(new ArrayList());
+        return HELPER.getCRLs(signedData.getCRLs());
     }
 
+    /**
+     * Return any X.509 attribute certificate objects in this SignedData structure as a Store of X509AttributeCertificateHolder objects.
+     *
+     * @return a Store of X509AttributeCertificateHolder objects.
+     */
     public Store getAttributeCertificates()
     {
-        ASN1Set certSet = signedData.getCertificates();
-
-        if (certSet != null)
-        {
-            List    certList = new ArrayList(certSet.size());
-
-            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
-            {
-                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
-
-                if (obj instanceof ASN1TaggedObject)
-                {
-                    certList.add(new X509AttributeCertificateHolder(AttributeCertificate.getInstance(((ASN1TaggedObject)obj).getObject())));
-                }
-            }
-
-            return new CollectionStore(certList);
-        }
-
-        return new CollectionStore(new ArrayList());
+        return HELPER.getAttributeCertificates(signedData.getCertificates());
     }
+
+    // BEGIN android-removed
+    // /**
+    //  * Return any OtherRevocationInfo OtherRevInfo objects of the type indicated by otherRevocationInfoFormat in
+    //  * this SignedData structure.
+    //  *
+    //  * @param otherRevocationInfoFormat OID of the format type been looked for.
+    //  *
+    //  * @return a Store of ASN1Encodable objects representing any objects of otherRevocationInfoFormat found.
+    //  */
+    // public Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat)
+    // {
+    //     return HELPER.getOtherRevocationInfo(otherRevocationInfoFormat, signedData.getCRLs());
+    // }
+    // END android-removed
 
     /**
      * Return the a string representation of the OID associated with the
@@ -554,9 +541,77 @@ public class CMSSignedData
     {
         return contentInfo.getEncoded();
     }
-    
+
+    // BEGIN android-removed
+    // /**
+    //  * Verify all the SignerInformation objects and their associated counter signatures attached
+    //  * to this CMS SignedData object.
+    //  *
+    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
+    //  * @return true if all verify, false otherwise.
+    //  * @throws CMSException  if an exception occurs during the verification process.
+    //  */
+    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider)
+    //     throws CMSException
+    // {
+    //     return verifySignatures(verifierProvider, false);
+    // }
+    //
+    // /**
+    //  * Verify all the SignerInformation objects and optionally their associated counter signatures attached
+    //  * to this CMS SignedData object.
+    //  *
+    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
+    //  * @param ignoreCounterSignatures if true don't check counter signatures. If false check counter signatures as well.
+    //  * @return true if all verify, false otherwise.
+    //  * @throws CMSException  if an exception occurs during the verification process.
+    //  */
+    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider, boolean ignoreCounterSignatures)
+    //     throws CMSException
+    // {
+    //     Collection signers = this.getSignerInfos().getSigners();
+    //
+    //     for (Iterator it = signers.iterator(); it.hasNext();)
+    //     {
+    //         SignerInformation signer = (SignerInformation)it.next();
+    //
+    //         try
+    //         {
+    //             SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
+    //
+    //             if (!signer.verify(verifier))
+    //             {
+    //                 return false;
+    //             }
+    //
+    //             if (!ignoreCounterSignatures)
+    //             {
+    //                 Collection counterSigners = signer.getCounterSignatures().getSigners();
+    //
+    //                 for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+    //                 {
+    //                     SignerInformation counterSigner = (SignerInformation)cIt.next();
+    //                     SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
+    //
+    //                     if (!counterSigner.verify(counterVerifier))
+    //                     {
+    //                         return false;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         catch (OperatorCreationException e)
+    //         {
+    //             throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
+    //         }
+    //     }
+    //
+    //     return true;
+    // }
+    // END android-removed
+
     /**
-     * Replace the signerinformation store associated with this
+     * Replace the SignerInformation store associated with this
      * CMSSignedData object with the new one passed in. You would
      * probably only want to do this if you wanted to change the unsigned 
      * attributes associated with a signer, or perhaps delete one.
