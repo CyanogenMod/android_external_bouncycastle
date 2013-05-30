@@ -48,6 +48,9 @@ public interface PBE
     static final int        PKCS5S2     = 1;
     static final int        PKCS12      = 2;
     static final int        OPENSSL     = 3;
+    // BEGIN android-added
+    static final int        PBKDF2      = 4;
+    // END android-added
 
     /**
      * uses the appropriate mixer to generate the key and IV if necessary.
@@ -83,7 +86,9 @@ public interface PBE
                     throw new IllegalStateException("PKCS5 scheme 1 only supports MD2, MD5 and SHA1.");
                 }
             }
-            else if (type == PKCS5S2)
+            // BEGIN android-changed
+            else if ((type == PKCS5S2) || (type == PBKDF2))
+            // END android-changed
             {
                 generator = new PKCS5S2ParametersGenerator();
             }
@@ -250,6 +255,12 @@ public interface PBE
             {
                 key = PBEParametersGenerator.PKCS12PasswordToBytes(keySpec.getPassword());
             }
+            // BEGIN android-changed
+            else if (type == PBKDF2)
+            {
+                key = PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(keySpec.getPassword());
+            }
+            // END android-changed
             else
             {   
                 key = PBEParametersGenerator.PKCS5PasswordToBytes(keySpec.getPassword());
@@ -293,8 +304,14 @@ public interface PBE
             {
                 key = PBEParametersGenerator.PKCS12PasswordToBytes(keySpec.getPassword());
             }
+            // BEGIN android-changed
+            else if (type == PBKDF2)
+            {
+                key = PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(keySpec.getPassword());
+            }
+            // END android-changed
             else
-            {   
+            {
                 key = PBEParametersGenerator.PKCS5PasswordToBytes(keySpec.getPassword());
             }
             

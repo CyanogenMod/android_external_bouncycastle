@@ -4184,6 +4184,22 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/DE
          }
      }
  }
+diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/BCPBEKey.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/BCPBEKey.java
+--- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/BCPBEKey.java	2013-02-10 00:37:58.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/BCPBEKey.java	2013-04-10 22:02:36.000000000 +0000
+@@ -78,6 +78,12 @@
+             {
+                 return PBEParametersGenerator.PKCS12PasswordToBytes(pbeKeySpec.getPassword());
+             }
++            // BEGIN android-changed
++            else if (type == PBE.PBKDF2)
++            {
++                return PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(pbeKeySpec.getPassword());
++            }
++            // END android-changed
+             else
+             {   
+                 return PBEParametersGenerator.PKCS5PasswordToBytes(pbeKeySpec.getPassword());
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/BaseAlgorithmParameters.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/BaseAlgorithmParameters.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/BaseAlgorithmParameters.java	2013-02-10 00:37:58.000000000 +0000
 +++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/BaseAlgorithmParameters.java	2012-09-17 23:04:47.000000000 +0000
@@ -5412,7 +5428,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
          Key     key)
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/PBE.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/PBE.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/util/PBE.java	2013-02-10 00:37:58.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/PBE.java	2013-01-31 02:26:40.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/symmetric/util/PBE.java	2013-04-10 22:02:36.000000000 +0000
 @@ -7,13 +7,18 @@
  
  import org.bouncycastle.crypto.CipherParameters;
@@ -5439,7 +5455,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
  import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
  import org.bouncycastle.crypto.generators.PKCS12ParametersGenerator;
  import org.bouncycastle.crypto.generators.PKCS5S1ParametersGenerator;
-@@ -29,11 +34,15 @@
+@@ -29,16 +34,23 @@
      //
      static final int        MD5         = 0;
      static final int        SHA1        = 1;
@@ -5459,7 +5475,15 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
  
      static final int        PKCS5S1     = 0;
      static final int        PKCS5S2     = 1;
-@@ -55,14 +64,20 @@
+     static final int        PKCS12      = 2;
+     static final int        OPENSSL     = 3;
++    // BEGIN android-added
++    static final int        PBKDF2      = 4;
++    // END android-added
+ 
+     /**
+      * uses the appropriate mixer to generate the key and IV if necessary.
+@@ -55,20 +67,28 @@
              {
                  switch (hash)
                  {
@@ -5485,7 +5509,16 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
                      break;
                  default:
                      throw new IllegalStateException("PKCS5 scheme 1 only supports MD2, MD5 and SHA1.");
-@@ -76,27 +91,39 @@
+                 }
+             }
+-            else if (type == PKCS5S2)
++            // BEGIN android-changed
++            else if ((type == PKCS5S2) || (type == PBKDF2))
++            // END android-changed
+             {
+                 generator = new PKCS5S2ParametersGenerator();
+             }
+@@ -76,27 +96,39 @@
              {
                  switch (hash)
                  {
@@ -5511,11 +5544,10 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
 -                    break;
 -                case TIGER:
 -                    generator = new PKCS12ParametersGenerator(new TigerDigest());
--                    break;
 +                    // BEGIN android-changed
 +                    generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA1());
 +                    // END android-changed
-+                    break;
+                     break;
 +                // BEGIN android-removed
 +                // case RIPEMD160:
 +                //     generator = new PKCS12ParametersGenerator(new RIPEMD160Digest());
@@ -5529,11 +5561,10 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
 -                    break;
 -                case GOST3411:
 -                    generator = new PKCS12ParametersGenerator(new GOST3411Digest());
--                    break;
 +                    // BEGIN android-changed
 +                    generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA256());
 +                    // END android-changed
-+                    break;
+                     break;
 +                // BEGIN android-removed
 +                // case GOST3411:
 +                //     generator = new PKCS12ParametersGenerator(new GOST3411Digest());
@@ -5542,6 +5573,35 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/symmetric/ut
                  default:
                      throw new IllegalStateException("unknown digest scheme for PBE encryption.");
                  }
+@@ -223,6 +255,12 @@
+             {
+                 key = PBEParametersGenerator.PKCS12PasswordToBytes(keySpec.getPassword());
+             }
++            // BEGIN android-changed
++            else if (type == PBKDF2)
++            {
++                key = PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(keySpec.getPassword());
++            }
++            // END android-changed
+             else
+             {   
+                 key = PBEParametersGenerator.PKCS5PasswordToBytes(keySpec.getPassword());
+@@ -266,8 +304,14 @@
+             {
+                 key = PBEParametersGenerator.PKCS12PasswordToBytes(keySpec.getPassword());
+             }
++            // BEGIN android-changed
++            else if (type == PBKDF2)
++            {
++                key = PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(keySpec.getPassword());
++            }
++            // END android-changed
+             else
+-            {   
++            {
+                 key = PBEParametersGenerator.PKCS5PasswordToBytes(keySpec.getPassword());
+             }
+             
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/util/DigestFactory.java bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/util/DigestFactory.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jcajce/provider/util/DigestFactory.java	2013-02-10 00:37:58.000000000 +0000
 +++ bcprov-jdk15on-148/org/bouncycastle/jcajce/provider/util/DigestFactory.java	2012-09-17 23:04:47.000000000 +0000
@@ -5984,7 +6044,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/PKCS10CertificationReque
              return digestAlgOID.getId();            
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java bcprov-jdk15on-148/org/bouncycastle/jce/provider/BouncyCastleProvider.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2013-02-10 00:37:58.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2013-01-31 02:26:40.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jce/provider/BouncyCastleProvider.java	2013-04-10 22:02:36.000000000 +0000
 @@ -11,7 +11,9 @@
  
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -6334,12 +6394,13 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/BouncyCastlePro
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
          put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
-@@ -408,20 +474,31 @@
+@@ -408,20 +474,32 @@
          put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes128_cbc.getId(), "PBEWITHSHA256AND128BITAES-CBC-BC");
          put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PBEWITHSHA256AND192BITAES-CBC-BC");
          put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PBEWITHSHA256AND256BITAES-CBC-BC");
 +        // BEGIN android-added
 +
++        put("SecretKeyFactory.BrokenPBKDF2WithHmacSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$BrokenPBKDF2WithHmacSHA1");
 +        put("SecretKeyFactory.PBKDF2WithHmacSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBKDF2WithHmacSHA1");
 +        // END android-added
  
@@ -6373,7 +6434,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/BouncyCastlePro
      }
  
      private void loadAlgorithms(String packageName, String[] names)
-@@ -468,21 +545,25 @@
+@@ -468,21 +546,25 @@
      private void addMacAlgorithms()
      {
  
@@ -7980,7 +8041,7 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/JCEMac.java bcp
  }
 diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/JCESecretKeyFactory.java bcprov-jdk15on-148/org/bouncycastle/jce/provider/JCESecretKeyFactory.java
 --- bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2013-02-10 00:37:58.000000000 +0000
-+++ bcprov-jdk15on-148/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2013-01-31 02:26:40.000000000 +0000
++++ bcprov-jdk15on-148/org/bouncycastle/jce/provider/JCESecretKeyFactory.java	2013-04-10 22:02:36.000000000 +0000
 @@ -252,29 +252,31 @@
          }
      }
@@ -8098,17 +8159,22 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/JCESecretKeyFac
     
     /**
      * PBEWithSHA1And128BitAES-BC
-@@ -551,4 +557,56 @@
+@@ -551,4 +557,79 @@
             super("PBEWithMD5And256BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
         }
     }
 +    // BEGIN android-added
-+    static public class PBKDF2WithHmacSHA1
++    static public class PBKDF2WithHmacSHA1Base
 +        extends JCESecretKeyFactory
 +    {
-+        public PBKDF2WithHmacSHA1()
++        int mScheme;
++
++        protected PBKDF2WithHmacSHA1Base(
++            String               algName,
++            int scheme)
 +        {
-+            super("PBKDF2WithHmacSHA1", PKCSObjectIdentifiers.id_PBKDF2);
++            super(algName, PKCSObjectIdentifiers.id_PBKDF2);
++            this.mScheme = scheme;
 +        }
 +
 +        protected SecretKey engineGenerateSecret(
@@ -8141,16 +8207,34 @@ diff -Naur bcprov-jdk15on-148.orig/org/bouncycastle/jce/provider/JCESecretKeyFac
 +                    throw new IllegalArgumentException("password empty");
 +                }
 +
-+                int scheme = PKCS5S2;
 +                int digest = SHA1;
 +                int keySize = pbeSpec.getKeyLength();
 +                int ivSize = -1;
-+                CipherParameters param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
-+                
-+                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
++
++                CipherParameters param = Util.makePBEMacParameters(pbeSpec, mScheme, digest, keySize);
++
++                return new BCPBEKey(this.algName, this.algOid, mScheme, digest, keySize, ivSize, pbeSpec, param);
 +            }
-+            
++
 +            throw new InvalidKeySpecException("Invalid KeySpec");
++        }
++    }
++
++    static public class PBKDF2WithHmacSHA1
++        extends PBKDF2WithHmacSHA1Base
++    {
++        public PBKDF2WithHmacSHA1()
++        {
++            super("PBKDF2WithHmacSHA1", PBKDF2);
++        }
++    }
++
++    static public class BrokenPBKDF2WithHmacSHA1
++        extends PBKDF2WithHmacSHA1Base
++    {
++        public BrokenPBKDF2WithHmacSHA1()
++        {
++            super("BrokenPBKDF2WithHmacSHA1", PKCS5S2);
 +        }
 +    }
 +    // END android-added
