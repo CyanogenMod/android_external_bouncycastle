@@ -7,10 +7,16 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
-import org.bouncycastle.jce.provider.JCEMac;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBESecretKeyFactory;
 
 public class SHA256
 {
+    private SHA256()
+    {
+
+    }
+
     static public class Digest
         extends BCMessageDigest
         implements Cloneable
@@ -31,7 +37,7 @@ public class SHA256
     }
 
     public static class HashMac
-        extends JCEMac
+        extends BaseMac
     {
         public HashMac()
         {
@@ -39,7 +45,21 @@ public class SHA256
         }
     }
 
-        /**
+    // BEGIN android-removed
+    // /**
+    //  * PBEWithHmacSHA
+    //  */
+    // public static class PBEWithMacKeyFactory
+    //     extends PBESecretKeyFactory
+    // {
+    //     public PBEWithMacKeyFactory()
+    //     {
+    //         super("PBEwithHmacSHA256", null, false, PKCS12, SHA256, 256, 0);
+    //     }
+    // }
+    // END android-removed
+
+    /**
      * HMACSHA256
      */
     public static class KeyGenerator
@@ -66,8 +86,15 @@ public class SHA256
             provider.addAlgorithm("Alg.Alias.MessageDigest.SHA256", "SHA-256");
             provider.addAlgorithm("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
 
+            // BEGIN android-removed
+            // provider.addAlgorithm("SecretKeyFactory.PBEWITHHMACSHA256", PREFIX + "$PBEWithMacKeyFactory");
+            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHHMACSHA-256", "PBEWITHHMACSHA256");
+            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + NISTObjectIdentifiers.id_sha256, "PBEWITHHMACSHA256");
+            // END android-removed
+
             addHMACAlgorithm(provider, "SHA256", PREFIX + "$HashMac",  PREFIX + "$KeyGenerator");
             addHMACAlias(provider, "SHA256", PKCSObjectIdentifiers.id_hmacWithSHA256);
+            addHMACAlias(provider, "SHA256", NISTObjectIdentifiers.id_sha256);
         }
     }
 }

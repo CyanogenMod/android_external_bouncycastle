@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.Integers;
+import org.bouncycastle.util.Memoable;
 
 /**
  * HMAC implementation based on RFC2104
@@ -23,9 +24,11 @@ public class HMac
     private Digest digest;
     private int digestSize;
     private int blockLength;
-    
+    private Memoable ipadState;
+    private Memoable opadState;
+
     private byte[] inputPad;
-    private byte[] outputPad;
+    private byte[] outputBuf;
 
     private static Hashtable blockLengths;
     
@@ -95,14 +98,12 @@ public class HMac
         int    byteLength)
     {
         this.digest = digest;
-        digestSize = digest.getDigestSize();
-
+        this.digestSize = digest.getDigestSize();
         this.blockLength = byteLength;
-
-        inputPad = new byte[blockLength];
-        outputPad = new byte[blockLength];
+        this.inputPad = new byte[blockLength];
+        this.outputBuf = new byte[blockLength + digestSize];
     }
-    
+
     public String getAlgorithmName()
     {
         return digest.getAlgorithmName() + "/HMAC";
@@ -119,39 +120,43 @@ public class HMac
         digest.reset();
 
         byte[] key = ((KeyParameter)params).getKey();
+        int keyLength = key.length;
 
-        if (key.length > blockLength)
+        if (keyLength > blockLength)
         {
-            digest.update(key, 0, key.length);
+            digest.update(key, 0, keyLength);
             digest.doFinal(inputPad, 0);
-            for (int i = digestSize; i < inputPad.length; i++)
-            {
-                inputPad[i] = 0;
-            }
+            
+            keyLength = digestSize;
         }
         else
         {
-            System.arraycopy(key, 0, inputPad, 0, key.length);
-            for (int i = key.length; i < inputPad.length; i++)
-            {
-                inputPad[i] = 0;
-            }
+            System.arraycopy(key, 0, inputPad, 0, keyLength);
         }
 
-        outputPad = new byte[inputPad.length];
-        System.arraycopy(inputPad, 0, outputPad, 0, inputPad.length);
-
-        for (int i = 0; i < inputPad.length; i++)
+        for (int i = keyLength; i < inputPad.length; i++)
         {
-            inputPad[i] ^= IPAD;
+            inputPad[i] = 0;
         }
 
-        for (int i = 0; i < outputPad.length; i++)
+        System.arraycopy(inputPad, 0, outputBuf, 0, blockLength);
+
+        xorPad(inputPad, blockLength, IPAD);
+        xorPad(outputBuf, blockLength, OPAD);
+
+        if (digest instanceof Memoable)
         {
-            outputPad[i] ^= OPAD;
+            opadState = ((Memoable)digest).copy();
+
+            ((Digest)opadState).update(outputBuf, 0, blockLength);
         }
 
         digest.update(inputPad, 0, inputPad.length);
+
+        if (digest instanceof Memoable)
+        {
+            ipadState = ((Memoable)digest).copy();
+        }
     }
 
     public int getMacSize()
@@ -177,15 +182,33 @@ public class HMac
         byte[] out,
         int outOff)
     {
-        byte[] tmp = new byte[digestSize];
-        digest.doFinal(tmp, 0);
+        digest.doFinal(outputBuf, blockLength);
 
-        digest.update(outputPad, 0, outputPad.length);
-        digest.update(tmp, 0, tmp.length);
+        if (opadState != null)
+        {
+            ((Memoable)digest).reset(opadState);
+            digest.update(outputBuf, blockLength, digest.getDigestSize());
+        }
+        else
+        {
+            digest.update(outputBuf, 0, outputBuf.length);
+        }
 
-        int     len = digest.doFinal(out, outOff);
+        int len = digest.doFinal(out, outOff);
 
-        reset();
+        for (int i = blockLength; i < outputBuf.length; i++)
+        {
+            outputBuf[i] = 0;
+        }
+
+        if (ipadState != null)
+        {
+            ((Memoable)digest).reset(ipadState);
+        }
+        else
+        {
+            digest.update(inputPad, 0, inputPad.length);
+        }
 
         return len;
     }
@@ -204,5 +227,13 @@ public class HMac
          * reinitialize the digest.
          */
         digest.update(inputPad, 0, inputPad.length);
+    }
+
+    private static void xorPad(byte[] pad, int len, byte n)
+    {
+        for (int i = 0; i < len; ++i)
+        {
+            pad[i] ^= n;
+        }
     }
 }
