@@ -22,6 +22,7 @@ import javax.crypto.spec.PBEParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
 
+import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -38,6 +39,7 @@ import org.bouncycastle.crypto.modes.CTSBlockCipher;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.modes.GOFBBlockCipher;
+// import org.bouncycastle.crypto.modes.OCBBlockCipher;
 // END android-removed
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 // BEGIN android-removed
@@ -89,7 +91,8 @@ public class BaseBlockCipher
                                         // END android-removed
                                     };
 
-    private org.bouncycastle.crypto.BlockCipher baseEngine;
+    private BlockCipher             baseEngine;
+    private BlockCipherProvider     engineProvider;
     private GenericBlockCipher      cipher;
     private ParametersWithIV        ivParam;
 
@@ -103,11 +106,20 @@ public class BaseBlockCipher
     private String                  modeName = null;
 
     protected BaseBlockCipher(
-        org.bouncycastle.crypto.BlockCipher engine)
+        BlockCipher engine)
     {
         baseEngine = engine;
 
         cipher = new BufferedGenericBlockCipher(engine);
+    }
+
+    protected BaseBlockCipher(
+        BlockCipherProvider provider)
+    {
+        baseEngine = provider.get();
+        engineProvider = provider;
+
+        cipher = new BufferedGenericBlockCipher(provider.get());
     }
 
     protected BaseBlockCipher(
@@ -292,6 +304,18 @@ public class BaseBlockCipher
             cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
         }
         // BEGIN android-removed
+        // else if (modeName.startsWith("OCB"))
+        // {
+        //     if (engineProvider != null)
+        //     {
+        //         ivLength = baseEngine.getBlockSize();
+        //         cipher = new AEADGenericBlockCipher(new OCBBlockCipher(baseEngine, engineProvider.get()));
+        //     }
+        //     else
+        //     {
+        //         throw new NoSuchAlgorithmException("can't support mode " + mode);
+        //     }
+        // }
         // else if (modeName.startsWith("EAX"))
         // {
         //     ivLength = baseEngine.getBlockSize();
@@ -413,7 +437,12 @@ public class BaseBlockCipher
             if (k.getParam() != null)
             {
                 param = k.getParam();
-                pbeSpec = new PBEParameterSpec(k.getSalt(), k.getIterationCount());
+                if (params instanceof IvParameterSpec)
+                {
+                    IvParameterSpec iv = (IvParameterSpec)params;
+
+                    param = new ParametersWithIV(param, iv.getIV());
+                }
             }
             else if (params instanceof PBEParameterSpec)
             {
@@ -736,7 +765,7 @@ public class BaseBlockCipher
 
             if (inputLen != 0)
             {
-                    len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+                len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
             }
 
             return (len + cipher.doFinal(output, outputOffset + len));
@@ -758,7 +787,9 @@ public class BaseBlockCipher
     private boolean isAEADModeName(
         String modeName)
     {
-        return "CCM".equals(modeName) || "EAX".equals(modeName) || "GCM".equals(modeName);
+        // BEGIN android-changed
+        return "CCM".equals(modeName) || "GCM".equals(modeName);
+        // END android-changed
     }
 
     /*

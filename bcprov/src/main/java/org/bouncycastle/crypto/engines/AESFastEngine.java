@@ -3,9 +3,7 @@ package org.bouncycastle.crypto.engines;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
-// BEGIN android-added
 import org.bouncycastle.crypto.OutputLengthException;
-// END android-added
 import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
@@ -726,9 +724,7 @@ public class AESFastEngine
 
         if ((outOff + (32 / 2)) > out.length)
         {
-            // BEGIN android-changed
             throw new OutputLengthException("output buffer too short");
-            // END android-changed
         }
 
         if (forEncryption)

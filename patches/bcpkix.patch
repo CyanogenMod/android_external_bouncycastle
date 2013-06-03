@@ -1,29 +1,508 @@
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedGenerator.java bcpkix-jdk15on-148/org/bouncycastle/cms/CMSSignedGenerator.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedGenerator.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/cms/CMSSignedGenerator.java	2013-01-31 02:26:40.000000000 +0000
-@@ -22,7 +22,9 @@
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedData.java bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedData.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedData.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedData.java	2013-05-25 02:14:15.000000000 +0000
+@@ -25,7 +25,9 @@
+ import org.bouncycastle.asn1.cms.ContentInfo;
+ import org.bouncycastle.asn1.cms.SignedData;
+ import org.bouncycastle.asn1.cms.SignerInfo;
+-import org.bouncycastle.cert.jcajce.JcaCertStoreBuilder;
++// BEGIN android-removed
++// import org.bouncycastle.cert.jcajce.JcaCertStoreBuilder;
++// END android-removed
+ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+ import org.bouncycastle.operator.OperatorCreationException;
+ import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
+@@ -309,147 +311,149 @@
+         return attributeStore;
+     }
+ 
+-    /**
+-     * return a X509Store containing the public key certificates, if any, contained
+-     * in this message.
+-     *
+-     * @param type type of store to create
+-     * @param provider name of provider to use
+-     * @return a store of public key certificates
+-     * @exception NoSuchProviderException if the provider requested isn't available.
+-     * @exception NoSuchStoreException if the store type isn't available.
+-     * @exception CMSException if a general exception prevents creation of the X509Store
+-     * @deprecated use base Store returning method
+-     */
+-    public X509Store getCertificates(
+-        String type,
+-        String provider)
+-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+-    {
+-        return getCertificates(type, CMSUtils.getProvider(provider));
+-    }
+-
+-    /**
+-     * return a X509Store containing the public key certificates, if any, contained
+-     * in this message.
+-     *
+-     * @param type type of store to create
+-     * @param provider provider to use
+-     * @return a store of public key certificates
+-     * @exception NoSuchStoreException if the store type isn't available.
+-     * @exception CMSException if a general exception prevents creation of the X509Store
+-     * @deprecated use base Store returning method
+-     */
+-    public X509Store getCertificates(
+-        String type,
+-        Provider provider)
+-        throws NoSuchStoreException, CMSException
+-    {
+-        if (certificateStore == null)
+-        {
+-            certificateStore = HELPER.createCertificateStore(type, provider, this.getCertificates());
+-        }
+-
+-        return certificateStore;
+-    }
+-
+-    /**
+-     * return a X509Store containing CRLs, if any, contained
+-     * in this message.
+-     *
+-     * @param type type of store to create
+-     * @param provider name of provider to use
+-     * @return a store of CRLs
+-     * @exception NoSuchProviderException if the provider requested isn't available.
+-     * @exception NoSuchStoreException if the store type isn't available.
+-     * @exception CMSException if a general exception prevents creation of the X509Store
+-     * @deprecated use base Store returning method
+-     */
+-    public X509Store getCRLs(
+-        String type,
+-        String provider)
+-        throws NoSuchStoreException, NoSuchProviderException, CMSException
+-    {
+-        return getCRLs(type, CMSUtils.getProvider(provider));
+-    }
+-
+-    /**
+-     * return a X509Store containing CRLs, if any, contained
+-     * in this message.
+-     *
+-     * @param type type of store to create
+-     * @param provider provider to use
+-     * @return a store of CRLs
+-     * @exception NoSuchStoreException if the store type isn't available.
+-     * @exception CMSException if a general exception prevents creation of the X509Store
+-     * @deprecated use base Store returning method
+-     */
+-    public X509Store getCRLs(
+-        String type,
+-        Provider provider)
+-        throws NoSuchStoreException, CMSException
+-    {
+-        if (crlStore == null)
+-        {
+-            crlStore = HELPER.createCRLsStore(type, provider, getCRLs());
+-        }
+-
+-        return crlStore;
+-    }
+-  
+-    /**
+-     * return a CertStore containing the certificates and CRLs associated with
+-     * this message.
+-     *
+-     * @exception NoSuchProviderException if the provider requested isn't available.
+-     * @exception NoSuchAlgorithmException if the cert store isn't available.
+-     * @exception CMSException if a general exception prevents creation of the CertStore
+-     * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
+-     */
+-    public CertStore getCertificatesAndCRLs(
+-        String  type,
+-        String  provider)
+-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+-    {
+-        return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
+-    }
+-
+-    /**
+-     * return a CertStore containing the certificates and CRLs associated with
+-     * this message.
+-     *
+-     * @exception NoSuchAlgorithmException if the cert store isn't available.
+-     * @exception CMSException if a general exception prevents creation of the CertStore
+-     * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
+-     */
+-    public CertStore getCertificatesAndCRLs(
+-        String  type,
+-        Provider  provider)
+-        throws NoSuchAlgorithmException, CMSException
+-    {
+-        try
+-        {
+-            JcaCertStoreBuilder certStoreBuilder = new JcaCertStoreBuilder().setType(type);
+-
+-            if (provider != null)
+-            {
+-                certStoreBuilder.setProvider(provider);
+-            }
+-
+-            certStoreBuilder.addCertificates(this.getCertificates());
+-            certStoreBuilder.addCRLs(this.getCRLs());
+-
+-            return certStoreBuilder.build();
+-        }
+-        catch (NoSuchAlgorithmException e)
+-        {
+-            throw e;
+-        }
+-        catch (Exception e)
+-        {
+-            throw new CMSException("exception creating CertStore: " + e.getMessage(), e);
+-        }
+-    }
++    // BEGIN android-removed
++    // /**
++    //  * return a X509Store containing the public key certificates, if any, contained
++    //  * in this message.
++    //  *
++    //  * @param type type of store to create
++    //  * @param provider name of provider to use
++    //  * @return a store of public key certificates
++    //  * @exception NoSuchProviderException if the provider requested isn't available.
++    //  * @exception NoSuchStoreException if the store type isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the X509Store
++    //  * @deprecated use base Store returning method
++    //  */
++    // public X509Store getCertificates(
++    //     String type,
++    //     String provider)
++    //     throws NoSuchStoreException, NoSuchProviderException, CMSException
++    // {
++    //     return getCertificates(type, CMSUtils.getProvider(provider));
++    // }
++    //
++    // /**
++    //  * return a X509Store containing the public key certificates, if any, contained
++    //  * in this message.
++    //  *
++    //  * @param type type of store to create
++    //  * @param provider provider to use
++    //  * @return a store of public key certificates
++    //  * @exception NoSuchStoreException if the store type isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the X509Store
++    //  * @deprecated use base Store returning method
++    //  */
++    // public X509Store getCertificates(
++    //     String type,
++    //     Provider provider)
++    //     throws NoSuchStoreException, CMSException
++    // {
++    //     if (certificateStore == null)
++    //     {
++    //         certificateStore = HELPER.createCertificateStore(type, provider, this.getCertificates());
++    //     }
++    //
++    //     return certificateStore;
++    // }
++    //
++    // /**
++    //  * return a X509Store containing CRLs, if any, contained
++    //  * in this message.
++    //  *
++    //  * @param type type of store to create
++    //  * @param provider name of provider to use
++    //  * @return a store of CRLs
++    //  * @exception NoSuchProviderException if the provider requested isn't available.
++    //  * @exception NoSuchStoreException if the store type isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the X509Store
++    //  * @deprecated use base Store returning method
++    //  */
++    // public X509Store getCRLs(
++    //     String type,
++    //     String provider)
++    //     throws NoSuchStoreException, NoSuchProviderException, CMSException
++    // {
++    //     return getCRLs(type, CMSUtils.getProvider(provider));
++    // }
++    //
++    // /**
++    //  * return a X509Store containing CRLs, if any, contained
++    //  * in this message.
++    //  *
++    //  * @param type type of store to create
++    //  * @param provider provider to use
++    //  * @return a store of CRLs
++    //  * @exception NoSuchStoreException if the store type isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the X509Store
++    //  * @deprecated use base Store returning method
++    //  */
++    // public X509Store getCRLs(
++    //     String type,
++    //     Provider provider)
++    //     throws NoSuchStoreException, CMSException
++    // {
++    //     if (crlStore == null)
++    //     {
++    //         crlStore = HELPER.createCRLsStore(type, provider, getCRLs());
++    //     }
++    //
++    //     return crlStore;
++    // }
++    //
++    // /**
++    //  * return a CertStore containing the certificates and CRLs associated with
++    //  * this message.
++    //  *
++    //  * @exception NoSuchProviderException if the provider requested isn't available.
++    //  * @exception NoSuchAlgorithmException if the cert store isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the CertStore
++    //  * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
++    //  */
++    // public CertStore getCertificatesAndCRLs(
++    //     String  type,
++    //     String  provider)
++    //     throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
++    // {
++    //     return getCertificatesAndCRLs(type, CMSUtils.getProvider(provider));
++    // }
++    //
++    // /**
++    //  * return a CertStore containing the certificates and CRLs associated with
++    //  * this message.
++    //  *
++    //  * @exception NoSuchAlgorithmException if the cert store isn't available.
++    //  * @exception CMSException if a general exception prevents creation of the CertStore
++    //  * @deprecated use base Store returning method and org.bouncycastle.cert.jcajce.JcaCertStoreBuilder
++    //  */
++    // public CertStore getCertificatesAndCRLs(
++    //     String  type,
++    //     Provider  provider)
++    //     throws NoSuchAlgorithmException, CMSException
++    // {
++    //     try
++    //     {
++    //         JcaCertStoreBuilder certStoreBuilder = new JcaCertStoreBuilder().setType(type);
++    //
++    //         if (provider != null)
++    //         {
++    //             certStoreBuilder.setProvider(provider);
++    //         }
++    //
++    //         certStoreBuilder.addCertificates(this.getCertificates());
++    //         certStoreBuilder.addCRLs(this.getCRLs());
++    //
++    //         return certStoreBuilder.build();
++    //     }
++    //     catch (NoSuchAlgorithmException e)
++    //     {
++    //         throw e;
++    //     }
++    //     catch (Exception e)
++    //     {
++    //         throw new CMSException("exception creating CertStore: " + e.getMessage(), e);
++    //     }
++    // }
++    // END android-removed
+ 
+     /**
+      * Return any X.509 certificate objects in this SignedData structure as a Store of X509CertificateHolder objects.
+@@ -481,18 +485,20 @@
+         return HELPER.getAttributeCertificates(signedData.getCertificates());
+     }
+ 
+-    /**
+-     * Return any OtherRevocationInfo OtherRevInfo objects of the type indicated by otherRevocationInfoFormat in
+-     * this SignedData structure.
+-     *
+-     * @param otherRevocationInfoFormat OID of the format type been looked for.
+-     *
+-     * @return a Store of ASN1Encodable objects representing any objects of otherRevocationInfoFormat found.
+-     */
+-    public Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat)
+-    {
+-        return HELPER.getOtherRevocationInfo(otherRevocationInfoFormat, signedData.getCRLs());
+-    }
++    // BEGIN android-removed
++    // /**
++    //  * Return any OtherRevocationInfo OtherRevInfo objects of the type indicated by otherRevocationInfoFormat in
++    //  * this SignedData structure.
++    //  *
++    //  * @param otherRevocationInfoFormat OID of the format type been looked for.
++    //  *
++    //  * @return a Store of ASN1Encodable objects representing any objects of otherRevocationInfoFormat found.
++    //  */
++    // public Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat)
++    // {
++    //     return HELPER.getOtherRevocationInfo(otherRevocationInfoFormat, signedData.getCRLs());
++    // }
++    // END android-removed
+ 
+     /**
+      * Return the a string representation of the OID associated with the
+@@ -536,71 +542,73 @@
+         return contentInfo.getEncoded();
+     }
+ 
+-    /**
+-     * Verify all the SignerInformation objects and their associated counter signatures attached
+-     * to this CMS SignedData object.
+-     *
+-     * @param verifierProvider  a provider of SignerInformationVerifier objects.
+-     * @return true if all verify, false otherwise.
+-     * @throws CMSException  if an exception occurs during the verification process.
+-     */
+-    public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider)
+-        throws CMSException
+-    {
+-        return verifySignatures(verifierProvider, false);
+-    }
+-
+-    /**
+-     * Verify all the SignerInformation objects and optionally their associated counter signatures attached
+-     * to this CMS SignedData object.
+-     *
+-     * @param verifierProvider  a provider of SignerInformationVerifier objects.
+-     * @param ignoreCounterSignatures if true don't check counter signatures. If false check counter signatures as well.
+-     * @return true if all verify, false otherwise.
+-     * @throws CMSException  if an exception occurs during the verification process.
+-     */
+-    public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider, boolean ignoreCounterSignatures)
+-        throws CMSException
+-    {
+-        Collection signers = this.getSignerInfos().getSigners();
+-
+-        for (Iterator it = signers.iterator(); it.hasNext();)
+-        {
+-            SignerInformation signer = (SignerInformation)it.next();
+-
+-            try
+-            {
+-                SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
+-
+-                if (!signer.verify(verifier))
+-                {
+-                    return false;
+-                }
+-
+-                if (!ignoreCounterSignatures)
+-                {
+-                    Collection counterSigners = signer.getCounterSignatures().getSigners();
+-
+-                    for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+-                    {
+-                        SignerInformation counterSigner = (SignerInformation)cIt.next();
+-                        SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
+-
+-                        if (!counterSigner.verify(counterVerifier))
+-                        {
+-                            return false;
+-                        }
+-                    }
+-                }
+-            }
+-            catch (OperatorCreationException e)
+-            {
+-                throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
+-            }
+-        }
+-
+-        return true;
+-    }
++    // BEGIN android-removed
++    // /**
++    //  * Verify all the SignerInformation objects and their associated counter signatures attached
++    //  * to this CMS SignedData object.
++    //  *
++    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
++    //  * @return true if all verify, false otherwise.
++    //  * @throws CMSException  if an exception occurs during the verification process.
++    //  */
++    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider)
++    //     throws CMSException
++    // {
++    //     return verifySignatures(verifierProvider, false);
++    // }
++    //
++    // /**
++    //  * Verify all the SignerInformation objects and optionally their associated counter signatures attached
++    //  * to this CMS SignedData object.
++    //  *
++    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
++    //  * @param ignoreCounterSignatures if true don't check counter signatures. If false check counter signatures as well.
++    //  * @return true if all verify, false otherwise.
++    //  * @throws CMSException  if an exception occurs during the verification process.
++    //  */
++    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider, boolean ignoreCounterSignatures)
++    //     throws CMSException
++    // {
++    //     Collection signers = this.getSignerInfos().getSigners();
++    //
++    //     for (Iterator it = signers.iterator(); it.hasNext();)
++    //     {
++    //         SignerInformation signer = (SignerInformation)it.next();
++    //
++    //         try
++    //         {
++    //             SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
++    //
++    //             if (!signer.verify(verifier))
++    //             {
++    //                 return false;
++    //             }
++    //
++    //             if (!ignoreCounterSignatures)
++    //             {
++    //                 Collection counterSigners = signer.getCounterSignatures().getSigners();
++    //
++    //                 for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
++    //                 {
++    //                     SignerInformation counterSigner = (SignerInformation)cIt.next();
++    //                     SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
++    //
++    //                     if (!counterSigner.verify(counterVerifier))
++    //                     {
++    //                         return false;
++    //                     }
++    //                 }
++    //             }
++    //         }
++    //         catch (OperatorCreationException e)
++    //         {
++    //             throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
++    //         }
++    //     }
++    //
++    //     return true;
++    // }
++    // END android-removed
+ 
+     /**
+      * Replace the SignerInformation store associated with this
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedGenerator.java bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedGenerator.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedGenerator.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedGenerator.java	2013-05-25 02:14:15.000000000 +0000
+@@ -23,8 +23,10 @@
  import org.bouncycastle.asn1.DERTaggedObject;
  import org.bouncycastle.asn1.cms.AttributeTable;
  import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+-import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 -import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 +// BEGIN android-removed
++// import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 +// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 +// END android-removed
  import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
  import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
  import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-@@ -30,7 +32,9 @@
- import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
- import org.bouncycastle.asn1.x509.AttributeCertificate;
- import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+@@ -35,7 +37,9 @@
+ import org.bouncycastle.cert.X509AttributeCertificateHolder;
+ import org.bouncycastle.cert.X509CRLHolder;
+ import org.bouncycastle.cert.X509CertificateHolder;
 -import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 +// BEGIN android-removed
 +// import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 +// END android-removed
+ import org.bouncycastle.util.Arrays;
  import org.bouncycastle.util.Store;
  import org.bouncycastle.x509.X509AttributeCertificate;
- import org.bouncycastle.x509.X509Store;
-@@ -43,25 +47,33 @@
+@@ -49,25 +53,33 @@
      public static final String  DATA = CMSObjectIdentifiers.data.getId();
      
      public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
@@ -65,7 +544,7 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedGenerator.java 
      private static final String  ENCRYPTION_ECDSA_WITH_SHA256 = X9ObjectIdentifiers.ecdsa_with_SHA256.getId();
      private static final String  ENCRYPTION_ECDSA_WITH_SHA384 = X9ObjectIdentifiers.ecdsa_with_SHA384.getId();
      private static final String  ENCRYPTION_ECDSA_WITH_SHA512 = X9ObjectIdentifiers.ecdsa_with_SHA512.getId();
-@@ -74,13 +86,17 @@
+@@ -80,13 +92,17 @@
          NO_PARAMS.add(ENCRYPTION_DSA);
          NO_PARAMS.add(ENCRYPTION_ECDSA);
          NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA1);
@@ -85,7 +564,7 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedGenerator.java 
          EC_ALGORITHMS.put(DIGEST_SHA256, ENCRYPTION_ECDSA_WITH_SHA256);
          EC_ALGORITHMS.put(DIGEST_SHA384, ENCRYPTION_ECDSA_WITH_SHA384);
          EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);
-@@ -138,14 +154,16 @@
+@@ -144,14 +160,16 @@
                  throw new IllegalArgumentException("can't mix ECDSA with anything but SHA family digests");
              }
          }
@@ -110,21 +589,95 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedGenerator.java 
          
          return encOID;
      }
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedHelper.java bcpkix-jdk15on-148/org/bouncycastle/cms/CMSSignedHelper.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedHelper.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/cms/CMSSignedHelper.java	2013-01-31 02:26:40.000000000 +0000
-@@ -23,7 +23,9 @@
+@@ -270,31 +288,33 @@
+         certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
+     }
+ 
+-    /**
+-     * Add a single instance of otherRevocationData to the CRL set to be included with the generated SignedData message.
+-     *
+-     * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
+-     * @param otherRevocationInfo the otherRevocationInfo ASN.1 structure.
+-     */
+-    public void addOtherRevocationInfo(
+-        ASN1ObjectIdentifier   otherRevocationInfoFormat,
+-        ASN1Encodable          otherRevocationInfo)
+-    {
+-        crls.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, otherRevocationInfo)));
+-    }
+-
+-    /**
+-     * Add a Store of otherRevocationData to the CRL set to be included with the generated SignedData message.
+-     *
+-     * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
+-     * @param otherRevocationInfos a Store of otherRevocationInfo data to add.
+-     */
+-    public void addOtherRevocationInfo(
+-        ASN1ObjectIdentifier   otherRevocationInfoFormat,
+-        Store                  otherRevocationInfos)
+-    {
+-        crls.addAll(CMSUtils.getOthersFromStore(otherRevocationInfoFormat, otherRevocationInfos));
+-    }
++    // BEGIN android-removed
++    // /**
++    //  * Add a single instance of otherRevocationData to the CRL set to be included with the generated SignedData message.
++    //  *
++    //  * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
++    //  * @param otherRevocationInfo the otherRevocationInfo ASN.1 structure.
++    //  */
++    // public void addOtherRevocationInfo(
++    //     ASN1ObjectIdentifier   otherRevocationInfoFormat,
++    //     ASN1Encodable          otherRevocationInfo)
++    // {
++    //     crls.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, otherRevocationInfo)));
++    // }
++    //
++    // /**
++    //  * Add a Store of otherRevocationData to the CRL set to be included with the generated SignedData message.
++    //  *
++    //  * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
++    //  * @param otherRevocationInfos a Store of otherRevocationInfo data to add.
++    //  */
++    // public void addOtherRevocationInfo(
++    //     ASN1ObjectIdentifier   otherRevocationInfoFormat,
++    //     Store                  otherRevocationInfos)
++    // {
++    //     crls.addAll(CMSUtils.getOthersFromStore(otherRevocationInfoFormat, otherRevocationInfos));
++    // }
++    // END android-removed
+ 
+     /**
+      * Add the attribute certificates contained in the passed in store to the
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedHelper.java bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedHelper.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSSignedHelper.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/CMSSignedHelper.java	2013-05-25 02:14:15.000000000 +0000
+@@ -19,8 +19,10 @@
  import org.bouncycastle.asn1.ASN1Set;
  import org.bouncycastle.asn1.ASN1TaggedObject;
  import org.bouncycastle.asn1.DERNull;
+-import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 -import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 +// BEGIN android-removed
++// import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 +// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 +// END android-removed
  import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
  import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
  import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-@@ -53,31 +55,43 @@
+@@ -35,8 +37,10 @@
+ import org.bouncycastle.cert.X509AttributeCertificateHolder;
+ import org.bouncycastle.cert.X509CRLHolder;
+ import org.bouncycastle.cert.X509CertificateHolder;
+-import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
++// BEGIN android-removed
++// import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
++// import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
++// END android-removed
+ import org.bouncycastle.util.CollectionStore;
+ import org.bouncycastle.util.Store;
+ import org.bouncycastle.x509.NoSuchStoreException;
+@@ -60,31 +64,43 @@
  
      static
      {
@@ -176,7 +729,7 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedHelper.java bcp
          addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_256, "SHA256", "ECDSA");
          addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_384, "SHA384", "ECDSA");
          addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_512, "SHA512", "ECDSA");
-@@ -90,30 +104,38 @@
+@@ -97,30 +113,38 @@
          encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
          encryptionAlgs.put(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm, "RSA");
          encryptionAlgs.put(X509ObjectIdentifiers.id_ea_rsa.getId(), "RSA");
@@ -232,9 +785,276 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/CMSSignedHelper.java bcp
          digestAliases.put("SHA256", new String[] { "SHA-256" });
          digestAliases.put("SHA384", new String[] { "SHA-384" });
          digestAliases.put("SHA512", new String[] { "SHA-512" });
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java bcpkix-jdk15on-148/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2012-09-17 23:04:47.000000000 +0000
+@@ -190,65 +214,67 @@
+         }
+     }
+ 
+-    X509Store createCertificateStore(
+-        String type,
+-        Provider provider,
+-        Store certStore)
+-        throws NoSuchStoreException, CMSException
+-    {
+-        try
+-        {
+-            JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(provider);
+-            Collection certHldrs = certStore.getMatches(null);
+-            List       certs = new ArrayList(certHldrs.size());
+-
+-            for (Iterator it = certHldrs.iterator(); it.hasNext();)
+-            {
+-                certs.add(converter.getCertificate((X509CertificateHolder)it.next()));
+-            }
+-
+-            return X509Store.getInstance(
+-                         "Certificate/" +type, new X509CollectionStoreParameters(certs), provider);
+-        }
+-        catch (IllegalArgumentException e)
+-        {
+-            throw new CMSException("can't setup the X509Store", e);
+-        }
+-        catch (CertificateException e)
+-        {
+-            throw new CMSException("can't setup the X509Store", e);
+-        }
+-    }
+-
+-    X509Store createCRLsStore(
+-        String type,
+-        Provider provider,
+-        Store    crlStore)
+-        throws NoSuchStoreException, CMSException
+-    {
+-        try
+-        {
+-            JcaX509CRLConverter converter = new JcaX509CRLConverter().setProvider(provider);
+-            Collection crlHldrs = crlStore.getMatches(null);
+-            List       crls = new ArrayList(crlHldrs.size());
+-
+-            for (Iterator it = crlHldrs.iterator(); it.hasNext();)
+-            {
+-                crls.add(converter.getCRL((X509CRLHolder)it.next()));
+-            }
+-
+-            return X509Store.getInstance(
+-                         "CRL/" +type, new X509CollectionStoreParameters(crls), provider);
+-        }
+-        catch (IllegalArgumentException e)
+-        {
+-            throw new CMSException("can't setup the X509Store", e);
+-        }
+-        catch (CRLException e)
+-        {
+-            throw new CMSException("can't setup the X509Store", e);
+-        }
+-    }
++    // BEGIN android-removed
++    // X509Store createCertificateStore(
++    //     String type,
++    //     Provider provider,
++    //     Store certStore)
++    //     throws NoSuchStoreException, CMSException
++    // {
++    //     try
++    //     {
++    //         JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(provider);
++    //         Collection certHldrs = certStore.getMatches(null);
++    //         List       certs = new ArrayList(certHldrs.size());
++    //
++    //         for (Iterator it = certHldrs.iterator(); it.hasNext();)
++    //         {
++    //             certs.add(converter.getCertificate((X509CertificateHolder)it.next()));
++    //         }
++    //
++    //         return X509Store.getInstance(
++    //                      "Certificate/" +type, new X509CollectionStoreParameters(certs), provider);
++    //     }
++    //     catch (IllegalArgumentException e)
++    //     {
++    //         throw new CMSException("can't setup the X509Store", e);
++    //     }
++    //     catch (CertificateException e)
++    //     {
++    //         throw new CMSException("can't setup the X509Store", e);
++    //     }
++    // }
++    //
++    // X509Store createCRLsStore(
++    //     String type,
++    //     Provider provider,
++    //     Store    crlStore)
++    //     throws NoSuchStoreException, CMSException
++    // {
++    //     try
++    //     {
++    //         JcaX509CRLConverter converter = new JcaX509CRLConverter().setProvider(provider);
++    //         Collection crlHldrs = crlStore.getMatches(null);
++    //         List       crls = new ArrayList(crlHldrs.size());
++    //
++    //         for (Iterator it = crlHldrs.iterator(); it.hasNext();)
++    //         {
++    //             crls.add(converter.getCRL((X509CRLHolder)it.next()));
++    //         }
++    //
++    //         return X509Store.getInstance(
++    //                      "CRL/" +type, new X509CollectionStoreParameters(crls), provider);
++    //     }
++    //     catch (IllegalArgumentException e)
++    //     {
++    //         throw new CMSException("can't setup the X509Store", e);
++    //     }
++    //     catch (CRLException e)
++    //     {
++    //         throw new CMSException("can't setup the X509Store", e);
++    //     }
++    // }
++    // END android-removed
+ 
+     AlgorithmIdentifier fixAlgID(AlgorithmIdentifier algId)
+     {
+@@ -336,35 +362,35 @@
+         return new CollectionStore(new ArrayList());
+     }
+ 
+-    Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat, ASN1Set crlSet)
+-    {
+-        if (crlSet != null)
+-        {
+-            List    crlList = new ArrayList(crlSet.size());
+-
+-            for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
+-            {
+-                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
+-
+-                if (obj instanceof ASN1TaggedObject)
+-                {
+-                    ASN1TaggedObject tObj = ASN1TaggedObject.getInstance(obj);
+-
+-                    if (tObj.getTagNo() == 1)
+-                    {
+-                        OtherRevocationInfoFormat other = OtherRevocationInfoFormat.getInstance(tObj, false);
+-
+-                        if (otherRevocationInfoFormat.equals(other.getInfoFormat()))
+-                        {
+-                            crlList.add(other.getInfo());
+-                        }
+-                    }
+-                }
+-            }
+-
+-            return new CollectionStore(crlList);
+-        }
+-
+-        return new CollectionStore(new ArrayList());
+-    }
++    // Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat, ASN1Set crlSet)
++    // {
++    //     if (crlSet != null)
++    //     {
++    //         List    crlList = new ArrayList(crlSet.size());
++    //
++    //         for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
++    //         {
++    //             ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
++    //
++    //             if (obj instanceof ASN1TaggedObject)
++    //             {
++    //                 ASN1TaggedObject tObj = ASN1TaggedObject.getInstance(obj);
++    //
++    //                 if (tObj.getTagNo() == 1)
++    //                 {
++    //                     OtherRevocationInfoFormat other = OtherRevocationInfoFormat.getInstance(tObj, false);
++    //
++    //                     if (otherRevocationInfoFormat.equals(other.getInfoFormat()))
++    //                     {
++    //                         crlList.add(other.getInfo());
++    //                     }
++    //                 }
++    //             }
++    //         }
++    //
++    //         return new CollectionStore(crlList);
++    //     }
++    //
++    //     return new CollectionStore(new ArrayList());
++    // }
+ }
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSUtils.java bcpkix-jdk15on-149/org/bouncycastle/cms/CMSUtils.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/CMSUtils.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/CMSUtils.java	2013-05-25 02:14:15.000000000 +0000
+@@ -30,9 +30,11 @@
+ import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+ import org.bouncycastle.asn1.cms.ContentInfo;
+ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+-import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
+-import org.bouncycastle.asn1.ocsp.OCSPResponse;
+-import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
++// BEGIN android-removed
++// import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
++// import org.bouncycastle.asn1.ocsp.OCSPResponse;
++// import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
++// END android-removed
+ import org.bouncycastle.asn1.x509.Certificate;
+ import org.bouncycastle.asn1.x509.CertificateList;
+ import org.bouncycastle.asn1.x509.TBSCertificate;
+@@ -189,29 +191,31 @@
+         }
+     }
+ 
+-    static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
+-    {
+-        List others = new ArrayList();
+-
+-        for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
+-        {
+-            ASN1Encodable info = (ASN1Encodable)it.next();
+-
+-            if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(otherRevocationInfoFormat))
+-            {
+-                OCSPResponse resp = OCSPResponse.getInstance(info);
+-
+-                if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
+-                {
+-                    throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
+-                }
+-            }
+-
+-            others.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, info)));
+-        }
+-
+-        return others;
+-    }
++    // BEGIN android-removed
++    // static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
++    // {
++    //     List others = new ArrayList();
++    //
++    //     for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
++    //     {
++    //         ASN1Encodable info = (ASN1Encodable)it.next();
++    //
++    //         if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(otherRevocationInfoFormat))
++    //         {
++    //             OCSPResponse resp = OCSPResponse.getInstance(info);
++    //
++    //             if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
++    //             {
++    //                 throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
++    //             }
++    //         }
++    //
++    //         others.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, info)));
++    //     }
++    //
++    //     return others;
++    // }
++    // END android-removed
+ 
+     static ASN1Set createBerSetFromList(List derObjects)
+     {
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java bcpkix-jdk15on-149/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2012-09-17 23:04:47.000000000 +0000
 @@ -4,7 +4,9 @@
  import java.util.Map;
  
@@ -346,9 +1166,9 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgor
      }
  
      /**
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java bcpkix-jdk15on-148/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2012-09-17 23:04:47.000000000 +0000
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java bcpkix-jdk15on-149/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2012-09-17 23:04:47.000000000 +0000
 @@ -16,21 +16,29 @@
  
      static
@@ -387,9 +1207,9 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/cms/DefaultCMSSignatureEncry
      }
  
      public AlgorithmIdentifier findEncryptionAlgorithm(AlgorithmIdentifier signatureAlgorithm)
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java bcpkix-jdk15on-148/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2013-01-31 02:26:40.000000000 +0000
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java bcpkix-jdk15on-149/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2013-01-31 02:26:40.000000000 +0000
 @@ -5,7 +5,9 @@
  
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -494,9 +1314,9 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultDigestAlgori
      }
  
      public AlgorithmIdentifier find(AlgorithmIdentifier sigAlgId)
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java bcpkix-jdk15on-148/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2013-01-31 02:26:40.000000000 +0000
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java bcpkix-jdk15on-149/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2013-01-31 02:26:40.000000000 +0000
 @@ -9,7 +9,9 @@
  import org.bouncycastle.asn1.ASN1Integer;
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -696,11 +1516,12 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/DefaultSignatureAlg
      }
  
      private static AlgorithmIdentifier generate(String signatureAlgorithm)
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/bc/BcUtil.java bcpkix-jdk15on-148/org/bouncycastle/operator/bc/BcUtil.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/operator/bc/BcUtil.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/operator/bc/BcUtil.java	2012-09-17 23:04:47.000000000 +0000
-@@ -1,21 +1,29 @@
- package org.bouncycastle.operator.bc;
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java bcpkix-jdk15on-149/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2013-05-25 02:14:15.000000000 +0000
+@@ -4,22 +4,30 @@
+ import java.util.HashMap;
+ import java.util.Map;
  
 -import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 +// BEGIN android-removed
@@ -711,7 +1532,7 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/bc/BcUtil.java bcpk
  import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
  import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
  import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
- import org.bouncycastle.crypto.Digest;
+ import org.bouncycastle.crypto.ExtendedDigest;
 -import org.bouncycastle.crypto.digests.GOST3411Digest;
 -import org.bouncycastle.crypto.digests.MD2Digest;
 -import org.bouncycastle.crypto.digests.MD4Digest;
@@ -737,83 +1558,125 @@ diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/bc/BcUtil.java bcpk
  import org.bouncycastle.crypto.digests.SHA256Digest;
  import org.bouncycastle.crypto.digests.SHA384Digest;
  import org.bouncycastle.crypto.digests.SHA512Digest;
-@@ -32,10 +40,12 @@
-         {
-             dig = new SHA1Digest();
-         }
--        else if (digAlg.getAlgorithm().equals(NISTObjectIdentifiers.id_sha224))
+@@ -41,13 +49,15 @@
+                 return new SHA1Digest();
+             }
+         });
+-        table.put(NISTObjectIdentifiers.id_sha224, new BcDigestProvider()
 -        {
--            dig = new SHA224Digest();
--        }
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new SHA224Digest();
+-            }
+-        });
 +        // BEGIN android-removed
-+        // else if (digAlg.getAlgorithm().equals(NISTObjectIdentifiers.id_sha224))
++        // table.put(NISTObjectIdentifiers.id_sha224, new BcDigestProvider()
 +        // {
-+        //     dig = new SHA224Digest();
-+        // }
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new SHA224Digest();
++        //     }
++        // });
 +        // END android-removed
-         else if (digAlg.getAlgorithm().equals(NISTObjectIdentifiers.id_sha256))
+         table.put(NISTObjectIdentifiers.id_sha256, new BcDigestProvider()
          {
-             dig = new SHA256Digest();
-@@ -52,30 +62,32 @@
-         {
-             dig = new MD5Digest();
-         }
--        else if (digAlg.getAlgorithm().equals(PKCSObjectIdentifiers.md4))
+             public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+@@ -76,48 +86,50 @@
+                 return new MD5Digest();
+             }
+         });
+-        table.put(PKCSObjectIdentifiers.md4, new BcDigestProvider()
 -        {
--            dig = new MD4Digest();
--        }
--        else if (digAlg.getAlgorithm().equals(PKCSObjectIdentifiers.md2))
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new MD4Digest();
+-            }
+-        });
+-        table.put(PKCSObjectIdentifiers.md2, new BcDigestProvider()
 -        {
--            dig = new MD2Digest();
--        }
--        else if (digAlg.getAlgorithm().equals(CryptoProObjectIdentifiers.gostR3411))
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new MD2Digest();
+-            }
+-        });
+-        table.put(CryptoProObjectIdentifiers.gostR3411, new BcDigestProvider()
 -        {
--            dig = new GOST3411Digest();
--        }
--        else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd128))
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new GOST3411Digest();
+-            }
+-        });
+-        table.put(TeleTrusTObjectIdentifiers.ripemd128, new BcDigestProvider()
 -        {
--            dig = new RIPEMD128Digest();
--        }
--        else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd160))
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new RIPEMD128Digest();
+-            }
+-        });
+-        table.put(TeleTrusTObjectIdentifiers.ripemd160, new BcDigestProvider()
 -        {
--            dig = new RIPEMD160Digest();
--        }
--        else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd256))
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new RIPEMD160Digest();
+-            }
+-        });
+-        table.put(TeleTrusTObjectIdentifiers.ripemd256, new BcDigestProvider()
 -        {
--            dig = new RIPEMD256Digest();
--        }
+-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+-            {
+-                return new RIPEMD256Digest();
+-            }
+-        });
 +        // BEGIN android-removed
-+        // else if (digAlg.getAlgorithm().equals(PKCSObjectIdentifiers.md4))
++        // table.put(PKCSObjectIdentifiers.md4, new BcDigestProvider()
 +        // {
-+        //     dig = new MD4Digest();
-+        // }
-+        // else if (digAlg.getAlgorithm().equals(PKCSObjectIdentifiers.md2))
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new MD4Digest();
++        //     }
++        // });
++        // table.put(PKCSObjectIdentifiers.md2, new BcDigestProvider()
 +        // {
-+        //     dig = new MD2Digest();
-+        // }
-+        // else if (digAlg.getAlgorithm().equals(CryptoProObjectIdentifiers.gostR3411))
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new MD2Digest();
++        //     }
++        // });
++        // table.put(CryptoProObjectIdentifiers.gostR3411, new BcDigestProvider()
 +        // {
-+        //     dig = new GOST3411Digest();
-+        // }
-+        // else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd128))
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new GOST3411Digest();
++        //     }
++        // });
++        // table.put(TeleTrusTObjectIdentifiers.ripemd128, new BcDigestProvider()
 +        // {
-+        //     dig = new RIPEMD128Digest();
-+        // }
-+        // else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd160))
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new RIPEMD128Digest();
++        //     }
++        // });
++        // table.put(TeleTrusTObjectIdentifiers.ripemd160, new BcDigestProvider()
 +        // {
-+        //     dig = new RIPEMD160Digest();
-+        // }
-+        // else if (digAlg.getAlgorithm().equals(TeleTrusTObjectIdentifiers.ripemd256))
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new RIPEMD160Digest();
++        //     }
++        // });
++        // table.put(TeleTrusTObjectIdentifiers.ripemd256, new BcDigestProvider()
 +        // {
-+        //     dig = new RIPEMD256Digest();
-+        // }
++        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
++        //     {
++        //         return new RIPEMD256Digest();
++        //     }
++        // });
 +        // END android-removed
-         else
-         {
-             throw new OperatorCreationException("cannot recognise digest");
-diff -Naur bcpkix-jdk15on-148.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java bcpkix-jdk15on-148/org/bouncycastle/operator/jcajce/OperatorHelper.java
---- bcpkix-jdk15on-148.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java	2013-02-08 17:54:18.000000000 +0000
-+++ bcpkix-jdk15on-148/org/bouncycastle/operator/jcajce/OperatorHelper.java	2013-01-31 02:26:40.000000000 +0000
+ 
+         return Collections.unmodifiableMap(table);
+     }
+diff -Naur bcpkix-jdk15on-149.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java bcpkix-jdk15on-149/org/bouncycastle/operator/jcajce/OperatorHelper.java
+--- bcpkix-jdk15on-149.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java	2013-05-31 21:17:22.000000000 +0000
++++ bcpkix-jdk15on-149/org/bouncycastle/operator/jcajce/OperatorHelper.java	2013-01-31 02:26:40.000000000 +0000
 @@ -20,7 +20,9 @@
  import org.bouncycastle.asn1.ASN1Encodable;
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;

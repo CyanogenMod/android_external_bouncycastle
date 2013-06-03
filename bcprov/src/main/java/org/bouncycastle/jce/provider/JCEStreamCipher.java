@@ -620,28 +620,4 @@ public class JCEStreamCipher
     //     }
     // }
     // END android-removed
-
-    /**
-     * PBEWithSHAAnd128BitRC4
-     */
-    static public class PBEWithSHAAnd128BitRC4
-        extends JCEStreamCipher
-    {
-        public PBEWithSHAAnd128BitRC4()
-        {
-            super(new RC4Engine(), 0);
-        }
-    }
-
-    /**
-     * PBEWithSHAAnd40BitRC4
-     */
-    static public class PBEWithSHAAnd40BitRC4
-        extends JCEStreamCipher
-    {
-        public PBEWithSHAAnd40BitRC4()
-        {
-            super(new RC4Engine(), 0);
-        }
-    }
 }

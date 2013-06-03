@@ -37,6 +37,7 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 // import org.bouncycastle.crypto.params.MQVPrivateParameters;
 // import org.bouncycastle.crypto.params.MQVPublicParameters;
 // END android-removed
+import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 // BEGIN android-removed

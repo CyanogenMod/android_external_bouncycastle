@@ -114,6 +114,8 @@ The following steps are recommended for porting new Bouncy Castle versions.
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/DigestInputStreamTest.java
      - java.security.DigestOutputStream
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/DigestOutputStreamTest.java
+     - javax.crypto.spec.GCMParameterSpec
+       libcore/luni/src/test/java/org/apache/harmony/crypto/tests/javax/crypto/spec/GCMParameterSpecTest.java
      - java.security.GuardedObject
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/GuardedObjectTest.java
      - java.security.Identity
@@ -212,10 +214,10 @@ The following steps are recommended for porting new Bouncy Castle versions.
      - java.security.SecureRandomSpi
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SecureRandomSpiTest.java
      - java.security.Signature
+       libcore/crypto/src/test/java/org/conscrypt/OpenSSLSignatureTest.java
        libcore/luni/src/test/java/libcore/java/security/SignatureTest.java
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/Signature2Test.java
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SignatureTest.java
-       libcore/luni/src/test/java/org/apache/harmony/xnet/provider/jsse/OpenSSLSignatureTest.java
        libcore/luni/src/test/java/tests/targets/security/SignatureTestMD2withRSA.java
      - java.security.SignatureSpi
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SignatureSpiTest.java
