@@ -313,8 +313,8 @@ diff -Naur bcprov-jdk15on-149.orig/org/bouncycastle/asn1/x509/X509NameTokenizer.
              }
 diff -Naur bcprov-jdk15on-149.orig/org/bouncycastle/crypto/digests/AndroidDigestFactory.java bcprov-jdk15on-149/org/bouncycastle/crypto/digests/AndroidDigestFactory.java
 --- bcprov-jdk15on-149.orig/org/bouncycastle/crypto/digests/AndroidDigestFactory.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk15on-149/org/bouncycastle/crypto/digests/AndroidDigestFactory.java	2012-09-17 23:04:47.000000000 +0000
-@@ -0,0 +1,78 @@
++++ bcprov-jdk15on-149/org/bouncycastle/crypto/digests/AndroidDigestFactory.java	2013-05-01 01:48:41.000000000 +0000
+@@ -0,0 +1,83 @@
 +/*
 + * Copyright (C) 2012 The Android Open Source Project
 + *
@@ -350,14 +350,19 @@ diff -Naur bcprov-jdk15on-149.orig/org/bouncycastle/crypto/digests/AndroidDigest
 +        Class factoryImplementationClass;
 +        try {
 +            factoryImplementationClass = Class.forName(OpenSSLFactoryClassName);
++            // Double check for NativeCrypto in case we are running on RI for testing
++            Class.forName("com.android.org.conscrypt.NativeCrypto");
 +        } catch (ClassNotFoundException e1) {
 +            try {
 +                factoryImplementationClass = Class.forName(BouncyCastleFactoryClassName);
 +            } catch (ClassNotFoundException e2) {
-+                throw new AssertionError("Failed to find AndroidDigestFactoryInterface "
++                AssertionError e = new AssertionError("Failed to load "
++                                         + "AndroidDigestFactoryInterface "
 +                                         + "implementation. Looked for "
 +                                         + OpenSSLFactoryClassName + " and "
 +                                         + BouncyCastleFactoryClassName);
++                e.initCause(e1);
++                throw e;
 +            }
 +        }
 +        if (!AndroidDigestFactoryInterface.class.isAssignableFrom(factoryImplementationClass)) {
