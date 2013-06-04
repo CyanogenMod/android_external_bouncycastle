@@ -15,15 +15,12 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-# used for bouncycastle-hostdex where we want everything for testing
 all_bcprov_src_files := $(call all-java-files-under,bcprov/src/main/java)
 
-# used for bouncycastle for target where we want to be sure to use OpenSSLDigest
 android_bcprov_src_files := $(filter-out \
  bcprov/src/main/java/org/bouncycastle/crypto/digests/AndroidDigestFactoryBouncyCastle.java, \
  $(all_bcprov_src_files))
 
-# used for bouncycastle-host where we can't use OpenSSLDigest
 ri_bcprov_src_files := $(filter-out \
  bcprov/src/main/java/org/bouncycastle/crypto/digests/AndroidDigestFactoryOpenSSL.java \
  bcprov/src/main/java/org/bouncycastle/crypto/digests/OpenSSLDigest.java, \
@@ -95,7 +92,7 @@ ifeq ($(WITH_HOST_DALVIK),true)
     include $(CLEAR_VARS)
     LOCAL_MODULE := bouncycastle-hostdex
     LOCAL_MODULE_TAGS := optional
-    LOCAL_SRC_FILES := $(all_bcprov_src_files)
+    LOCAL_SRC_FILES := $(android_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
     LOCAL_BUILD_HOST_DEX := true
     LOCAL_MODULE_TAGS := optional
