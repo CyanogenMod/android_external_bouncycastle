@@ -227,8 +227,17 @@ The following steps are recommended for porting new Bouncy Castle versions.
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/SignerTest.java
      - java.security.Timestamp
        libcore/luni/src/test/java/org/apache/harmony/security/tests/java/security/TimestampTest.java
+     - java.security.cert.TrustAnchor
+       libcore/luni/src/test/java/tests/security/cert/TrustAnchorTest.java
      - javax.net.ssl.TrustManagerFactory
        libcore/luni/src/test/java/libcore/javax/net/ssl/TrustManagerFactoryTest.java
+     - java.net.URLConnection
+       libcore/luni/src/test/java/libcore/java/net/URLConnectionTest.java
+       libcore/luni/src/test/java/org/apache/harmony/luni/tests/java/net/URLConnectionTest.java
+     - javax.security.auth.x500.X500Principal
+       libcore/luni/src/test/java/libcore/javax/net/ssl/DistinguishedNameParserTest.java
+       libcore/luni/src/test/java/libcore/javax/security/auth/x500/X500PrincipalTest.java
+       libcore/luni/src/test/java/tests/api/javax/security/auth/X500PrincipalTest.java
      - javax.net.ssl.SSLSocket and javax.net.ssl.SSLEngine (which touch on Cipher, MessageDigest, Signature)
        libcore/luni/src/test/java/libcore/javax/net/ssl/
      - Test Android additions to bouncycastle such as org.bouncycastle.crypto.digests.OpenSSLDigest and org.bouncycastle.jce.provider.CertBlacklist
