@@ -100,13 +100,11 @@ public class DefaultDigestAlgorithmIdentifierFinder
 
         if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
         {
-            digAlgId = ((RSASSAPSSparams)sigAlgId.getParameters()).getHashAlgorithm();
+            digAlgId = RSASSAPSSparams.getInstance(sigAlgId.getParameters()).getHashAlgorithm();
         }
         else
         {
-            // BEGIN android-changed
             digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigAlgId.getAlgorithm()), DERNull.INSTANCE);
-            // END android-changed
         }
 
         return digAlgId;
@@ -114,8 +112,6 @@ public class DefaultDigestAlgorithmIdentifierFinder
 
     public AlgorithmIdentifier find(String digAlgName)
     {
-        // BEGIN android-changed
         return new AlgorithmIdentifier((ASN1ObjectIdentifier)digestNameToOids.get(digAlgName), DERNull.INSTANCE);
-        // END android-changed
     }
 }

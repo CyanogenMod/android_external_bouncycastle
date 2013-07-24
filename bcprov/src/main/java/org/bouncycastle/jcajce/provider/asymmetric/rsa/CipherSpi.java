@@ -328,6 +328,8 @@ public class CipherSpi
             }
         }
 
+        bOut.reset();
+
         switch (opmode)
         {
         case Cipher.ENCRYPT_MODE:
@@ -510,13 +512,16 @@ public class CipherSpi
         try
         {
             byte[]  bytes = bOut.toByteArray();
-            bOut.reset();
 
             out = cipher.processBlock(bytes, 0, bytes.length);
         }
         catch (InvalidCipherTextException e)
         {
             throw new BadPaddingException(e.getMessage());
+        }
+        finally
+        {
+            bOut.reset();
         }
 
         for (int i = 0; i != out.length; i++)

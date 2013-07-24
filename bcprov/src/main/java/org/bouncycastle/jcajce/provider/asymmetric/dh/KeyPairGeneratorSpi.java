@@ -16,11 +16,13 @@ import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Integers;
 
 public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
     private static Hashtable params = new Hashtable();
+    private static Object    lock = new Object();
 
     DHKeyGenerationParameters param;
     DHBasicKeyPairGenerator engine = new DHBasicKeyPairGenerator();
@@ -63,9 +65,7 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            // BEGIN android-changed
-            Integer paramStrength = Integer.valueOf(strength);
-            // END android-changed
+            Integer paramStrength = Integers.valueOf(strength);
 
             if (params.containsKey(paramStrength))
             {
@@ -73,21 +73,34 @@ public class KeyPairGeneratorSpi
             }
             else
             {
-                DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters();
+                DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(strength);
 
-                if (dhParams != null && dhParams.getP().bitLength() == strength)
+                if (dhParams != null)
                 {
                     param = new DHKeyGenerationParameters(random, new DHParameters(dhParams.getP(), dhParams.getG(), null, dhParams.getL()));
                 }
                 else
                 {
-                    DHParametersGenerator pGen = new DHParametersGenerator();
+                    synchronized (lock)
+                    {
+                        // we do the check again in case we were blocked by a generator for
+                        // our key size.
+                        if (params.containsKey(paramStrength))
+                        {
+                            param = (DHKeyGenerationParameters)params.get(paramStrength);
+                        }
+                        else
+                        {
 
-                    pGen.init(strength, certainty, random);
+                            DHParametersGenerator pGen = new DHParametersGenerator();
 
-                    param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+                            pGen.init(strength, certainty, random);
 
-                    params.put(paramStrength, param);
+                            param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+
+                            params.put(paramStrength, param);
+                        }
+                    }
                 }
             }
 

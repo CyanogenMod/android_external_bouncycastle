@@ -135,31 +135,21 @@ class X509Util
         //
         // explicit params
         //
-        // BEGIN android-changed
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
 
         // BEGIN android-removed
-        // // BEGIN android-changed
         // AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
-        // // END android-changed
         // params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
         // END android-removed
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA384WITHRSAANDMGF1", creatPSSParams(sha384AlgId, 48));
 
-        // BEGIN android-changed
         AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, DERNull.INSTANCE);
-        // END android-changed
         params.put("SHA512WITHRSAANDMGF1", creatPSSParams(sha512AlgId, 64));
     }
 
@@ -202,9 +192,7 @@ class X509Util
         }
         else
         {
-            // BEGIN android-changed
             return new AlgorithmIdentifier(sigOid, DERNull.INSTANCE);
-            // END android-changed
         }
     }
     

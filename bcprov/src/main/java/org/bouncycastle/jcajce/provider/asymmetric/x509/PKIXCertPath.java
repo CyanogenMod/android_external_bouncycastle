@@ -53,7 +53,9 @@ public  class PKIXCertPath
     {
         List encodings = new ArrayList();
         encodings.add("PkiPath");
-        encodings.add("PEM");
+        // BEGIN android-removed
+        // encodings.add("PEM");
+        // END android-removed
         encodings.add("PKCS7");
         certPathEncodings = Collections.unmodifiableList(encodings);
     }

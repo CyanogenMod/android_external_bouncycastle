@@ -5,9 +5,15 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -22,17 +28,17 @@ import javax.crypto.spec.PBEParameterSpec;
 // import javax.crypto.spec.RC2ParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
+import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.OutputLengthException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.engines.GOST28147Engine;
-// END android-removed
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
@@ -738,30 +744,23 @@ public class JCEBlockCipher
         int     inputOffset,
         int     inputLen,
         byte[]  output,
-        int     outputOffset) 
+        int     outputOffset)
         throws IllegalBlockSizeException, BadPaddingException, ShortBufferException
     {
-        // BEGIN android-note
-        // added ShortBufferException to the throws statement
-        // END android-note
-        int     len = 0;
-
-        // BEGIN android-added
-        int outputLen = cipher.getOutputSize(inputLen);
-
-        if (outputLen + outputOffset > output.length) {
-            throw new ShortBufferException("need at least " + outputLen + " bytes");
-        }
-        // BEGIN android-added
-
-        if (inputLen != 0)
-        {
-                len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
-        }
-
         try
         {
+            int     len = 0;
+
+            if (inputLen != 0)
+            {
+                    len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+            }
+
             return (len + cipher.doFinal(output, outputOffset + len));
+        }
+        catch (OutputLengthException e)
+        {
+            throw new ShortBufferException(e.getMessage());
         }
         catch (DataLengthException e)
         {
@@ -779,80 +778,111 @@ public class JCEBlockCipher
         return "CCM".equals(modeName) || "EAX".equals(modeName) || "GCM".equals(modeName);
     }
 
-    /*
-     * The ciphers that inherit from us.
-     */
-
-    /**
-     * DES
-     */
-    static public class DES
-        extends JCEBlockCipher
+    protected byte[] engineWrap(
+        Key     key)
+    throws IllegalBlockSizeException, InvalidKeyException
     {
-        public DES()
+        byte[] encoded = key.getEncoded();
+        if (encoded == null)
         {
-            super(new DESEngine());
+            throw new InvalidKeyException("Cannot wrap key, null encoding.");
+        }
+
+        try
+        {
+            return engineDoFinal(encoded, 0, encoded.length);
+        }
+        catch (BadPaddingException e)
+        {
+            throw new IllegalBlockSizeException(e.getMessage());
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * DESCBC
-    //  */
-    // static public class DESCBC
-    //     extends JCEBlockCipher
-    // {
-    //     public DESCBC()
-    //     {
-    //         super(new CBCBlockCipher(new DESEngine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  *  GOST28147
-    //  */
-    // static public class GOST28147
-    //     extends JCEBlockCipher
-    // {
-    //     public GOST28147()
-    //     {
-    //         super(new GOST28147Engine());
-    //     }
-    // }
-    //
-    // static public class GOST28147cbc
-    //     extends JCEBlockCipher
-    // {
-    //     public GOST28147cbc()
-    //     {
-    //         super(new CBCBlockCipher(new GOST28147Engine()), 64);
-    //     }
-    // }
-    //
-    // /**
-    //  * RC2
-    //  */
-    // static public class RC2
-    //     extends JCEBlockCipher
-    // {
-    //     public RC2()
-    //     {
-    //         super(new RC2Engine());
-    //     }
-    // }
-    //
-    // /**
-    //  * RC2CBC
-    //  */
-    // static public class RC2CBC
-    //     extends JCEBlockCipher
-    // {
-    //     public RC2CBC()
-    //     {
-    //         super(new CBCBlockCipher(new RC2Engine()), 64);
-    //     }
-    // }
-    // END android-removed
+    protected Key engineUnwrap(
+        byte[] wrappedKey,
+        String wrappedKeyAlgorithm,
+        int wrappedKeyType)
+        throws InvalidKeyException
+    {
+        byte[] encoded;
+        try
+        {
+            encoded = engineDoFinal(wrappedKey, 0, wrappedKey.length);
+        }
+        catch (BadPaddingException e)
+        {
+            throw new InvalidKeyException(e.getMessage());
+        }
+        catch (IllegalBlockSizeException e2)
+        {
+            throw new InvalidKeyException(e2.getMessage());
+        }
+
+        if (wrappedKeyType == Cipher.SECRET_KEY)
+        {
+            return new SecretKeySpec(encoded, wrappedKeyAlgorithm);
+        }
+        else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
+        {
+            /*
+             * The caller doesn't know the algorithm as it is part of
+             * the encrypted data.
+             */
+            try
+            {
+                PrivateKeyInfo       in = PrivateKeyInfo.getInstance(encoded);
+
+                PrivateKey privKey = BouncyCastleProvider.getPrivateKey(in);
+
+                if (privKey != null)
+                {
+                    return privKey;
+                }
+                else
+                {
+                    throw new InvalidKeyException("algorithm " + in.getPrivateKeyAlgorithm().getAlgorithm() + " not supported");
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidKeyException("Invalid key encoding.");
+            }
+        }
+        else
+        {
+            try
+            {
+                KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
+
+                if (wrappedKeyType == Cipher.PUBLIC_KEY)
+                {
+                    return kf.generatePublic(new X509EncodedKeySpec(encoded));
+                }
+                else if (wrappedKeyType == Cipher.PRIVATE_KEY)
+                {
+                    return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+                }
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new InvalidKeyException("Unknown key type " + e.getMessage());
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                throw new InvalidKeyException("Unknown key type " + e.getMessage());
+            }
+            catch (InvalidKeySpecException e2)
+            {
+                throw new InvalidKeyException("Unknown key type " + e2.getMessage());
+            }
+
+            throw new InvalidKeyException("Unknown key type " + wrappedKeyType);
+        }
+    }
+
+    /*
+     * The ciphers that inherit from us.
+     */
 
     /**
      * PBEWithMD5AndDES

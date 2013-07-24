@@ -1669,7 +1669,7 @@ public class RFC3280CertPathUtilities
             //
             // (g) (1) permitted subtrees
             //
-            ASN1Sequence permitted = nc.getPermittedSubtrees();
+            GeneralSubtree[] permitted = nc.getPermittedSubtrees();
             if (permitted != null)
             {
                 try
@@ -1686,17 +1686,13 @@ public class RFC3280CertPathUtilities
             //
             // (g) (2) excluded subtrees
             //
-            ASN1Sequence excluded = nc.getExcludedSubtrees();
+            GeneralSubtree[] excluded = nc.getExcludedSubtrees();
             if (excluded != null)
             {
-                Enumeration e = excluded.getObjects();
+                for (int i = 0; i != excluded.length; i++)
                 try
                 {
-                    while (e.hasMoreElements())
-                    {
-                        GeneralSubtree subtree = GeneralSubtree.getInstance(e.nextElement());
-                        nameConstraintValidator.addExcludedSubtree(subtree);
-                    }
+                        nameConstraintValidator.addExcludedSubtree(excluded[i]);
                 }
                 catch (Exception ex)
                 {
@@ -2203,7 +2199,7 @@ public class RFC3280CertPathUtilities
         }
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension.", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }
@@ -2384,7 +2380,7 @@ public class RFC3280CertPathUtilities
 
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }

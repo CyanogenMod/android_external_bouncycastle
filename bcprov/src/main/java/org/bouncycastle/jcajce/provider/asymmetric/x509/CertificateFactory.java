@@ -22,8 +22,8 @@ import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.jce.provider.X509CRLObject;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 
@@ -67,7 +67,7 @@ public class CertificateFactory
         }
 
         return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(seq));
+                            Certificate.getInstance(seq));
     }
 
     private java.security.cert.Certificate getCertificate()
@@ -82,7 +82,7 @@ public class CertificateFactory
                 if (obj instanceof ASN1Sequence)
                 {
                    return new X509CertificateObject(
-                                    X509CertificateStructure.getInstance(obj));
+                                    Certificate.getInstance(obj));
                 }
             }
         }
@@ -99,7 +99,7 @@ public class CertificateFactory
         if (seq != null)
         {
             return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(seq));
+                            Certificate.getInstance(seq));
         }
 
         return null;
@@ -334,7 +334,9 @@ public class CertificateFactory
 
     public Iterator engineGetCertPathEncodings()
     {
-        return null; // TODO: PKIXCertPath.certPathEncodings.iterator();
+        // BEGIN android-changed
+        return PKIXCertPath.certPathEncodings.iterator();
+        // END android-changed
     }
 
     public CertPath engineGenerateCertPath(

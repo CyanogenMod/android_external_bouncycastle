@@ -56,11 +56,10 @@ public class BaseKeyGenerator
     {
         try
         {
-            // BEGIN android-added
-            if (random == null) {
+            if (random == null)
+            {
                 random = new SecureRandom();
             }
-            // END android-added
             engine.init(new KeyGenerationParameters(random, keySize));
             uninitialised = false;
         }
