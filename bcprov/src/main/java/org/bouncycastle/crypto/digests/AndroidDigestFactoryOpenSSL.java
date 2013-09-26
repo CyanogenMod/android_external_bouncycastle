@@ -25,6 +25,9 @@ public class AndroidDigestFactoryOpenSSL implements AndroidDigestFactoryInterfac
     public Digest getSHA1() {
         return new OpenSSLDigest.SHA1();
     }
+    public Digest getSHA224() {
+        return new OpenSSLDigest.SHA224();
+    }
     public Digest getSHA256() {
         return new OpenSSLDigest.SHA256();
     }

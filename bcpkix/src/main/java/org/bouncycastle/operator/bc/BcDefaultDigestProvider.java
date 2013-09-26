@@ -25,9 +25,7 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD256Digest;
 // END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.digests.SHA224Digest;
-// END android-removed
+import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -49,15 +47,13 @@ public class BcDefaultDigestProvider
                 return new SHA1Digest();
             }
         });
-        // BEGIN android-removed
-        // table.put(NISTObjectIdentifiers.id_sha224, new BcDigestProvider()
-        // {
-        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-        //     {
-        //         return new SHA224Digest();
-        //     }
-        // });
-        // END android-removed
+        table.put(NISTObjectIdentifiers.id_sha224, new BcDigestProvider()
+        {
+            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+            {
+                return new SHA224Digest();
+            }
+        });
         table.put(NISTObjectIdentifiers.id_sha256, new BcDigestProvider()
         {
             public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)

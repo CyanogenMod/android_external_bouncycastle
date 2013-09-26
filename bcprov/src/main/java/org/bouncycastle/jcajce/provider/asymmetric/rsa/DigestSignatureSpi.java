@@ -274,16 +274,16 @@ public class DigestSignatureSpi
         }
     }
 
-    // BEGIN android-removed
-    // static public class SHA224
-    //     extends DigestSignatureSpi
-    // {
-    //     public SHA224()
-    //     {
-    //         super(NISTObjectIdentifiers.id_sha224, new SHA224Digest(), new PKCS1Encoding(new RSABlindedEngine()));
-    //     }
-    // }
-    // END android-removed
+    static public class SHA224
+        extends DigestSignatureSpi
+    {
+        public SHA224()
+        {
+            // BEGIN android-changed
+            super(NISTObjectIdentifiers.id_sha224, AndroidDigestFactory.getSHA224(), new PKCS1Encoding(new RSABlindedEngine()));
+            // END android-changed
+        }
+    }
 
     static public class SHA256
         extends DigestSignatureSpi

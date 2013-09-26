@@ -24,9 +24,7 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    sha256WithRSAEncryption   = pkcs_1.branch("11");
     static final ASN1ObjectIdentifier    sha384WithRSAEncryption   = pkcs_1.branch("12");
     static final ASN1ObjectIdentifier    sha512WithRSAEncryption   = pkcs_1.branch("13");
-    // BEGIN android-removed
-    // static final ASN1ObjectIdentifier    sha224WithRSAEncryption   = pkcs_1.branch("14");
-    // END android-removed
+    static final ASN1ObjectIdentifier    sha224WithRSAEncryption   = pkcs_1.branch("14");
 
     //
     // pkcs-3 OBJECT IDENTIFIER ::= {
@@ -89,9 +87,7 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    md5                     = digestAlgorithm.branch("5");
 
     static final ASN1ObjectIdentifier    id_hmacWithSHA1         = digestAlgorithm.branch("7");
-    // BEGIN android-removed
-    // static final ASN1ObjectIdentifier    id_hmacWithSHA224       = digestAlgorithm.branch("8");
-    // END android-removed
+    static final ASN1ObjectIdentifier    id_hmacWithSHA224       = digestAlgorithm.branch("8");
     static final ASN1ObjectIdentifier    id_hmacWithSHA256       = digestAlgorithm.branch("9");
     static final ASN1ObjectIdentifier    id_hmacWithSHA384       = digestAlgorithm.branch("10");
     static final ASN1ObjectIdentifier    id_hmacWithSHA512       = digestAlgorithm.branch("11");

@@ -53,9 +53,7 @@ public class CMSSignedGenerator
     public static final String  DATA = CMSObjectIdentifiers.data.getId();
     
     public static final String  DIGEST_SHA1 = OIWObjectIdentifiers.idSHA1.getId();
-    // BEGIN android-removed
-    // public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
-    // END android-removed
+    public static final String  DIGEST_SHA224 = NISTObjectIdentifiers.id_sha224.getId();
     public static final String  DIGEST_SHA256 = NISTObjectIdentifiers.id_sha256.getId();
     public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
     public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
@@ -77,9 +75,7 @@ public class CMSSignedGenerator
     // END android-removed
 
     private static final String  ENCRYPTION_ECDSA_WITH_SHA1 = X9ObjectIdentifiers.ecdsa_with_SHA1.getId();
-    // BEGIN android-removed
-    // private static final String  ENCRYPTION_ECDSA_WITH_SHA224 = X9ObjectIdentifiers.ecdsa_with_SHA224.getId();
-    // END android-removed
+    private static final String  ENCRYPTION_ECDSA_WITH_SHA224 = X9ObjectIdentifiers.ecdsa_with_SHA224.getId();
     private static final String  ENCRYPTION_ECDSA_WITH_SHA256 = X9ObjectIdentifiers.ecdsa_with_SHA256.getId();
     private static final String  ENCRYPTION_ECDSA_WITH_SHA384 = X9ObjectIdentifiers.ecdsa_with_SHA384.getId();
     private static final String  ENCRYPTION_ECDSA_WITH_SHA512 = X9ObjectIdentifiers.ecdsa_with_SHA512.getId();
@@ -92,17 +88,13 @@ public class CMSSignedGenerator
         NO_PARAMS.add(ENCRYPTION_DSA);
         NO_PARAMS.add(ENCRYPTION_ECDSA);
         NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA1);
-        // BEGIN android-removed
-        // NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA224);
-        // END android-removed
+        NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA224);
         NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA256);
         NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA384);
         NO_PARAMS.add(ENCRYPTION_ECDSA_WITH_SHA512);
 
         EC_ALGORITHMS.put(DIGEST_SHA1, ENCRYPTION_ECDSA_WITH_SHA1);
-        // BEGIN android-removed
-        // EC_ALGORITHMS.put(DIGEST_SHA224, ENCRYPTION_ECDSA_WITH_SHA224);
-        // END android-removed
+        EC_ALGORITHMS.put(DIGEST_SHA224, ENCRYPTION_ECDSA_WITH_SHA224);
         EC_ALGORITHMS.put(DIGEST_SHA256, ENCRYPTION_ECDSA_WITH_SHA256);
         EC_ALGORITHMS.put(DIGEST_SHA384, ENCRYPTION_ECDSA_WITH_SHA384);
         EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);

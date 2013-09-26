@@ -30,9 +30,7 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
 
     public DefaultCMSSignatureAlgorithmNameGenerator()
     {
-        // BEGIN android-removed
-        // addEntries(NISTObjectIdentifiers.dsa_with_sha224, "SHA224", "DSA");
-        // END android-removed
+        addEntries(NISTObjectIdentifiers.dsa_with_sha224, "SHA224", "DSA");
         addEntries(NISTObjectIdentifiers.dsa_with_sha256, "SHA256", "DSA");
         addEntries(NISTObjectIdentifiers.dsa_with_sha384, "SHA384", "DSA");
         addEntries(NISTObjectIdentifiers.dsa_with_sha512, "SHA512", "DSA");
@@ -49,24 +47,18 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         // END android-removed
         addEntries(PKCSObjectIdentifiers.md5WithRSAEncryption, "MD5", "RSA");
         addEntries(PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1", "RSA");
-        // BEGIN android-removed
-        // addEntries(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224", "RSA");
-        // END android-removed
+        addEntries(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224", "RSA");
         addEntries(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256", "RSA");
         addEntries(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384", "RSA");
         addEntries(PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512", "RSA");
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1", "ECDSA");
-        // BEGIN android-removed
-        // addEntries(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224", "ECDSA");
-        // END android-removed
+        addEntries(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224", "ECDSA");
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256", "ECDSA");
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA384, "SHA384", "ECDSA");
         addEntries(X9ObjectIdentifiers.ecdsa_with_SHA512, "SHA512", "ECDSA");
         addEntries(X9ObjectIdentifiers.id_dsa_with_sha1, "SHA1", "DSA");
         addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_1, "SHA1", "ECDSA");
-        // BEGIN android-removed
-        // addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_224, "SHA224", "ECDSA");
-        // END android-removed
+        addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_224, "SHA224", "ECDSA");
         addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_256, "SHA256", "ECDSA");
         addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_384, "SHA384", "ECDSA");
         addEntries(EACObjectIdentifiers.id_TA_ECDSA_SHA_512, "SHA512", "ECDSA");
@@ -93,9 +85,7 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         // END android-removed
         digestAlgs.put(PKCSObjectIdentifiers.md5, "MD5");
         digestAlgs.put(OIWObjectIdentifiers.idSHA1, "SHA1");
-        // BEGIN android-removed
-        // digestAlgs.put(NISTObjectIdentifiers.id_sha224, "SHA224");
-        // END android-removed
+        digestAlgs.put(NISTObjectIdentifiers.id_sha224, "SHA224");
         digestAlgs.put(NISTObjectIdentifiers.id_sha256, "SHA256");
         digestAlgs.put(NISTObjectIdentifiers.id_sha384, "SHA384");
         digestAlgs.put(NISTObjectIdentifiers.id_sha512, "SHA512");

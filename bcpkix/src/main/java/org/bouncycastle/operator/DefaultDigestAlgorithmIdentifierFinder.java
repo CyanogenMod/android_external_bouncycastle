@@ -33,9 +33,7 @@ public class DefaultDigestAlgorithmIdentifierFinder
         // END android-removed
         digestOids.put(OIWObjectIdentifiers.sha1WithRSA, OIWObjectIdentifiers.idSHA1);
 
-        // BEGIN android-removed
-        // digestOids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        digestOids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, NISTObjectIdentifiers.id_sha224);
         digestOids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, NISTObjectIdentifiers.id_sha256);
         digestOids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, NISTObjectIdentifiers.id_sha384);
         digestOids.put(PKCSObjectIdentifiers.sha512WithRSAEncryption, NISTObjectIdentifiers.id_sha512);
@@ -47,17 +45,13 @@ public class DefaultDigestAlgorithmIdentifierFinder
         digestOids.put(PKCSObjectIdentifiers.sha1WithRSAEncryption, OIWObjectIdentifiers.idSHA1);
 
         digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, OIWObjectIdentifiers.idSHA1);
-        // BEGIN android-removed
-        // digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, NISTObjectIdentifiers.id_sha224);
         digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, NISTObjectIdentifiers.id_sha256);
         digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA384, NISTObjectIdentifiers.id_sha384);
         digestOids.put(X9ObjectIdentifiers.ecdsa_with_SHA512, NISTObjectIdentifiers.id_sha512);
         digestOids.put(X9ObjectIdentifiers.id_dsa_with_sha1, OIWObjectIdentifiers.idSHA1);
 
-        // BEGIN android-removed
-        // digestOids.put(NISTObjectIdentifiers.dsa_with_sha224, NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        digestOids.put(NISTObjectIdentifiers.dsa_with_sha224, NISTObjectIdentifiers.id_sha224);
         digestOids.put(NISTObjectIdentifiers.dsa_with_sha256, NISTObjectIdentifiers.id_sha256);
         digestOids.put(NISTObjectIdentifiers.dsa_with_sha384, NISTObjectIdentifiers.id_sha384);
         digestOids.put(NISTObjectIdentifiers.dsa_with_sha512, NISTObjectIdentifiers.id_sha512);
@@ -72,9 +66,7 @@ public class DefaultDigestAlgorithmIdentifierFinder
         // END android-removed
 
         digestNameToOids.put("SHA-1", OIWObjectIdentifiers.idSHA1);
-        // BEGIN android-removed
-        // digestNameToOids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        digestNameToOids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
         digestNameToOids.put("SHA-256", NISTObjectIdentifiers.id_sha256);
         digestNameToOids.put("SHA-384", NISTObjectIdentifiers.id_sha384);
         digestNameToOids.put("SHA-512", NISTObjectIdentifiers.id_sha512);

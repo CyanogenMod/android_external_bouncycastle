@@ -22,9 +22,7 @@ public class DefaultCMSSignatureEncryptionAlgorithmFinder
         // END android-removed
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.md5WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha1WithRSAEncryption);
-        // BEGIN android-removed
-        // RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        // END android-removed
+        RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha224WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha256WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha384WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha512WithRSAEncryption);

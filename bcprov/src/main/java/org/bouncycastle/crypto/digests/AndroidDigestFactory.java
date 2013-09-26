@@ -69,6 +69,10 @@ public final class AndroidDigestFactory {
         return FACTORY.getSHA1();
     }
 
+    public static Digest getSHA224() {
+        return FACTORY.getSHA224();
+    }
+
     public static Digest getSHA256() {
         return FACTORY.getSHA256();
     }

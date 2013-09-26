@@ -49,9 +49,7 @@ class OperatorHelper
         // reverse mappings
         //
         oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
-        // BEGIN android-removed
-        // oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
-        // END android-removed
+        oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512WITHRSA");
@@ -66,17 +64,13 @@ class OperatorHelper
         // END android-removed
         oids.put(new ASN1ObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
-        // BEGIN android-removed
-        // oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
-        // END android-removed
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA384, "SHA384WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA512, "SHA512WITHECDSA");
         oids.put(OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
         oids.put(OIWObjectIdentifiers.dsaWithSHA1, "SHA1WITHDSA");
-        // BEGIN android-removed
-        // oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
-        // END android-removed
+        oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
         oids.put(NISTObjectIdentifiers.dsa_with_sha256, "SHA256WITHDSA");
 
         oids.put(OIWObjectIdentifiers.idSHA1, "SHA-1");
@@ -317,12 +311,10 @@ class OperatorHelper
         {
             return "SHA1";
         }
-        // BEGIN android-removed
-        // else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
-        // {
-        //     return "SHA224";
-        // }
-        // END android-removed
+        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
         else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
         {
             return "SHA256";
