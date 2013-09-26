@@ -46,9 +46,7 @@ public class RSADigestSigner
         // END android-removed
 
         oidMap.put("SHA-1", X509ObjectIdentifiers.id_SHA1);
-        // BEGIN android-removed
-        // oidMap.put("SHA-224", NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        oidMap.put("SHA-224", NISTObjectIdentifiers.id_sha224);
         oidMap.put("SHA-256", NISTObjectIdentifiers.id_sha256);
         oidMap.put("SHA-384", NISTObjectIdentifiers.id_sha384);
         oidMap.put("SHA-512", NISTObjectIdentifiers.id_sha512);

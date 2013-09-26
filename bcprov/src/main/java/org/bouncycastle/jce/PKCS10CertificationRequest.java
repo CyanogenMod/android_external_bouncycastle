@@ -95,10 +95,8 @@ public class PKCS10CertificationRequest
         algorithms.put("RSAWITHMD5", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
         algorithms.put("SHA1WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
         algorithms.put("SHA1WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        // algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        // END android-removed
+        algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
+        algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA256WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha256WithRSAEncryption);
         algorithms.put("SHA256WITHRSA", PKCSObjectIdentifiers.sha256WithRSAEncryption);
         algorithms.put("SHA384WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha384WithRSAEncryption);
@@ -106,9 +104,7 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA1WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
-        // END android-removed
+        algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA256WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
@@ -123,16 +119,12 @@ public class PKCS10CertificationRequest
         // END android-removed
         algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
-        // END android-removed
+        algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
         algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
         algorithms.put("SHA512WITHDSA", NISTObjectIdentifiers.dsa_with_sha512);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
-        // END android-removed
+        algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
         algorithms.put("SHA256WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         algorithms.put("SHA384WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
@@ -149,9 +141,7 @@ public class PKCS10CertificationRequest
         // reverse mappings
         //
         oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
-        // BEGIN android-removed
-        // oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
-        // END android-removed
+        oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512WITHRSA");
@@ -167,17 +157,13 @@ public class PKCS10CertificationRequest
         // END android-removed
         oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
-        // BEGIN android-removed
-        // oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
-        // END android-removed
+        oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA384, "SHA384WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA512, "SHA512WITHECDSA");
         oids.put(OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
         oids.put(OIWObjectIdentifiers.dsaWithSHA1, "SHA1WITHDSA");
-        // BEGIN android-removed
-        // oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
-        // END android-removed
+        oids.put(NISTObjectIdentifiers.dsa_with_sha224, "SHA224WITHDSA");
         oids.put(NISTObjectIdentifiers.dsa_with_sha256, "SHA256WITHDSA");
         
         //
@@ -191,16 +177,12 @@ public class PKCS10CertificationRequest
         // The parameters field SHALL be NULL for RSA based signature algorithms.
         //
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA1);
-        // BEGIN android-removed
-        // noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
-        // END android-removed
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA256);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA384);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA512);
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
-        // BEGIN android-removed
-        // noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
-        // END android-removed
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
 
         //
@@ -216,10 +198,8 @@ public class PKCS10CertificationRequest
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
         params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
 
-        // BEGIN android-removed
-        // AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
-        // params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
-        // END android-removed
+        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
+        params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
 
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
         params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
@@ -638,12 +618,10 @@ public class PKCS10CertificationRequest
         {
             return "SHA1";
         }
-        // BEGIN android-removed
-        // else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
-        // {
-        //     return "SHA224";
-        // }
-        // END android-removed
+        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
         else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
         {
             return "SHA256";

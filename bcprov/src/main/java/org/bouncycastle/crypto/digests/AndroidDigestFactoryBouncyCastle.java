@@ -25,6 +25,9 @@ public class AndroidDigestFactoryBouncyCastle implements AndroidDigestFactoryInt
     public Digest getSHA1() {
         return new SHA1Digest();
     }
+    public Digest getSHA224() {
+        return new SHA224Digest();
+    }
     public Digest getSHA256() {
         return new SHA256Digest();
     }

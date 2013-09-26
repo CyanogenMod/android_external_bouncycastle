@@ -91,16 +91,16 @@ public class SignatureSpi
         }
     }
 
-    // BEGIN android-removed
-    // static public class ecDSA224
-    //     extends SignatureSpi
-    // {
-    //     public ecDSA224()
-    //     {
-    //         super(new SHA224Digest(), new ECDSASigner(), new StdDSAEncoder());
-    //     }
-    // }
-    // END android-removed
+    static public class ecDSA224
+        extends SignatureSpi
+    {
+        public ecDSA224()
+        {
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA224(), new ECDSASigner(), new StdDSAEncoder());
+            // END android-changed
+        }
+    }
 
     static public class ecDSA256
         extends SignatureSpi

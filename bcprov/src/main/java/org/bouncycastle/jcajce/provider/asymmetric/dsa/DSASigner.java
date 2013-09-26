@@ -227,25 +227,29 @@ public class DSASigner
         }
     }
 
+    static public class dsa224
+        extends DSASigner
+    {
+        public dsa224()
+        {
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA224(), new org.bouncycastle.crypto.signers.DSASigner());
+            // END android-changed
+        }
+    }
+    
+    static public class dsa256
+        extends DSASigner
+    {
+        public dsa256()
+        {
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA256(), new org.bouncycastle.crypto.signers.DSASigner());
+            // END android-changed
+        }
+    }
+    
     // BEGIN android-removed
-    // static public class dsa224
-    //     extends DSASigner
-    // {
-    //     public dsa224()
-    //     {
-    //         super(new SHA224Digest(), new org.bouncycastle.crypto.signers.DSASigner());
-    //     }
-    // }
-    //
-    // static public class dsa256
-    //     extends DSASigner
-    // {
-    //     public dsa256()
-    //     {
-    //         super(new SHA256Digest(), new org.bouncycastle.crypto.signers.DSASigner());
-    //     }
-    // }
-    //
     // static public class dsa384
     //     extends DSASigner
     // {

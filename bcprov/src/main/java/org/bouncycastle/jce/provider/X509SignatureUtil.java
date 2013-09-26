@@ -102,12 +102,10 @@ class X509SignatureUtil
         {
             return "SHA1";
         }
-        // BEGIN android-removed
-        // else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
-        // {
-        //     return "SHA224";
-        // }
-        // END android-removed
+        else if (NISTObjectIdentifiers.id_sha224.equals(digestAlgOID))
+        {
+            return "SHA224";
+        }
         else if (NISTObjectIdentifiers.id_sha256.equals(digestAlgOID))
         {
             return "SHA256";
