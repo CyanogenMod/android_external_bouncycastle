@@ -27,9 +27,7 @@ public class DigestFactory
 {
     private static Set md5 = new HashSet();
     private static Set sha1 = new HashSet();
-    // BEGIN android-removed
-    // private static Set sha224 = new HashSet();
-    // END android-removed
+    private static Set sha224 = new HashSet();
     private static Set sha256 = new HashSet();
     private static Set sha384 = new HashSet();
     private static Set sha512 = new HashSet();
@@ -45,11 +43,9 @@ public class DigestFactory
         sha1.add("SHA-1");
         sha1.add(OIWObjectIdentifiers.idSHA1.getId());
         
-        // BEGIN android-removed
-        // sha224.add("SHA224");
-        // sha224.add("SHA-224");
-        // sha224.add(NISTObjectIdentifiers.id_sha224.getId());
-        // END android-removed
+        sha224.add("SHA224");
+        sha224.add("SHA-224");
+        sha224.add(NISTObjectIdentifiers.id_sha224.getId());
         
         sha256.add("SHA256");
         sha256.add("SHA-256");
@@ -70,11 +66,9 @@ public class DigestFactory
         oids.put("SHA-1", OIWObjectIdentifiers.idSHA1);
         oids.put(OIWObjectIdentifiers.idSHA1.getId(), OIWObjectIdentifiers.idSHA1);
         
-        // BEGIN android-removed
-        // oids.put("SHA224", NISTObjectIdentifiers.id_sha224);
-        // oids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
-        // oids.put(NISTObjectIdentifiers.id_sha224.getId(), NISTObjectIdentifiers.id_sha224);
-        // END android-removed
+        oids.put("SHA224", NISTObjectIdentifiers.id_sha224);
+        oids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
+        oids.put(NISTObjectIdentifiers.id_sha224.getId(), NISTObjectIdentifiers.id_sha224);
         
         oids.put("SHA256", NISTObjectIdentifiers.id_sha256);
         oids.put("SHA-256", NISTObjectIdentifiers.id_sha256);
@@ -106,12 +100,12 @@ public class DigestFactory
             return AndroidDigestFactory.getMD5();
             // END android-changed
         }
-        // BEGIN android-removed
-        // if (sha224.contains(digestName))
-        // {
-        //     return new SHA224Digest();
-        // }
-        // END android-removed
+        if (sha224.contains(digestName))
+        {
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA224();
+            // END android-changed
+        }
         if (sha256.contains(digestName))
         {
             // BEGIN android-changed
@@ -139,9 +133,7 @@ public class DigestFactory
         String digest2)
     {
         return (sha1.contains(digest1) && sha1.contains(digest2))
-            // BEGIN android-removed
-            // || (sha224.contains(digest1) && sha224.contains(digest2))
-            // END android-removed
+            || (sha224.contains(digest1) && sha224.contains(digest2))
             || (sha256.contains(digest1) && sha256.contains(digest2))
             || (sha384.contains(digest1) && sha384.contains(digest2))
             || (sha512.contains(digest1) && sha512.contains(digest2))

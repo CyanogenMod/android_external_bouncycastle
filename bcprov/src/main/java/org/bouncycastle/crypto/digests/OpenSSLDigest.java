@@ -136,6 +136,13 @@ public class OpenSSLDigest implements ExtendedDigest {
         public SHA1() { super("SHA-1", EVP_MD, SIZE, BLOCK_SIZE); }
     }
 
+    public static class SHA224 extends OpenSSLDigest {
+        private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha224");
+        private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);
+        private static final int BLOCK_SIZE = NativeCrypto.EVP_MD_block_size(EVP_MD);
+        public SHA224() { super("SHA-224", EVP_MD, SIZE, BLOCK_SIZE); }
+    }
+
     public static class SHA256 extends OpenSSLDigest {
         private static final long EVP_MD = NativeCrypto.EVP_get_digestbyname("sha256");
         private static final int SIZE = NativeCrypto.EVP_MD_size(EVP_MD);

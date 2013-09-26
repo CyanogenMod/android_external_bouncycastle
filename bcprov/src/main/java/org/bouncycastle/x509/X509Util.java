@@ -56,10 +56,8 @@ class X509Util
         algorithms.put("MD5WITHRSA", PKCSObjectIdentifiers.md5WithRSAEncryption);
         algorithms.put("SHA1WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha1WithRSAEncryption);
         algorithms.put("SHA1WITHRSA", PKCSObjectIdentifiers.sha1WithRSAEncryption);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        // algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-        // END android-removed
+        algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
+        algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA256WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha256WithRSAEncryption);
         algorithms.put("SHA256WITHRSA", PKCSObjectIdentifiers.sha256WithRSAEncryption);
         algorithms.put("SHA384WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha384WithRSAEncryption);
@@ -67,9 +65,7 @@ class X509Util
         algorithms.put("SHA512WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA512WITHRSA", PKCSObjectIdentifiers.sha512WithRSAEncryption);
         algorithms.put("SHA1WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
-        // END android-removed
+        algorithms.put("SHA224WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA256WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
@@ -83,17 +79,13 @@ class X509Util
         // END android-removed
         algorithms.put("SHA1WITHDSA", X9ObjectIdentifiers.id_dsa_with_sha1);
         algorithms.put("DSAWITHSHA1", X9ObjectIdentifiers.id_dsa_with_sha1);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
-        // END android-removed
+        algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
         algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
         algorithms.put("SHA512WITHDSA", NISTObjectIdentifiers.dsa_with_sha512);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
-        // BEGIN android-removed
-        // algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
-        // END android-removed
+        algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
         algorithms.put("SHA256WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
         algorithms.put("SHA384WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
@@ -110,16 +102,12 @@ class X509Util
         // The parameters field SHALL be NULL for RSA based signature algorithms.
         //
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA1);
-        // BEGIN android-removed
-        // noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
-        // END android-removed
+        noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA224);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA256);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA384);
         noParams.add(X9ObjectIdentifiers.ecdsa_with_SHA512);
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
-        // BEGIN android-removed
-        // noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
-        // END android-removed
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha384);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha512);
@@ -138,10 +126,8 @@ class X509Util
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
         params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
 
-        // BEGIN android-removed
-        // AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
-        // params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
-        // END android-removed
+        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
+        params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
 
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
         params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
