@@ -29,27 +29,34 @@ ri_bcprov_src_files := $(filter-out \
  bcprov/src/main/java/org/bouncycastle/crypto/digests/OpenSSLDigest.java, \
  $(all_bcprov_src_files))
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := bouncycastle
-LOCAL_MODULE_TAGS := optional
-LOCAL_SRC_FILES := $(android_bcprov_src_files)
-LOCAL_JAVACFLAGS := -encoding UTF-8
-LOCAL_JAVA_LIBRARIES := conscrypt core
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-include $(BUILD_JAVA_LIBRARY)
+# These cannot build in the PDK, because the PDK requires all libraries
+# compile against SDK versions. LOCAL_NO_STANDARD_LIBRARIES conflicts with
+# this requirement.
+ifneq ($(TARGET_BUILD_PDK),true)
 
-# non-jarjar version to build okhttp-tests
-include $(CLEAR_VARS)
-LOCAL_MODULE := bouncycastle-nojarjar
-LOCAL_MODULE_TAGS := optional
-LOCAL_SRC_FILES := $(android_bcprov_src_files)
-LOCAL_JAVACFLAGS := -encoding UTF-8
-LOCAL_JAVA_LIBRARIES := conscrypt core
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-include $(BUILD_STATIC_JAVA_LIBRARY)
+    include $(CLEAR_VARS)
+    LOCAL_MODULE := bouncycastle
+    LOCAL_MODULE_TAGS := optional
+    LOCAL_SRC_FILES := $(android_bcprov_src_files)
+    LOCAL_JAVACFLAGS := -encoding UTF-8
+    LOCAL_JAVA_LIBRARIES := conscrypt core
+    LOCAL_NO_STANDARD_LIBRARIES := true
+    LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+    LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    include $(BUILD_JAVA_LIBRARY)
+
+    # non-jarjar version to build okhttp-tests
+    include $(CLEAR_VARS)
+    LOCAL_MODULE := bouncycastle-nojarjar
+    LOCAL_MODULE_TAGS := optional
+    LOCAL_SRC_FILES := $(android_bcprov_src_files)
+    LOCAL_JAVACFLAGS := -encoding UTF-8
+    LOCAL_JAVA_LIBRARIES := conscrypt core
+    LOCAL_NO_STANDARD_LIBRARIES := true
+    LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    include $(BUILD_STATIC_JAVA_LIBRARY)
+
+endif # TARGET_BUILD_PDK != true
 
 # This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
 # Based on "Finding dead code" example in ProGuard manual at http://proguard.sourceforge.net/
