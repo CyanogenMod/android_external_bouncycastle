@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.keystore.bc;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,12 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-// BEGIN android-added
-import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-added
-// BEGIN android-removed
-// import org.bouncycastle.crypto.digests.SHA1Digest;
-// END android-removed
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.generators.PKCS12ParametersGenerator;
 import org.bouncycastle.crypto.io.DigestInputStream;
 import org.bouncycastle.crypto.io.DigestOutputStream;
@@ -52,11 +47,12 @@ import org.bouncycastle.crypto.io.MacInputStream;
 import org.bouncycastle.crypto.io.MacOutputStream;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.TeeOutputStream;
 
-public class JDKKeyStore
+public class BcKeyStoreSpi
     extends KeyStoreSpi
     implements BCKeyStore
 {
@@ -90,8 +86,11 @@ public class JDKKeyStore
 
     protected SecureRandom    random = new SecureRandom();
 
-    public JDKKeyStore()
+    protected int              version;
+
+    public BcKeyStoreSpi(int version)
     {
+        this.version = version;
     }
 
     private class StoreEntry
@@ -503,13 +502,7 @@ public class JDKKeyStore
 
         if (entry == null)
         {
-            // BEGIN android-removed
-            // Only throw if there is a problem removing, not if missing
-            // throw new KeyStoreException("no such entry as " + alias);
-            // END android-removed
-            // BEGIN android-added
             return;
-            // END android-added
         }
 
         table.remove(alias);
@@ -828,16 +821,12 @@ public class JDKKeyStore
         //
         // we only do an integrity check if the password is provided.
         //
-        // BEGIN android-changed
-        HMac hMac = new HMac(AndroidDigestFactory.getSHA1());
-        // END android-changed
+        HMac hMac = new HMac(new SHA1Digest());
         if (password != null && password.length != 0)
         {
             byte[] passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
-            // BEGIN android-changed
-            PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA1());
-            // END android-changed
+            PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
             pbeGen.init(passKey, salt, iterationCount);
 
             CipherParameters macParams;
@@ -894,21 +883,26 @@ public class JDKKeyStore
 
         random.nextBytes(salt);
 
-        dOut.writeInt(STORE_VERSION);
+        dOut.writeInt(version);
         dOut.writeInt(salt.length);
         dOut.write(salt);
         dOut.writeInt(iterationCount);
 
-        // BEGIN android-changed
-        HMac                    hMac = new HMac(AndroidDigestFactory.getSHA1());
+        HMac                    hMac = new HMac(new SHA1Digest());
         MacOutputStream         mOut = new MacOutputStream(hMac);
-        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA1());
-        // END android-changed
+        PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
         byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
         pbeGen.init(passKey, salt, iterationCount);
 
-        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8));
+        if (version < 2)
+        {
+            hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
+        }
+        else
+        {
+            hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8));
+        }
 
         for (int i = 0; i != passKey.length; i++)
         {
@@ -937,8 +931,13 @@ public class JDKKeyStore
      * Also referred to by the alias UBER.
      */
     public static class BouncyCastleStore
-        extends JDKKeyStore
+        extends BcKeyStoreSpi
     {
+        public BouncyCastleStore()
+        {
+            super(1);
+        }
+
         public void engineLoad(
             InputStream stream,
             char[]      password) 
@@ -991,9 +990,7 @@ public class JDKKeyStore
             Cipher cipher = this.makePBECipher(cipherAlg, Cipher.DECRYPT_MODE, password, salt, iterationCount);
             CipherInputStream cIn = new CipherInputStream(dIn, cipher);
 
-            // BEGIN android-changed
-            Digest dig = AndroidDigestFactory.getSHA1();
-            // END android-changed
+            Digest dig = new SHA1Digest();
             DigestInputStream  dgIn = new DigestInputStream(cIn, dig);
     
             this.loadStore(dgIn);
@@ -1024,7 +1021,7 @@ public class JDKKeyStore
     
             random.nextBytes(salt);
     
-            dOut.writeInt(STORE_VERSION);
+            dOut.writeInt(version);
             dOut.writeInt(salt.length);
             dOut.write(salt);
             dOut.writeInt(iterationCount);
@@ -1032,9 +1029,7 @@ public class JDKKeyStore
             cipher = this.makePBECipher(STORE_CIPHER, Cipher.ENCRYPT_MODE, password, salt, iterationCount);
     
             CipherOutputStream  cOut = new CipherOutputStream(dOut, cipher);
-            // BEGIN android-changed
-            DigestOutputStream  dgOut = new DigestOutputStream(AndroidDigestFactory.getSHA1());
-            // END android-changed
+            DigestOutputStream  dgOut = new DigestOutputStream(new SHA1Digest());
     
             this.saveStore(new TeeOutputStream(cOut, dgOut));
     
@@ -1043,6 +1038,24 @@ public class JDKKeyStore
             cOut.write(dig);
     
             cOut.close();
+        }
+    }
+
+    public static class Std
+       extends BcKeyStoreSpi
+    {
+        public Std()
+        {
+            super(STORE_VERSION);
+        }
+    }
+
+    public static class Version1
+        extends BcKeyStoreSpi
+    {
+        public Version1()
+        {
+            super(1);
         }
     }
 }
