@@ -107,12 +107,11 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(all_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
-    LOCAL_BUILD_HOST_DEX := true
     LOCAL_MODULE_TAGS := optional
     LOCAL_JAVA_LIBRARIES := conscrypt-hostdex
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-    include $(BUILD_HOST_JAVA_LIBRARY)
+    include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
 endif
 endif
 
