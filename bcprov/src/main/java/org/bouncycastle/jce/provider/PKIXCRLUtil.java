@@ -15,7 +15,9 @@ import java.util.Set;
 import org.bouncycastle.util.StoreException;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509Store;
+// BEGIN android-removed
+// import org.bouncycastle.x509.X509Store;
+// END android-removed
 
 public class PKIXCRLUtil
 {
@@ -114,22 +116,24 @@ public class PKIXCRLUtil
         {
             Object obj = iter.next();
 
-            if (obj instanceof X509Store)
-            {
-                X509Store store = (X509Store)obj;
-
-                try
-                {
-                    crls.addAll(store.getMatches(crlSelect));
-                    foundValidStore = true;
-                }
-                catch (StoreException e)
-                {
-                    lastException = new AnnotatedException(
-                        "Exception searching in X.509 CRL store.", e);
-                }
-            }
-            else
+            // BEGIN android-removed
+            // if (obj instanceof X509Store)
+            // {
+            //     X509Store store = (X509Store)obj;
+            //
+            //     try
+            //     {
+            //         crls.addAll(store.getMatches(crlSelect));
+            //         foundValidStore = true;
+            //     }
+            //     catch (StoreException e)
+            //     {
+            //         lastException = new AnnotatedException(
+            //             "Exception searching in X.509 CRL store.", e);
+            //     }
+            // }
+            // else
+            // END android-removed
             {
                 CertStore store = (CertStore)obj;
 
