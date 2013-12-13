@@ -19,5 +19,18 @@ abstract class SymmetricAlgorithmProvider
     //     provider.addAlgorithm("KeyGenerator." + algorithm + "-GMAC", keyGeneratorClassName);
     //     provider.addAlgorithm("Alg.Alias.KeyGenerator." + algorithm + "GMAC",  algorithm + "-GMAC");
     // }
+    //
+    // protected void addPoly1305Algorithm(ConfigurableProvider provider,
+    //                                     String algorithm,
+    //                                     String algorithmClassName,
+    //                                     String keyGeneratorClassName)
+    // {
+    //     provider.addAlgorithm("Mac.POLY1305-" + algorithm, algorithmClassName);
+    //     provider.addAlgorithm("Alg.Alias.Mac.POLY1305" + algorithm, "POLY1305-" + algorithm);
+    //
+    //     provider.addAlgorithm("KeyGenerator.POLY1305-" + algorithm, keyGeneratorClassName);
+    //     provider.addAlgorithm("Alg.Alias.KeyGenerator.POLY1305" + algorithm, "POLY1305-" + algorithm);
+    // }
     // END android-removed
+
 }

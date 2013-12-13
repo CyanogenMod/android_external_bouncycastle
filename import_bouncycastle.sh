@@ -28,6 +28,8 @@
 set -e
 trap  "echo WARNING: Exiting on non-zero subprocess exit code" ERR;
 
+cd $(dirname $0)
+
 function die() {
   declare -r message=$1
 
@@ -57,7 +59,7 @@ function main() {
     die "bouncycastle.version not found"
   fi
 
-  source bouncycastle.version
+  source ./bouncycastle.version
   if [ "$BOUNCYCASTLE_JDK" == "" -o "$BOUNCYCASTLE_VERSION" == "" ]; then
     die "Invalid bouncycastle.version; see README.android for more information"
   fi
@@ -72,7 +74,7 @@ function main() {
     die "bouncycastle.config not found"
   fi
 
-  source bouncycastle.config
+  source ./bouncycastle.config
   if [ "$UNNEEDED_BCPROV_SOURCES" == "" -o "$NEEDED_BCPROV_SOURCES" == "" \
     -o "$UNNEEDED_BCPKIX_SOURCES" == "" -o "$NEEDED_BCPKIX_SOURCES" == "" ]; then
     die "Invalid bouncycastle.config; see README.android for more information"

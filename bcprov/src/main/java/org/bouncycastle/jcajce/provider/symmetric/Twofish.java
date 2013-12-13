@@ -6,6 +6,7 @@ package org.bouncycastle.jcajce.provider.symmetric;
 // END android-removed
 import org.bouncycastle.crypto.engines.TwofishEngine;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.generators.Poly1305KeyGenerator;
 // import org.bouncycastle.crypto.macs.GMac;
 // END android-removed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -59,6 +60,24 @@ public final class Twofish
     //     public GMAC()
     //     {
     //         super(new GMac(new GCMBlockCipher(new TwofishEngine())));
+    //     }
+    // }
+    //
+    // public static class Poly1305
+    //     extends BaseMac
+    // {
+    //     public Poly1305()
+    //     {
+    //         super(new org.bouncycastle.crypto.macs.Poly1305(new TwofishEngine()));
+    //     }
+    // }
+    //
+    // public static class Poly1305KeyGen
+    //     extends BaseKeyGenerator
+    // {
+    //     public Poly1305KeyGen()
+    //     {
+    //         super("Poly1305-Twofish", 256, new Poly1305KeyGenerator());
     //     }
     // }
     // END android-removed
@@ -122,6 +141,7 @@ public final class Twofish
 
             // BEGIN android-removed
             // addGMacAlgorithm(provider, "Twofish", PREFIX + "$GMAC", PREFIX + "$KeyGen");
+            // addPoly1305Algorithm(provider, "Twofish", PREFIX + "$Poly1305", PREFIX + "$Poly1305KeyGen");
             // END android-removed
         }
     }

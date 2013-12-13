@@ -15,7 +15,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
@@ -84,7 +84,7 @@ public class KeyAgreementSpi
     private byte[] bigIntToBytes(
         BigInteger    r)
     {
-        return converter.integerToBytes(r, converter.getByteLength(parameters.getG().getX()));
+        return converter.integerToBytes(r, converter.getByteLength(parameters.getG().getAffineXCoord()));
     }
 
     protected KeyAgreementSpi(
@@ -197,10 +197,10 @@ public class KeyAgreementSpi
         //     {
         //         throw new NoSuchAlgorithmException("unknown algorithm encountered: " + algorithm);
         //     }
-        //  
+        //     
         //     int    keySize = ((Integer)algorithms.get(algorithm)).intValue();
         //
-        //     DHKDFParameters params = new DHKDFParameters(new DERObjectIdentifier(algorithm), keySize, secret);
+        //     DHKDFParameters params = new DHKDFParameters(new ASN1ObjectIdentifier(algorithm), keySize, secret);
         //
         //     byte[] keyBytes = new byte[keySize / 8];
         //     kdf.init(params);
