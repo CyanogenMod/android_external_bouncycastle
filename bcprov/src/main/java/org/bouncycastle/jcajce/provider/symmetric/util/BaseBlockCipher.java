@@ -178,6 +178,11 @@ public class BaseBlockCipher
 
     protected byte[] engineGetIV()
     {
+        // BEGIN android-added
+        if (aeadParams != null) {
+            return aeadParams.getNonce();
+        }
+        // END android-added
         return (ivParam != null) ? ivParam.getIV() : null;
     }
 
