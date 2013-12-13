@@ -12,7 +12,6 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
@@ -20,10 +19,6 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAPublicKey;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -31,7 +26,7 @@ import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.DHDomainParameters;
 import org.bouncycastle.asn1.x9.DHPublicKey;
 import org.bouncycastle.asn1.x9.DHValidationParms;
-import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECPoint;
@@ -168,31 +163,13 @@ public class PublicKeyFactory
         }
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            X962Parameters params = new X962Parameters(
-                (ASN1Primitive)algId.getParameters());
+            X962Parameters params = X962Parameters.getInstance(algId.getParameters());
 
             X9ECParameters x9;
             if (params.isNamedCurve())
             {
                 ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)params.getParameters();
-                x9 = X962NamedCurves.getByOID(oid);
-
-                if (x9 == null)
-                {
-                    x9 = SECNamedCurves.getByOID(oid);
-
-                    if (x9 == null)
-                    {
-                        x9 = NISTNamedCurves.getByOID(oid);
-
-                        // BEGIN android-removed
-                        // if (x9 == null)
-                        // {
-                        //     x9 = TeleTrusTNamedCurves.getByOID(oid);
-                        // }
-                        // END android-removed
-                    }
-                }
+                x9 = ECNamedCurveTable.getByOID(oid);
             }
             else
             {
