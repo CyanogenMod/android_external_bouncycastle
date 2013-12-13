@@ -44,7 +44,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.49";
+    private static String info = "BouncyCastle Security Provider v1.50";
 
     public static final String PROVIDER_NAME = "BC";
 
@@ -72,11 +72,13 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] SYMMETRIC_CIPHERS =
     {
         // BEGIN android-removed
-        // "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DES", "DESede", "GOST28147", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
-        // "Noekeon", "RC2", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
+        // "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "ChaCha", "DES", "DESede",
+        // "GOST28147", "Grainv1", "Grain128", "HC128", "HC256", "IDEA", "Noekeon", "RC2", "RC5",
+        // "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Shacal2", "Skipjack", "TEA", "Twofish", "Threefish",
+        // "VMPC", "VMPCKSA3", "XTEA", "XSalsa20"
         // END android-removed
         // BEGIN android-added
-        "AES", "ARC4", "Blowfish", "DES", "DESede", "RC2", "Twofish"
+        "AES", "ARC4", "Blowfish", "DES", "DESede", "RC2", "Twofish",
         // END android-added
     };
 
@@ -114,7 +116,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String[] DIGESTS =
     {
         // BEGIN android-removed
-        // "GOST3411", "MD2", "MD4", "MD5", "SHA1", "RIPEMD128", "RIPEMD160", "RIPEMD256", "RIPEMD320", "SHA224", "SHA256", "SHA384", "SHA512", "SHA3", "Tiger", "Whirlpool"
+        // "GOST3411", "MD2", "MD4", "MD5", "SHA1", "RIPEMD128", "RIPEMD160", "RIPEMD256", "RIPEMD320", "SHA224", "SHA256", "SHA384", "SHA512", "SHA3", "Skein", "SM3", "Tiger", "Whirlpool"
         // END android-removed
         // BEGIN android-added
         "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
@@ -122,7 +124,7 @@ public final class BouncyCastleProvider extends Provider
     };
 
     /*
-     * Configurable digests
+     * Configurable keystores
      */
     private static final String KEYSTORE_PACKAGE = "org.bouncycastle.jcajce.provider.keystore.";
     private static final String[] KEYSTORES =
@@ -137,7 +139,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.49, info);
+        super(PROVIDER_NAME, 1.50, info);
 
         AccessController.doPrivileged(new PrivilegedAction()
         {

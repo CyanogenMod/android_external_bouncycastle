@@ -31,6 +31,7 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.signers.ECNRSigner;
+// import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 // END android-removed
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSABase;
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSAEncoder;
@@ -82,6 +83,17 @@ public class SignatureSpi
         }
     }
 
+    // BEGIN android-removed
+    // static public class ecDetDSA
+    //     extends SignatureSpi
+    // {
+    //     public ecDetDSA()
+    //     {
+    //         super(new SHA1Digest(), new ECDSASigner(new HMacDSAKCalculator(new SHA1Digest())), new StdDSAEncoder());
+    //     }
+    // }
+    // END android-removed
+
     static public class ecDSAnone
         extends SignatureSpi
     {
@@ -102,6 +114,17 @@ public class SignatureSpi
         }
     }
 
+    // BEGIN android-removed
+    // static public class ecDetDSA224
+    //     extends SignatureSpi
+    // {
+    //     public ecDetDSA224()
+    //     {
+    //         super(new SHA224Digest(), new ECDSASigner(new HMacDSAKCalculator(new SHA224Digest())), new StdDSAEncoder());
+    //     }
+    // }
+    // END android-removed
+
     static public class ecDSA256
         extends SignatureSpi
     {
@@ -113,6 +136,17 @@ public class SignatureSpi
         }
     }
 
+    // BEGIN android-removed
+    // static public class ecDetDSA256
+    //     extends SignatureSpi
+    // {
+    //     public ecDetDSA256()
+    //     {
+    //         super(new SHA256Digest(), new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest())), new StdDSAEncoder());
+    //     }
+    // }
+    // END android-removed
+
     static public class ecDSA384
         extends SignatureSpi
     {
@@ -123,6 +157,17 @@ public class SignatureSpi
             // END android-changed
         }
     }
+
+    // BEGIN android-removed
+    // static public class ecDetDSA384
+    //     extends SignatureSpi
+    // {
+    //     public ecDetDSA384()
+    //     {
+    //         super(new SHA384Digest(), new ECDSASigner(new HMacDSAKCalculator(new SHA384Digest())), new StdDSAEncoder());
+    //     }
+    // }
+    // END android-removed
 
     static public class ecDSA512
         extends SignatureSpi
@@ -136,6 +181,15 @@ public class SignatureSpi
     }
 
     // BEGIN android-removed
+    // static public class ecDetDSA512
+    //     extends SignatureSpi
+    // {
+    //     public ecDetDSA512()
+    //     {
+    //         super(new SHA512Digest(), new ECDSASigner(new HMacDSAKCalculator(new SHA512Digest())), new StdDSAEncoder());
+    //     }
+    // }
+    //
     // static public class ecDSARipeMD160
     //     extends SignatureSpi
     // {

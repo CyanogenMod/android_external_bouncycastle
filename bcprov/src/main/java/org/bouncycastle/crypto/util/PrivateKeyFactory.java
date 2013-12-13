@@ -10,7 +10,6 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
@@ -20,13 +19,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.sec.ECPrivateKey;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
-import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
@@ -138,24 +133,7 @@ public class PrivateKeyFactory
             if (params.isNamedCurve())
             {
                 ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
-                x9 = X962NamedCurves.getByOID(oid);
-
-                if (x9 == null)
-                {
-                    x9 = SECNamedCurves.getByOID(oid);
-
-                    if (x9 == null)
-                    {
-                        x9 = NISTNamedCurves.getByOID(oid);
-
-                        // BEGIN android-removed
-                        // if (x9 == null)
-                        // {
-                        //     x9 = TeleTrusTNamedCurves.getByOID(oid);
-                        // }
-                        // END android-removed
-                    }
-                }
+                x9 = ECNamedCurveTable.getByOID(oid);
             }
             else
             {

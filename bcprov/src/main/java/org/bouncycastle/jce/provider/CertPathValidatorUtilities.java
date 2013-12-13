@@ -76,7 +76,9 @@ import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;
 import org.bouncycastle.x509.X509CertStoreSelector;
-import org.bouncycastle.x509.X509Store;
+// BEGIN android-removed
+// import org.bouncycastle.x509.X509Store;
+// END android-removed
 
 public class CertPathValidatorUtilities
 {
@@ -726,20 +728,22 @@ public class CertPathValidatorUtilities
         {
             Object obj = iter.next();
 
-            if (obj instanceof X509Store)
-            {
-                X509Store certStore = (X509Store)obj;
-                try
-                {
-                    certs.addAll(certStore.getMatches(certSelect));
-                }
-                catch (StoreException e)
-                {
-                    throw new AnnotatedException(
-                            "Problem while picking certificates from X.509 store.", e);
-                }
-            }
-            else
+            // BEGIN android-removed
+            // if (obj instanceof X509Store)
+            // {
+            //     X509Store certStore = (X509Store)obj;
+            //     try
+            //     {
+            //         certs.addAll(certStore.getMatches(certSelect));
+            //     }
+            //     catch (StoreException e)
+            //     {
+            //         throw new AnnotatedException(
+            //                 "Problem while picking certificates from X.509 store.", e);
+            //     }
+            // }
+            // else
+            // END android-removed
             {
                 CertStore certStore = (CertStore)obj;
 
