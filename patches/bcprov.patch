@@ -5934,7 +5934,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/Tw
  }
 diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/util/BaseBlockCipher.java bcprov-jdk15on-150/org/bouncycastle/jcajce/provider/symmetric/util/BaseBlockCipher.java
 --- bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/util/BaseBlockCipher.java	2013-12-03 20:18:20.000000000 +0000
-+++ bcprov-jdk15on-150/org/bouncycastle/jcajce/provider/symmetric/util/BaseBlockCipher.java	2013-12-12 00:35:05.000000000 +0000
++++ bcprov-jdk15on-150/org/bouncycastle/jcajce/provider/symmetric/util/BaseBlockCipher.java	2013-12-13 23:56:53.000000000 +0000
 @@ -19,8 +19,10 @@
  import javax.crypto.ShortBufferException;
  import javax.crypto.spec.IvParameterSpec;
@@ -6014,7 +6014,19 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
                                          gcmSpecClass
                                      };
  
-@@ -278,48 +294,52 @@
+@@ -162,6 +178,11 @@
+ 
+     protected byte[] engineGetIV()
+     {
++        // BEGIN android-added
++        if (aeadParams != null) {
++            return aeadParams.getNonce();
++        }
++        // END android-added
+         return (ivParam != null) ? ivParam.getIV() : null;
+     }
+ 
+@@ -278,48 +299,52 @@
                          new CFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
              }
          }
@@ -6103,7 +6115,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
          else if (modeName.startsWith("CTS"))
          {
              ivLength = baseEngine.getBlockSize();
-@@ -330,24 +350,26 @@
+@@ -330,24 +355,26 @@
              ivLength = 13; // CCM nonce 7..13 bytes
              cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
          }
@@ -6148,7 +6160,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
          else if (modeName.startsWith("GCM"))
          {
              ivLength = baseEngine.getBlockSize();
-@@ -470,18 +492,20 @@
+@@ -470,18 +497,20 @@
  
                      param = new ParametersWithIV(param, iv.getIV());
                  }
@@ -6181,7 +6193,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
              }
              else if (params instanceof PBEParameterSpec)
              {
-@@ -513,12 +537,14 @@
+@@ -513,12 +542,14 @@
                      throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                  }
  
@@ -6202,7 +6214,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
                  {
                      param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
                      ivParam = (ParametersWithIV)param;
-@@ -534,63 +560,65 @@
+@@ -534,63 +565,65 @@
                  param = new KeyParameter(key.getEncoded());
              }
          }
@@ -6325,7 +6337,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
          else if (gcmSpecClass != null && gcmSpecClass.isInstance(params))
          {
              if (!isAEADModeName(modeName) && !(cipher instanceof AEADGenericBlockCipher))
-@@ -603,11 +631,13 @@
+@@ -603,11 +636,13 @@
                  Method tLen = gcmSpecClass.getDeclaredMethod("getTLen", new Class[0]);
                  Method iv= gcmSpecClass.getDeclaredMethod("getIV", new Class[0]);
  
@@ -6344,7 +6356,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/jcajce/provider/symmetric/ut
                  {
                      param = aeadParams = new AEADParameters(new KeyParameter(key.getEncoded()), ((Integer)tLen.invoke(params, new Object[0])).intValue(), (byte[])iv.invoke(params, new Object[0]));
                  }
-@@ -867,7 +897,9 @@
+@@ -867,7 +902,9 @@
      private boolean isAEADModeName(
          String modeName)
      {
