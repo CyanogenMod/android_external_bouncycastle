@@ -16,19 +16,24 @@
 
 package org.bouncycastle.crypto.digests;
 
-import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.ExtendedDigest;
+import org.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi;
 import java.security.DigestException;
 import java.security.MessageDigest;
 
 /**
- * Implements the BouncyCastle Digest interface using OpenSSL's EVP API.
+ * Implements the BouncyCastle Digest interface using OpenSSL's EVP API. This
+ * must be an ExtendedDigest for {@link BcKeyStoreSpi} to be able to use it.
  */
-public class OpenSSLDigest implements Digest {
+public class OpenSSLDigest implements ExtendedDigest {
     private final MessageDigest delegate;
 
-    public OpenSSLDigest(String algorithm) {
+    private final int byteSize;
+
+    public OpenSSLDigest(String algorithm, int byteSize) {
         try {
             delegate = MessageDigest.getInstance(algorithm, "AndroidOpenSSL");
+            this.byteSize = byteSize;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -40,6 +45,10 @@ public class OpenSSLDigest implements Digest {
 
     public int getDigestSize() {
         return delegate.getDigestLength();
+    }
+
+    public int getByteLength() {
+        return byteSize;
     }
 
     public void reset() {
@@ -63,26 +72,26 @@ public class OpenSSLDigest implements Digest {
     }
 
     public static class MD5 extends OpenSSLDigest {
-        public MD5() { super("MD5"); }
+        public MD5() { super("MD5", 64); }
     }
 
     public static class SHA1 extends OpenSSLDigest {
-        public SHA1() { super("SHA-1"); }
+        public SHA1() { super("SHA-1", 64); }
     }
 
     public static class SHA224 extends OpenSSLDigest {
-        public SHA224() { super("SHA-224"); }
+        public SHA224() { super("SHA-224", 64); }
     }
 
     public static class SHA256 extends OpenSSLDigest {
-        public SHA256() { super("SHA-256"); }
+        public SHA256() { super("SHA-256", 64); }
     }
 
     public static class SHA384 extends OpenSSLDigest {
-        public SHA384() { super("SHA-384"); }
+        public SHA384() { super("SHA-384", 128); }
     }
 
     public static class SHA512 extends OpenSSLDigest {
-        public SHA512() { super("SHA-512"); }
+        public SHA512() { super("SHA-512", 128); }
     }
 }
