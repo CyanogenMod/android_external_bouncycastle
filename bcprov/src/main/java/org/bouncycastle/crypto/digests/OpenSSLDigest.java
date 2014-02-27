@@ -65,7 +65,7 @@ public class OpenSSLDigest implements ExtendedDigest {
 
     public int doFinal(byte[] out, int outOff) {
         try {
-            return delegate.digest(out, outOff, out.length);
+            return delegate.digest(out, outOff, out.length - outOff);
         } catch (DigestException e) {
             throw new RuntimeException(e);
         }
