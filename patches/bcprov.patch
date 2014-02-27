@@ -569,7 +569,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/crypto/digests/AndroidDigest
 +}
 diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java bcprov-jdk15on-150/org/bouncycastle/crypto/digests/OpenSSLDigest.java
 --- bcprov-jdk15on-150.orig/org/bouncycastle/crypto/digests/OpenSSLDigest.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk15on-150/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2014-02-25 22:51:56.000000000 +0000
++++ bcprov-jdk15on-150/org/bouncycastle/crypto/digests/OpenSSLDigest.java	2014-02-27 18:09:19.000000000 +0000
 @@ -0,0 +1,97 @@
 +/*
 + * Copyright (C) 2008 The Android Open Source Project
@@ -638,7 +638,7 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/crypto/digests/OpenSSLDigest
 +
 +    public int doFinal(byte[] out, int outOff) {
 +        try {
-+            return delegate.digest(out, outOff, out.length);
++            return delegate.digest(out, outOff, out.length - outOff);
 +        } catch (DigestException e) {
 +            throw new RuntimeException(e);
 +        }
