@@ -137,7 +137,8 @@ public class CertBlacklist {
             new BigInteger("392a434f0e07df1f8aa305de34e0c229", 16),
             new BigInteger("3e75ced46b693021218830ae86a82a71", 16),
             new BigInteger("864", 16),
-            new BigInteger("827", 16)
+            new BigInteger("827", 16),
+            new BigInteger("31da7", 16)
         ));
 
         // attempt to augment it with values taken from gservices
@@ -184,7 +185,10 @@ public class CertBlacklist {
             "5f3ab33d55007054bc5e3e5553cd8d8465d77c61".getBytes(),
             // Subject: CN=*.EGO.GOV.TR 93
             // Issuer: CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri
-            "783333c9687df63377efceddd82efa9101913e8e".getBytes()
+            "783333c9687df63377efceddd82efa9101913e8e".getBytes(),
+            // Subject: Subject: C=FR, O=DG Tr\xC3\xA9sor, CN=AC DG Tr\xC3\xA9sor SSL
+            // Issuer: C=FR, O=DGTPE, CN=AC DGTPE Signature Authentification
+            "3ecf4bbbe46096d514bb539bb913d77aa4ef31bf".getBytes()
         ));
 
         // attempt to augment it with values taken from gservices
