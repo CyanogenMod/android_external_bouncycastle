@@ -130,6 +130,38 @@ diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/asn1/DERPrintableString.java
  
      /**
       * return a printable string from the passed in object.
+diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/asn1/StreamUtil.java bcprov-jdk15on-150/org/bouncycastle/asn1/StreamUtil.java
+--- bcprov-jdk15on-150.orig/org/bouncycastle/asn1/StreamUtil.java	2013-12-03 20:18:20.000000000 +0000
++++ bcprov-jdk15on-150/org/bouncycastle/asn1/StreamUtil.java	2014-05-05 17:17:14.000000000 +0000
+@@ -8,7 +8,9 @@
+ 
+ class StreamUtil
+ {
+-    private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
++    // BEGIN android-removed
++    // private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
++    // END android-removed
+ 
+     /**
+      * Find out possible longest length...
+@@ -48,12 +50,15 @@
+             }
+         }
+ 
+-        if (MAX_MEMORY > Integer.MAX_VALUE)
++        // BEGIN android-changed
++        long maxMemory = Runtime.getRuntime().maxMemory();
++        if (maxMemory > Integer.MAX_VALUE)
+         {
+             return Integer.MAX_VALUE;
+         }
+ 
+-        return (int)MAX_MEMORY;
++        return (int) maxMemory;
++        // END android-changed
+     }
+ 
+     static int calculateBodyLength(
 diff -Naur bcprov-jdk15on-150.orig/org/bouncycastle/asn1/cms/ContentInfo.java bcprov-jdk15on-150/org/bouncycastle/asn1/cms/ContentInfo.java
 --- bcprov-jdk15on-150.orig/org/bouncycastle/asn1/cms/ContentInfo.java	2013-12-03 20:18:20.000000000 +0000
 +++ bcprov-jdk15on-150/org/bouncycastle/asn1/cms/ContentInfo.java	2013-12-12 00:35:05.000000000 +0000
