@@ -1,7 +1,14 @@
 package org.bouncycastle.jcajce.provider.asymmetric;
 
+// BEGIN android-added
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.asymmetric.dh.KeyFactorySpi;
+// END android-added
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
+// BEGIN android-added
+import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
+// END android-added
 
 public class DH
 {
@@ -24,6 +31,10 @@ public class DH
 
             provider.addAlgorithm("KeyFactory.DH", PREFIX + "KeyFactorySpi");
             provider.addAlgorithm("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
+            // BEGIN android-added
+            AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
+            registerOid(provider, PKCSObjectIdentifiers.dhKeyAgreement, "DH", keyFact);
+            // END android-added
 
             provider.addAlgorithm("AlgorithmParameters.DH", PREFIX + "AlgorithmParametersSpi");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
