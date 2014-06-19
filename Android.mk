@@ -39,7 +39,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(android_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
-    LOCAL_JAVA_LIBRARIES := conscrypt core
+    LOCAL_JAVA_LIBRARIES := core-libart conscrypt
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
@@ -51,7 +51,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(android_bcprov_src_files)
     LOCAL_JAVACFLAGS := -encoding UTF-8
-    LOCAL_JAVA_LIBRARIES := conscrypt core
+    LOCAL_JAVA_LIBRARIES := core-libart conscrypt
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
     include $(BUILD_STATIC_JAVA_LIBRARY)
