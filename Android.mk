@@ -56,6 +56,16 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
     include $(BUILD_STATIC_JAVA_LIBRARY)
 
+    # unbundled bouncycastle jar
+    include $(CLEAR_VARS)
+    LOCAL_MODULE := bouncycastle-unbundled
+    LOCAL_MODULE_TAGS := optional
+    LOCAL_SDK_VERSION := 9
+    LOCAL_SRC_FILES := $(ri_bcprov_src_files)
+    LOCAL_JAVACFLAGS := -encoding UTF-8
+    LOCAL_MODULE_TAGS := optional
+    LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    include $(BUILD_STATIC_JAVA_LIBRARY)
 endif # TARGET_BUILD_PDK != true
 
 # This is used to generate a list of what is unused so it can be removed when bouncycastle is updated.
