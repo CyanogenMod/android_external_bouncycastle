@@ -1,4 +1,4 @@
-package org.bouncycastle.jcajce;
+package org.bouncycastle.jcajce.util;
 
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
@@ -17,6 +17,10 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 
+/**
+ * {@link JcaJceHelper} that obtains all algorithms using the default JCA/JCE mechanism (i.e.
+ * without specifying a provider).
+ */
 public class DefaultJcaJceHelper
     implements JcaJceHelper
 {

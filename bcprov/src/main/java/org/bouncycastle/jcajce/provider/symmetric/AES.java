@@ -25,6 +25,7 @@ import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+// import org.bouncycastle.crypto.engines.RFC5649WrapEngine;
 // import org.bouncycastle.crypto.generators.Poly1305KeyGenerator;
 // import org.bouncycastle.crypto.macs.CMac;
 // import org.bouncycastle.crypto.macs.GMac;
@@ -157,7 +158,7 @@ public final class AES
             super(new AESWrapEngine());
         }
     }
-    
+
     // BEGIN android-removed
     // public static class RFC3211Wrap
     //     extends BaseWrapCipher
@@ -167,9 +168,17 @@ public final class AES
     //         super(new RFC3211WrapEngine(new AESFastEngine()), 16);
     //     }
     // }
+    //
+    // public static class RFC5649Wrap
+    //     extends BaseWrapCipher
+    // {
+    //     public RFC5649Wrap()
+    //     {
+    //         super(new RFC5649WrapEngine(new AESFastEngine()));
+    //     }
+    // }
     // END android-removed
 
-    
     /**
      * PBEWithAES-CBC
      */
@@ -453,9 +462,9 @@ public final class AES
             {
                 try
                 {
-                    Constructor constructor = gcmSpecClass.getConstructor(new Class[] { byte[].class, Integer.class });
+                    Constructor constructor = gcmSpecClass.getConstructor(new Class[] { Integer.TYPE, byte[].class });
 
-                    return (AlgorithmParameterSpec)constructor.newInstance(new Object[] { gcmParams.getNonce(), Integers.valueOf(gcmParams.getIcvLen()) });
+                    return (AlgorithmParameterSpec)constructor.newInstance(new Object[] { Integers.valueOf(gcmParams.getIcvLen()), gcmParams.getNonce() });
                 }
                 catch (NoSuchMethodException e)
                 {
@@ -536,8 +545,10 @@ public final class AES
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
+
             // BEGIN android-removed
             // provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
+            // provider.addAlgorithm("Cipher.AESRFC5649WRAP", PREFIX + "$RFC5649Wrap");
             // END android-removed
 
             provider.addAlgorithm("Cipher.GCM", PREFIX + "$GCM");

@@ -14,6 +14,7 @@ import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.cert.X509Extension;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -24,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
@@ -31,11 +33,11 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -891,8 +893,8 @@ public class RFC3280CertPathUtilities
             for (int j = 0; j < mappings.size(); j++)
             {
                 ASN1Sequence mapping = (ASN1Sequence)mappings.getObjectAt(j);
-                String id_p = ((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
-                String sd_p = ((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
+                String id_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(0)).getId();
+                String sd_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(1)).getId();
                 Set tmp;
 
                 if (!m_idp.containsKey(id_p))
@@ -1070,14 +1072,14 @@ public class RFC3280CertPathUtilities
 
             for (int j = 0; j < mappings.size(); j++)
             {
-                DERObjectIdentifier issuerDomainPolicy = null;
-                DERObjectIdentifier subjectDomainPolicy = null;
+                ASN1ObjectIdentifier issuerDomainPolicy = null;
+                ASN1ObjectIdentifier subjectDomainPolicy = null;
                 try
                 {
                     ASN1Sequence mapping = DERSequence.getInstance(mappings.getObjectAt(j));
 
-                    issuerDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(0));
-                    subjectDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(1));
+                    issuerDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(0));
+                    subjectDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(1));
                 }
                 catch (Exception e)
                 {
@@ -1284,7 +1286,7 @@ public class RFC3280CertPathUtilities
             while (e.hasMoreElements())
             {
                 PolicyInformation pInfo = PolicyInformation.getInstance(e.nextElement());
-                DERObjectIdentifier pOid = pInfo.getPolicyIdentifier();
+                ASN1ObjectIdentifier pOid = pInfo.getPolicyIdentifier();
 
                 pols.add(pOid.getId());
 
@@ -1363,9 +1365,9 @@ public class RFC3280CertPathUtilities
                                 {
                                     _policy = (String)_tmp;
                                 }
-                                else if (_tmp instanceof DERObjectIdentifier)
+                                else if (_tmp instanceof ASN1ObjectIdentifier)
                                 {
-                                    _policy = ((DERObjectIdentifier)_tmp).getId();
+                                    _policy = ((ASN1ObjectIdentifier)_tmp).getId();
                                 }
                                 else
                                 {
@@ -1565,7 +1567,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 0)
                     {
-                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                        tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < explicitPolicy)
                         {
                             return tmpInt;
@@ -1619,7 +1621,7 @@ public class RFC3280CertPathUtilities
                     ASN1TaggedObject constraint = ASN1TaggedObject.getInstance(policyConstraints.nextElement());
                     if (constraint.getTagNo() == 1)
                     {
-                        tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                        tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                         if (tmpInt < policyMapping)
                         {
                             return tmpInt;
@@ -2004,7 +2006,9 @@ public class RFC3280CertPathUtilities
         }
         if (certStatus.getCertStatus() != CertStatus.UNREVOKED)
         {
-            String message = "Certificate revocation after " + certStatus.getRevocationDate();
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String message = "Certificate revocation after " + df.format(certStatus.getRevocationDate());
             message += ", reason: " + crlReasons[certStatus.getCertStatus()];
             throw new AnnotatedException(message);
         }
@@ -2029,10 +2033,10 @@ public class RFC3280CertPathUtilities
         //
         // (j)
         //
-        DERInteger iap = null;
+        ASN1Integer iap = null;
         try
         {
-            iap = DERInteger.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,
+            iap = ASN1Integer.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,
                 RFC3280CertPathUtilities.INHIBIT_ANY_POLICY));
         }
         catch (Exception e)
@@ -2335,7 +2339,7 @@ public class RFC3280CertPathUtilities
                     case 0:
                         try
                         {
-                            tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                            tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                         }
                         catch (Exception e)
                         {

@@ -19,10 +19,8 @@ import javax.crypto.spec.PBEParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
 // END android-removed
 
-import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.StreamBlockCipher;
 import org.bouncycastle.crypto.StreamCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -59,15 +57,6 @@ public class BaseStreamCipher
     {
         cipher = engine;
         this.ivLength = ivLength;
-    }
-
-    protected BaseStreamCipher(
-        BlockCipher engine,
-        int ivLength)
-    {
-        this.ivLength = ivLength;
-
-        cipher = new StreamBlockCipher(engine);
     }
 
     protected int engineGetBlockSize()

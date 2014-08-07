@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 // BEGIN android-removed
+// import org.bouncycastle.asn1.bsi.BSIObjectIdentifiers;
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
@@ -66,6 +67,14 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         addEntries(EACObjectIdentifiers.id_TA_RSA_v1_5_SHA_256, "SHA256", "RSA");
         addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_1, "SHA1", "RSAandMGF1");
         addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_256, "SHA256", "RSAandMGF1");
+        // BEGIN android-removed
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA1, "SHA1", "PLAIN-ECDSA");
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA224, "SHA224", "PLAIN-ECDSA");
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA256, "SHA256", "PLAIN-ECDSA");
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA384, "SHA384", "PLAIN-ECDSA");
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA512, "SHA512", "PLAIN-ECDSA");
+        // addEntries(BSIObjectIdentifiers.ecdsa_plain_RIPEMD160, "RIPEMD160", "PLAIN-ECDSA");
+        // END android-removed
 
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa, "DSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption, "RSA");

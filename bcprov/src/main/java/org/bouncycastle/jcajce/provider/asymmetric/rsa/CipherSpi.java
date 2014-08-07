@@ -311,7 +311,7 @@ public class CipherSpi
         }
         else
         {
-            throw new IllegalArgumentException("unknown parameter type.");
+            throw new InvalidAlgorithmParameterException("unknown parameter type: " + params.getClass().getName());
         }
 
         if (!(cipher instanceof RSABlindedEngine))
