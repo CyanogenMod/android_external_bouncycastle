@@ -11,9 +11,9 @@ import java.security.spec.PSSParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
@@ -80,7 +80,7 @@ class X509SignatureUtil
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
                 
-                return getDigestAlgName((DERObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
+                return getDigestAlgName((ASN1ObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
             }
         }
 
@@ -92,7 +92,7 @@ class X509SignatureUtil
      * representations rather the the algorithm identifier (if possible).
      */
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {
