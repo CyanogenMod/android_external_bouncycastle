@@ -8456,7 +8456,7 @@ diff -Naur bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCRLUtil.jav
  
 diff -Naur bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java bcprov-jdk15on-151/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java
 --- bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2014-07-26 04:17:24.000000000 +0000
-+++ bcprov-jdk15on-151/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2014-07-28 19:51:54.000000000 +0000
++++ bcprov-jdk15on-151/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2014-10-16 17:49:43.000000000 +0000
 @@ -1,5 +1,8 @@
  package org.bouncycastle.jce.provider;
  
@@ -8466,17 +8466,19 @@ diff -Naur bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCertPathVal
  import java.security.InvalidAlgorithmParameterException;
  import java.security.PublicKey;
  import java.security.cert.CertPath;
-@@ -33,6 +36,9 @@
+@@ -33,6 +36,11 @@
  public class PKIXCertPathValidatorSpi
          extends CertPathValidatorSpi
  {
 +    // BEGIN android-added
-+    private final static CertBlacklist blacklist = new CertBlacklist();
++    private static class NoPreloadHolder {
++        private final static CertBlacklist blacklist = new CertBlacklist();
++    }
 +    // END android-added
  
      public CertPathValidatorResult engineValidate(
              CertPath certPath,
-@@ -75,6 +81,22 @@
+@@ -75,6 +83,22 @@
          {
              throw new CertPathValidatorException("Certification path is empty.", null, certPath, 0);
          }
@@ -8486,7 +8488,7 @@ diff -Naur bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCertPathVal
 +
 +            if (cert != null) {
 +                BigInteger serial = cert.getSerialNumber();
-+                if (blacklist.isSerialNumberBlackListed(serial)) {
++                if (NoPreloadHolder.blacklist.isSerialNumberBlackListed(serial)) {
 +                    // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
 +                    String message = "Certificate revocation of serial 0x" + serial.toString(16);
 +                    System.out.println(message);
@@ -8499,12 +8501,12 @@ diff -Naur bcprov-jdk15on-151.orig/org/bouncycastle/jce/provider/PKIXCertPathVal
  
          //
          // (b)
-@@ -251,6 +273,15 @@
+@@ -251,6 +275,15 @@
  
          for (index = certs.size() - 1; index >= 0; index--)
          {
 +            // BEGIN android-added
-+            if (blacklist.isPublicKeyBlackListed(workingPublicKey)) {
++            if (NoPreloadHolder.blacklist.isPublicKeyBlackListed(workingPublicKey)) {
 +                // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
 +                String message = "Certificate revocation of public key " + workingPublicKey;
 +                System.out.println(message);
