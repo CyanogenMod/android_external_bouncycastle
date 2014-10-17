@@ -37,9 +37,7 @@ public class PKIXCertPathValidatorSpi
         extends CertPathValidatorSpi
 {
     // BEGIN android-added
-    private static class NoPreloadHolder {
-        private final static CertBlacklist blacklist = new CertBlacklist();
-    }
+    private final static CertBlacklist blacklist = new CertBlacklist();
     // END android-added
 
     public CertPathValidatorResult engineValidate(
@@ -89,7 +87,7 @@ public class PKIXCertPathValidatorSpi
 
             if (cert != null) {
                 BigInteger serial = cert.getSerialNumber();
-                if (NoPreloadHolder.blacklist.isSerialNumberBlackListed(serial)) {
+                if (blacklist.isSerialNumberBlackListed(serial)) {
                     // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
                     String message = "Certificate revocation of serial 0x" + serial.toString(16);
                     System.out.println(message);
@@ -276,7 +274,7 @@ public class PKIXCertPathValidatorSpi
         for (index = certs.size() - 1; index >= 0; index--)
         {
             // BEGIN android-added
-            if (NoPreloadHolder.blacklist.isPublicKeyBlackListed(workingPublicKey)) {
+            if (blacklist.isPublicKeyBlackListed(workingPublicKey)) {
                 // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
                 String message = "Certificate revocation of public key " + workingPublicKey;
                 System.out.println(message);
