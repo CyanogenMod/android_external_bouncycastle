@@ -108,9 +108,10 @@ bouncycastle-proguard-deadcode: $(full_classes_compiled_jar) $(full_java_libs)
 		    public java.lang.String getPaddingName(); \
 		}"
 
-# Conscrypt isn't built in the PDK, so this cannot be built because it has a
-# dependency on conscrypt-hostdex.
+# Conscrypt isn't built in the PDK or on non-linux OSes, so this cannot be built
+# because it has a dependency on conscrypt-hostdex.
 ifneq ($(TARGET_BUILD_PDK),true)
+  ifeq ($(HOST_OS),linux)
     include $(CLEAR_VARS)
     LOCAL_MODULE := bouncycastle-hostdex
     LOCAL_MODULE_TAGS := optional
@@ -121,6 +122,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
     include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
+  endif  # ($(HOST_OS),linux)
 endif
 
 include $(CLEAR_VARS)
