@@ -287,6 +287,9 @@ public abstract class ECPoint
         return x == null || y == null || (zs.length > 0 && zs[0].isZero());
     }
 
+    /**
+     * @deprecated per-point compression property will be removed, refer {@link #getEncoded(boolean)}
+     */
     public boolean isCompressed()
     {
         return this.withCompression;
@@ -435,13 +438,19 @@ public abstract class ECPoint
         return sb.toString();
     }
 
+    /**
+     * @deprecated per-point compression property will be removed, refer {@link #getEncoded(boolean)}
+     */
     public byte[] getEncoded()
     {
         return getEncoded(this.withCompression);
     }
 
     /**
-     * return the field element encoded with point compression. (S 4.3.6)
+     * Get an encoding of the point value, optionally in compressed format.
+     * 
+     * @param compressed whether to generate a compressed point encoding.
+     * @return the point encoding
      */
     public byte[] getEncoded(boolean compressed)
     {
@@ -771,14 +780,7 @@ public abstract class ECPoint
                     Y3 = W1.subtract(X3).multiply(dy).subtract(A1);
                     Z3 = dx;
 
-                    if (Z1IsOne)
-                    {
-                        Z3Squared = C;
-                    }
-                    else
-                    {
-                        Z3 = Z3.multiply(Z1);
-                    }
+                    Z3 = Z3.multiply(Z1);
                 }
                 else
                 {
@@ -967,7 +969,7 @@ public abstract class ECPoint
                     }
                     else if (!a4.isZero())
                     {
-                        ECFieldElement Z1Squared = Z1IsOne ? Z1 : Z1.square();
+                        ECFieldElement Z1Squared = Z1.square();
                         ECFieldElement Z1Pow4 = Z1Squared.square();
                         if (a4Neg.bitLength() < a4.bitLength())
                         {

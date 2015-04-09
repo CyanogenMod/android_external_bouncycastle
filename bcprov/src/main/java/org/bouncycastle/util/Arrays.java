@@ -1,6 +1,7 @@
 package org.bouncycastle.util;
 
 import java.math.BigInteger;
+import java.util.Iterator;
 
 /**
  * General array utilities.
@@ -967,5 +968,44 @@ public final class Arrays
         }
 
         return result;
+    }
+
+    /**
+     * Iterator backed by a specific array.
+     */
+    public static class Iterator<T>
+        implements java.util.Iterator<T>
+    {
+        private final T[] dataArray;
+
+        private int position = 0;
+
+        /**
+         * Base constructor.
+         * <p>
+         * Note: the array is not cloned, changes to it will affect the values returned by next().
+         * </p>
+         *
+         * @param dataArray array backing the iterator.
+         */
+        public Iterator(T[] dataArray)
+        {
+            this.dataArray = dataArray;
+        }
+
+        public boolean hasNext()
+        {
+            return position < dataArray.length;
+        }
+
+        public T next()
+        {
+            return dataArray[position++];
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException("Cannot remove element from an Array.");
+        }
     }
 }

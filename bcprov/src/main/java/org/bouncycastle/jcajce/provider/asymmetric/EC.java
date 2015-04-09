@@ -37,12 +37,16 @@ public class EC
             registerOid(provider, X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC", new KeyFactorySpi.EC());
             // BEGIN android-removed
             // registerOid(provider, X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, "ECMQV", new KeyFactorySpi.ECMQV());
+            //
+            // // Android comment: the registration below is causing CTS tests to fail and doesn't seem
+            // // to be implemented by bouncycastle (so looks like an bug in bouncycastle).
+            // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.id_ecPublicKey, "EC");
             // END android-removed
-
-            registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.id_ecPublicKey, "EC");
             // TODO Should this be an alias for ECDH?
-            registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
             // BEGIN android-removed
+            // // Android comment: the registration below is causing CTS tests to fail and doesn't seem
+            // // to be implemented by bouncycastle (so looks like an bug in bouncycastle).
+            // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
             // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, "EC");
             // END android-removed
 
