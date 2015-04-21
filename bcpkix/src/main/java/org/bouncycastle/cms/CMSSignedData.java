@@ -23,6 +23,7 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.util.Encodable;
 import org.bouncycastle.util.Store;
 
 /**
@@ -54,6 +55,7 @@ import org.bouncycastle.util.Store;
  * </pre>
  */
 public class CMSSignedData
+    implements Encodable
 {
     private static final CMSSignedHelper HELPER = CMSSignedHelper.INSTANCE;
     
@@ -347,7 +349,7 @@ public class CMSSignedData
     // {
     //     return verifySignatures(verifierProvider, false);
     // }
-    //
+    // 
     // /**
     //  * Verify all the SignerInformation objects and optionally their associated counter signatures attached
     //  * to this CMS SignedData object.
@@ -361,30 +363,27 @@ public class CMSSignedData
     //     throws CMSException
     // {
     //     Collection signers = this.getSignerInfos().getSigners();
-    //
+    // 
     //     for (Iterator it = signers.iterator(); it.hasNext();)
     //     {
     //         SignerInformation signer = (SignerInformation)it.next();
-    //
+    // 
     //         try
     //         {
     //             SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
-    //
+    // 
     //             if (!signer.verify(verifier))
     //             {
     //                 return false;
     //             }
-    //
+    // 
     //             if (!ignoreCounterSignatures)
     //             {
     //                 Collection counterSigners = signer.getCounterSignatures().getSigners();
-    //
+    // 
     //                 for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
     //                 {
-    //                     SignerInformation counterSigner = (SignerInformation)cIt.next();
-    //                     SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
-    //
-    //                     if (!counterSigner.verify(counterVerifier))
+    //                     if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
     //                     {
     //                         return false;
     //                     }
@@ -396,7 +395,29 @@ public class CMSSignedData
     //             throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
     //         }
     //     }
-    //
+    // 
+    //     return true;
+    // }
+    // 
+    // private boolean verifyCounterSignature(SignerInformation counterSigner, SignerInformationVerifierProvider verifierProvider)
+    //     throws OperatorCreationException, CMSException
+    // {
+    //     SignerInformationVerifier counterVerifier = verifierProvider.get(counterSigner.getSID());
+    // 
+    //     if (!counterSigner.verify(counterVerifier))
+    //     {
+    //         return false;
+    //     }
+    // 
+    //     Collection counterSigners = counterSigner.getCounterSignatures().getSigners();
+    //     for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+    //     {
+    //         if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
+    //         {
+    //             return false;
+    //         }
+    //     }
+    // 
     //     return true;
     // }
     // END android-removed
