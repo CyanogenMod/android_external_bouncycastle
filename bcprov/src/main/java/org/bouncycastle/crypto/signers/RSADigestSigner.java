@@ -224,6 +224,8 @@ public class RSADigestSigner
         }
         else
         {
+            Arrays.constantTimeAreEqual(expected, expected);  // keep time "steady".
+
             return false;
         }
     }

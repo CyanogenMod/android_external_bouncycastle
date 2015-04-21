@@ -207,7 +207,7 @@ public class BaseBlockCipher
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(pbeAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
+                    engineParams = createParametersInstance(pbeAlgorithm);
                     engineParams.init(pbeSpec);
                 }
                 catch (Exception e)
@@ -226,7 +226,7 @@ public class BaseBlockCipher
 
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
+                    engineParams = createParametersInstance(name);
                     engineParams.init(ivParam.getIV());
                 }
                 catch (Exception e)
@@ -238,7 +238,7 @@ public class BaseBlockCipher
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance("GCM", BouncyCastleProvider.PROVIDER_NAME);
+                    engineParams = createParametersInstance("GCM");
                     engineParams.init(new GCMParameters(aeadParams.getNonce(), aeadParams.getMacSize()).getEncoded());
                 }
                 catch (Exception e)

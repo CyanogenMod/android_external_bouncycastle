@@ -15,6 +15,7 @@ import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -88,12 +89,14 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.jcajce.provider.config.PKCS12StoreParameter;
+import org.bouncycastle.jcajce.PKCS12StoreParameter;
 import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 // BEGIN android-removed
 // import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
 // END android-removed
 import org.bouncycastle.jcajce.spec.PBKDF2KeySpec;
+import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -107,10 +110,11 @@ public class PKCS12KeyStoreSpi
     extends KeyStoreSpi
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers, BCKeyStore
 {
+    private final JcaJceHelper helper = new BCJcaJceHelper();
+
     private static final int SALT_SIZE = 20;
     private static final int MIN_ITERATIONS = 1024;
 
-    private static final Provider bcProvider = new BouncyCastleProvider();
     private static final DefaultSecretKeyProvider keySizeProvider = new DefaultSecretKeyProvider();
 
     private IgnoresCaseHashtable keys = new IgnoresCaseHashtable();
@@ -605,8 +609,8 @@ public class PKCS12KeyStoreSpi
                 PBEKeySpec pbeSpec = new PBEKeySpec(password);
                 PrivateKey out;
 
-                SecretKeyFactory keyFact = SecretKeyFactory.getInstance(
-                    algorithm.getId(), bcProvider);
+                SecretKeyFactory keyFact = helper.createSecretKeyFactory(
+                    algorithm.getId());
                 PBEParameterSpec defParams = new PBEParameterSpec(
                     pbeParams.getIV(),
                     pbeParams.getIterations().intValue());
@@ -615,7 +619,7 @@ public class PKCS12KeyStoreSpi
 
                 ((BCPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
-                Cipher cipher = Cipher.getInstance(algorithm.getId(), bcProvider);
+                Cipher cipher = helper.createCipher(algorithm.getId());
 
                 cipher.init(Cipher.UNWRAP_MODE, k, defParams);
 
@@ -651,13 +655,12 @@ public class PKCS12KeyStoreSpi
 
         try
         {
-            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(
-                algorithm, bcProvider);
+            SecretKeyFactory keyFact =  helper.createSecretKeyFactory(algorithm);
             PBEParameterSpec defParams = new PBEParameterSpec(
                 pbeParams.getIV(),
                 pbeParams.getIterations().intValue());
 
-            Cipher cipher = Cipher.getInstance(algorithm, bcProvider);
+            Cipher cipher = helper.createCipher(algorithm);
 
             cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams);
 
@@ -689,7 +692,7 @@ public class PKCS12KeyStoreSpi
 
             try
             {
-                SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm.getId(), bcProvider);
+                SecretKeyFactory keyFact = helper.createSecretKeyFactory(algorithm.getId());
                 PBEParameterSpec defParams = new PBEParameterSpec(
                     pbeParams.getIV(),
                     pbeParams.getIterations().intValue());
@@ -697,7 +700,7 @@ public class PKCS12KeyStoreSpi
 
                 key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
-                Cipher cipher = Cipher.getInstance(algorithm.getId(), bcProvider);
+                Cipher cipher = helper.createCipher(algorithm.getId());
 
                 cipher.init(mode, key, defParams);
                 return cipher.doFinal(data);
@@ -727,13 +730,13 @@ public class PKCS12KeyStoreSpi
     }
 
     private Cipher createCipher(int mode, char[] password, AlgorithmIdentifier algId)
-        throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+        throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchProviderException
     {
         PBES2Parameters alg = PBES2Parameters.getInstance(algId.getParameters());
         PBKDF2Params func = PBKDF2Params.getInstance(alg.getKeyDerivationFunc().getParameters());
         AlgorithmIdentifier encScheme = AlgorithmIdentifier.getInstance(alg.getEncryptionScheme());
 
-        SecretKeyFactory keyFact = SecretKeyFactory.getInstance(alg.getKeyDerivationFunc().getAlgorithm().getId(), bcProvider);
+        SecretKeyFactory keyFact = helper.createSecretKeyFactory(alg.getKeyDerivationFunc().getAlgorithm().getId());
         SecretKey key;
 
         if (func.isDefaultPrf())
@@ -1654,7 +1657,7 @@ public class PKCS12KeyStoreSpi
         asn1Out.writeObject(pfx);
     }
 
-    private static byte[] calculatePbeMac(
+    private byte[] calculatePbeMac(
         ASN1ObjectIdentifier oid,
         byte[] salt,
         int itCount,
@@ -1663,13 +1666,13 @@ public class PKCS12KeyStoreSpi
         byte[] data)
         throws Exception
     {
-        SecretKeyFactory keyFact = SecretKeyFactory.getInstance(oid.getId(), bcProvider);
+        SecretKeyFactory keyFact = helper.createSecretKeyFactory(oid.getId());
         PBEParameterSpec defParams = new PBEParameterSpec(salt, itCount);
         PBEKeySpec pbeSpec = new PBEKeySpec(password);
         BCPBEKey key = (BCPBEKey)keyFact.generateSecret(pbeSpec);
         key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
 
-        Mac mac = Mac.getInstance(oid.getId(), bcProvider);
+        Mac mac = helper.createMac(oid.getId());
         mac.init(key, defParams);
         mac.update(data);
         return mac.doFinal();
@@ -1680,20 +1683,19 @@ public class PKCS12KeyStoreSpi
     {
         public BCPKCS12KeyStore()
         {
-            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
+            super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
-
     // BEGIN android-removed
     // public static class BCPKCS12KeyStore3DES
     //     extends PKCS12KeyStoreSpi
     // {
     //     public BCPKCS12KeyStore3DES()
     //     {
-    //         super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+    //         super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
     //     }
     // }
-    //
+    // 
     // public static class DefPKCS12KeyStore
     //     extends PKCS12KeyStoreSpi
     // {
@@ -1702,7 +1704,7 @@ public class PKCS12KeyStoreSpi
     //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
     //     }
     // }
-    //
+    // 
     // public static class DefPKCS12KeyStore3DES
     //     extends PKCS12KeyStoreSpi
     // {

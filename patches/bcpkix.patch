@@ -1,7 +1,7 @@
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedData.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedData.java	2014-07-28 23:57:30.811988142 +0000
-@@ -285,18 +285,20 @@
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedData.java bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedData.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedData.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedData.java	2015-04-09 13:10:16.000000000 +0000
+@@ -287,18 +287,20 @@
          return HELPER.getAttributeCertificates(signedData.getCertificates());
      }
  
@@ -34,7 +34,7 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
  
      /**
       * Return the a string representation of the OID associated with the
-@@ -331,71 +333,73 @@
+@@ -333,90 +335,92 @@
          return contentInfo.getEncoded();
      }
  
@@ -85,10 +85,7 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
 -
 -                    for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
 -                    {
--                        SignerInformation counterSigner = (SignerInformation)cIt.next();
--                        SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
--
--                        if (!counterSigner.verify(counterVerifier))
+-                        if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
 -                        {
 -                            return false;
 -                        }
@@ -98,6 +95,28 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
 -            catch (OperatorCreationException e)
 -            {
 -                throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
+-            }
+-        }
+-
+-        return true;
+-    }
+-
+-    private boolean verifyCounterSignature(SignerInformation counterSigner, SignerInformationVerifierProvider verifierProvider)
+-        throws OperatorCreationException, CMSException
+-    {
+-        SignerInformationVerifier counterVerifier = verifierProvider.get(counterSigner.getSID());
+-
+-        if (!counterSigner.verify(counterVerifier))
+-        {
+-            return false;
+-        }
+-
+-        Collection counterSigners = counterSigner.getCounterSignatures().getSigners();
+-        for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+-        {
+-            if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
+-            {
+-                return false;
 -            }
 -        }
 -
@@ -117,7 +136,7 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
 +    // {
 +    //     return verifySignatures(verifierProvider, false);
 +    // }
-+    //
++    // 
 +    // /**
 +    //  * Verify all the SignerInformation objects and optionally their associated counter signatures attached
 +    //  * to this CMS SignedData object.
@@ -131,30 +150,27 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
 +    //     throws CMSException
 +    // {
 +    //     Collection signers = this.getSignerInfos().getSigners();
-+    //
++    // 
 +    //     for (Iterator it = signers.iterator(); it.hasNext();)
 +    //     {
 +    //         SignerInformation signer = (SignerInformation)it.next();
-+    //
++    // 
 +    //         try
 +    //         {
 +    //             SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
-+    //
++    // 
 +    //             if (!signer.verify(verifier))
 +    //             {
 +    //                 return false;
 +    //             }
-+    //
++    // 
 +    //             if (!ignoreCounterSignatures)
 +    //             {
 +    //                 Collection counterSigners = signer.getCounterSignatures().getSigners();
-+    //
++    // 
 +    //                 for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
 +    //                 {
-+    //                     SignerInformation counterSigner = (SignerInformation)cIt.next();
-+    //                     SignerInformationVerifier counterVerifier = verifierProvider.get(signer.getSID());
-+    //
-+    //                     if (!counterSigner.verify(counterVerifier))
++    //                     if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
 +    //                     {
 +    //                         return false;
 +    //                     }
@@ -166,16 +182,38 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedData.java bcpki
 +    //             throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
 +    //         }
 +    //     }
-+    //
++    // 
++    //     return true;
++    // }
++    // 
++    // private boolean verifyCounterSignature(SignerInformation counterSigner, SignerInformationVerifierProvider verifierProvider)
++    //     throws OperatorCreationException, CMSException
++    // {
++    //     SignerInformationVerifier counterVerifier = verifierProvider.get(counterSigner.getSID());
++    // 
++    //     if (!counterSigner.verify(counterVerifier))
++    //     {
++    //         return false;
++    //     }
++    // 
++    //     Collection counterSigners = counterSigner.getCounterSignatures().getSigners();
++    //     for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
++    //     {
++    //         if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
++    //         {
++    //             return false;
++    //         }
++    //     }
++    // 
 +    //     return true;
 +    // }
 +    // END android-removed
  
      /**
       * Replace the SignerInformation store associated with this
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedGenerator.java bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedGenerator.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedGenerator.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedGenerator.java	2014-07-28 23:57:30.815988170 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedGenerator.java bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedGenerator.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedGenerator.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedGenerator.java	2013-12-12 00:35:05.000000000 +0000
 @@ -12,8 +12,10 @@
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
  import org.bouncycastle.asn1.DERTaggedObject;
@@ -276,9 +314,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedGenerator.java 
  
      /**
       * Add a store of pre-calculated signers to the generator.
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedHelper.java bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedHelper.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedHelper.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/CMSSignedHelper.java	2014-07-28 23:57:30.795988031 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedHelper.java bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedHelper.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSSignedHelper.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/CMSSignedHelper.java	2013-12-12 00:35:05.000000000 +0000
 @@ -13,8 +13,10 @@
  import org.bouncycastle.asn1.ASN1Set;
  import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -427,9 +465,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSSignedHelper.java bcp
 +    //     return new CollectionStore(new ArrayList());
 +    // }
  }
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSUtils.java bcpkix-jdk15on-151/org/bouncycastle/cms/CMSUtils.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSUtils.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/CMSUtils.java	2014-07-28 23:57:30.775987892 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSUtils.java bcpkix-jdk15on-152/org/bouncycastle/cms/CMSUtils.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/CMSUtils.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/CMSUtils.java	2014-07-28 19:51:54.000000000 +0000
 @@ -20,9 +20,11 @@
  import org.bouncycastle.asn1.DERTaggedObject;
  import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -536,9 +574,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/CMSUtils.java bcpkix-jdk
  
      static ASN1Set createBerSetFromList(List derObjects)
      {
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java bcpkix-jdk15on-151/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2014-07-28 23:57:30.779987920 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java bcpkix-jdk15on-152/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/DefaultCMSSignatureAlgorithmNameGenerator.java	2015-04-09 13:10:16.000000000 +0000
 @@ -4,8 +4,10 @@
  import java.util.Map;
  
@@ -573,7 +611,7 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgor
          addEntries(PKCSObjectIdentifiers.md5WithRSAEncryption, "MD5", "RSA");
          addEntries(PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1", "RSA");
          addEntries(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224", "RSA");
-@@ -61,38 +67,44 @@
+@@ -66,38 +72,44 @@
          addEntries(EACObjectIdentifiers.id_TA_RSA_v1_5_SHA_256, "SHA256", "RSA");
          addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_1, "SHA1", "RSAandMGF1");
          addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_256, "SHA256", "RSAandMGF1");
@@ -638,9 +676,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureAlgor
      }
  
      /**
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java bcpkix-jdk15on-151/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2014-07-28 23:57:30.803988086 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java bcpkix-jdk15on-152/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/cms/DefaultCMSSignatureEncryptionAlgorithmFinder.java	2013-09-26 18:06:21.000000000 +0000
 @@ -16,21 +16,27 @@
  
      static
@@ -676,9 +714,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/cms/DefaultCMSSignatureEncry
      }
  
      public AlgorithmIdentifier findEncryptionAlgorithm(AlgorithmIdentifier signatureAlgorithm)
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java bcpkix-jdk15on-151/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2014-07-28 23:57:30.735987614 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java bcpkix-jdk15on-152/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/operator/DefaultDigestAlgorithmIdentifierFinder.java	2013-09-26 18:06:21.000000000 +0000
 @@ -5,7 +5,9 @@
  
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -763,9 +801,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultDigestAlgori
      }
  
      public AlgorithmIdentifier find(AlgorithmIdentifier sigAlgId)
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java bcpkix-jdk15on-151/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2014-07-28 23:57:30.695987337 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java bcpkix-jdk15on-152/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/operator/DefaultSignatureAlgorithmIdentifierFinder.java	2014-07-28 19:51:54.000000000 +0000
 @@ -9,9 +9,11 @@
  import org.bouncycastle.asn1.ASN1Integer;
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -927,9 +965,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/DefaultSignatureAlg
 -}
 \ No newline at end of file
 +}
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java bcpkix-jdk15on-151/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2014-07-28 23:57:30.731987587 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java bcpkix-jdk15on-152/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/operator/bc/BcDefaultDigestProvider.java	2013-09-26 18:06:21.000000000 +0000
 @@ -4,20 +4,26 @@
  import java.util.HashMap;
  import java.util.Map;
@@ -1057,9 +1095,9 @@ diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/bc/BcDefaultDigestP
  
          return Collections.unmodifiableMap(table);
      }
-diff -Naur bcpkix-jdk15on-151.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java bcpkix-jdk15on-151/org/bouncycastle/operator/jcajce/OperatorHelper.java
---- bcpkix-jdk15on-151.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java	2014-07-26 04:18:10.000000000 +0000
-+++ bcpkix-jdk15on-151/org/bouncycastle/operator/jcajce/OperatorHelper.java	2014-07-28 23:57:30.711987448 +0000
+diff -Naur bcpkix-jdk15on-152.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java bcpkix-jdk15on-152/org/bouncycastle/operator/jcajce/OperatorHelper.java
+--- bcpkix-jdk15on-152.orig/org/bouncycastle/operator/jcajce/OperatorHelper.java	2015-03-01 12:03:46.000000000 +0000
++++ bcpkix-jdk15on-152/org/bouncycastle/operator/jcajce/OperatorHelper.java	2015-04-09 13:10:16.000000000 +0000
 @@ -24,9 +24,11 @@
  import org.bouncycastle.asn1.ASN1Encodable;
  import org.bouncycastle.asn1.ASN1ObjectIdentifier;

@@ -21,11 +21,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jcajce.PKIXExtendedBuilderParameters;
+import org.bouncycastle.jcajce.PKIXExtendedParameters;
+import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 
@@ -36,6 +39,11 @@ import org.bouncycastle.x509.ExtendedPKIXParameters;
 public class PKIXCertPathValidatorSpi
         extends CertPathValidatorSpi
 {
+    private final JcaJceHelper helper = new BCJcaJceHelper();
+
+    public PKIXCertPathValidatorSpi()
+    {
+    }
     // BEGIN android-added
     private static class NoPreloadHolder {
         private final static CertBlacklist blacklist = new CertBlacklist();
@@ -48,21 +56,36 @@ public class PKIXCertPathValidatorSpi
             throws CertPathValidatorException,
             InvalidAlgorithmParameterException
     {
-        if (!(params instanceof PKIXParameters))
+        if (!(params instanceof CertPathParameters))
         {
             throw new InvalidAlgorithmParameterException("Parameters must be a " + PKIXParameters.class.getName()
                     + " instance.");
         }
 
-        ExtendedPKIXParameters paramsPKIX;
-        if (params instanceof ExtendedPKIXParameters)
+        PKIXExtendedParameters paramsPKIX;
+        if (params instanceof PKIXParameters)
         {
-            paramsPKIX = (ExtendedPKIXParameters)params;
+            PKIXExtendedParameters.Builder paramsPKIXBldr = new PKIXExtendedParameters.Builder((PKIXParameters)params);
+
+            if (params instanceof ExtendedPKIXParameters)
+            {
+                ExtendedPKIXParameters extPKIX = (ExtendedPKIXParameters)params;
+
+                paramsPKIXBldr.setUseDeltasEnabled(extPKIX.isUseDeltasEnabled());
+                paramsPKIXBldr.setValidityModel(extPKIX.getValidityModel());
+            }
+
+            paramsPKIX = paramsPKIXBldr.build();
+        }
+        else if (params instanceof PKIXExtendedBuilderParameters)
+        {
+            paramsPKIX = ((PKIXExtendedBuilderParameters)params).getBaseParameters();
         }
         else
         {
-            paramsPKIX = ExtendedPKIXParameters.getInstance((PKIXParameters)params);
+            paramsPKIX = (PKIXExtendedParameters)params;
         }
+
         if (paramsPKIX.getTrustAnchors() == null)
         {
             throw new InvalidAlgorithmParameterException(
@@ -128,6 +151,9 @@ public class PKIXCertPathValidatorSpi
         {
             throw new CertPathValidatorException("Trust anchor for certification path not found.", null, certPath, -1);
         }
+
+        // RFC 5280 - CRLs must originate from the same trust anchor as the target certificate.
+        paramsPKIX = new PKIXExtendedParameters.Builder(paramsPKIX).setTrustAnchor(trust).build();
 
         //
         // (e), (f), (g) are part of the paramsPKIX object.
@@ -210,19 +236,19 @@ public class PKIXCertPathValidatorSpi
         // (g), (h), (i), (j)
         //
         PublicKey workingPublicKey;
-        X500Principal workingIssuerName;
+        X500Name workingIssuerName;
 
         X509Certificate sign = trust.getTrustedCert();
         try
         {
             if (sign != null)
             {
-                workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);
+                workingIssuerName = PrincipalUtils.getSubjectPrincipal(sign);
                 workingPublicKey = sign.getPublicKey();
             }
             else
             {
-                workingIssuerName = new X500Principal(trust.getCAName());
+                workingIssuerName = PrincipalUtils.getCA(trust);
                 workingPublicKey = trust.getCAPublicKey();
             }
         }
@@ -305,7 +331,7 @@ public class PKIXCertPathValidatorSpi
             //
 
             RFC3280CertPathUtilities.processCertA(certPath, paramsPKIX, index, workingPublicKey,
-                verificationAlreadyPerformed, workingIssuerName, sign);
+                verificationAlreadyPerformed, workingIssuerName, sign, helper);
 
             RFC3280CertPathUtilities.processCertBC(certPath, index, nameConstraintValidator);
 
@@ -390,12 +416,12 @@ public class PKIXCertPathValidatorSpi
                 sign = cert;
 
                 // (c)
-                workingIssuerName = CertPathValidatorUtilities.getSubjectPrincipal(sign);
+                workingIssuerName = PrincipalUtils.getSubjectPrincipal(sign);
 
                 // (d)
                 try
                 {
-                    workingPublicKey = CertPathValidatorUtilities.getNextWorkingKey(certPath.getCertificates(), index);
+                    workingPublicKey = CertPathValidatorUtilities.getNextWorkingKey(certPath.getCertificates(), index, helper);
                 }
                 catch (CertPathValidatorException e)
                 {
