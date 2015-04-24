@@ -1261,7 +1261,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/D
                  registerOidAlgorithmParameters(provider, DSAUtil.dsaOids[i], "DSA");
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/EC.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/EC.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/EC.java	2015-03-01 12:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/EC.java	2014-07-28 19:51:54.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/EC.java	2015-04-09 13:10:16.000000000 +0000
 @@ -1,8 +1,10 @@
  package org.bouncycastle.jcajce.provider.asymmetric;
  
@@ -8494,7 +8494,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/PKIXCRLUtil.jav
  
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java bcprov-jdk15on-152/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2015-03-01 12:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2015-04-09 13:10:16.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jce/provider/PKIXCertPathValidatorSpi.java	2015-04-24 13:59:41.000000000 +0000
 @@ -1,5 +1,8 @@
  package org.bouncycastle.jce.provider;
  
@@ -8516,7 +8516,27 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/PKIXCertPathVal
  
      public CertPathValidatorResult engineValidate(
              CertPath certPath,
-@@ -98,6 +106,22 @@
+@@ -73,10 +81,18 @@
+         {
+             paramsPKIX = ((PKIXExtendedBuilderParameters)params).getBaseParameters();
+         }
+-        else
++        // BEGIN android-changed
++        // else
++        else if (params instanceof PKIXExtendedParameters)
++        // END android-changed
+         {
+             paramsPKIX = (PKIXExtendedParameters)params;
+         }
++        // BEGIN android-added
++        else {
++            throw new InvalidAlgorithmParameterException("Expecting PKIX algorithm parameters");
++        }
++        // END android-added
+ 
+         if (paramsPKIX.getTrustAnchors() == null)
+         {
+@@ -98,6 +114,22 @@
          {
              throw new CertPathValidatorException("Certification path is empty.", null, certPath, 0);
          }
@@ -8539,7 +8559,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/PKIXCertPathVal
  
          //
          // (b)
-@@ -277,6 +301,15 @@
+@@ -277,6 +309,15 @@
  
          for (index = certs.size() - 1; index >= 0; index--)
          {
