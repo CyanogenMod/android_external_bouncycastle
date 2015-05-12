@@ -208,7 +208,9 @@ public final class AES
     {
         public KeyGen()
         {
-            this(192);
+            // BEGIN android-changed
+            this(128);
+            // END android-changed
         }
 
         public KeyGen(int keySize)
