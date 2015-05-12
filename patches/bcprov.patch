@@ -2338,9 +2338,20 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/e
      public static class ECDH
          extends KeyFactorySpi
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2015-03-01 12:03:02.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2015-03-01 20:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2014-07-28 19:51:54.000000000 +0000
-@@ -84,7 +84,13 @@
+@@ -42,7 +42,9 @@
+         ECKeyGenerationParameters   param;
+         ECKeyPairGenerator          engine = new ECKeyPairGenerator();
+         Object                      ecParams = null;
+-        int                         strength = 239;
++        // BEGIN android-changed
++        int                         strength = 256;
++        // BEGIN android-changed
+         int                         certainty = 50;
+         SecureRandom                random = new SecureRandom();
+         boolean                     initialised = false;
+@@ -84,7 +86,13 @@
              SecureRandom    random)
          {
              this.strength = strength;
@@ -2354,7 +2365,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/e
  
              ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(Integers.valueOf(strength));
              if (ecParams == null)
-@@ -107,6 +113,11 @@
+@@ -107,6 +115,11 @@
              SecureRandom            random)
              throws InvalidAlgorithmParameterException
          {
@@ -2366,7 +2377,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/e
              if (params == null)
              {
                  ECParameterSpec implicitCA = configuration.getEcImplicitlyCa();
-@@ -267,4 +278,4 @@
+@@ -267,4 +280,4 @@
              super("ECMQV", BouncyCastleProvider.CONFIGURATION);
          }
      }
