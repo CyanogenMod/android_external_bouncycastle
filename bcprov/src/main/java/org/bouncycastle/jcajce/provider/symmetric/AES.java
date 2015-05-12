@@ -736,10 +736,12 @@ public final class AES
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
             // END android-removed
 
-            provider.addAlgorithm("Cipher.GCM", PREFIX + "$GCM");
-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
+            // BEGIN android-changed
+            provider.addAlgorithm("Cipher.AES/GCM/NOPADDING", PREFIX + "$GCM");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "AES/GCM/NOPADDING");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "AES/GCM/NOPADDING");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "AES/GCM/NOPADDING");
+            // END android-changed
 
             provider.addAlgorithm("KeyGenerator.AES", PREFIX + "$KeyGen");
             // BEGIN android-removed

@@ -4082,8 +4082,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/keystore/pkc
              KEY_SIZES = Collections.unmodifiableMap(keySizes);
          }
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-03-01 12:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-04-09 13:10:16.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-03-01 20:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-05-12 00:19:13.000000000 +0000
 @@ -3,16 +3,22 @@
  import java.io.IOException;
  import java.lang.reflect.Constructor;
@@ -4754,7 +4754,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      public static class Mappings
          extends SymmetricAlgorithmProvider
-@@ -652,58 +678,63 @@
+@@ -652,92 +678,101 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
@@ -4838,6 +4838,11 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
+-
+-            provider.addAlgorithm("Cipher.GCM", PREFIX + "$GCM");
+-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
+-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
+-            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
 +            // BEGIN android-removed
 +            // provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
 +            // provider.addAlgorithm("Cipher.AESRFC5649WRAP", PREFIX + "$RFC5649Wrap");
@@ -4857,11 +4862,13 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
 +            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
 +            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
 +            // END android-removed
- 
-             provider.addAlgorithm("Cipher.GCM", PREFIX + "$GCM");
-             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
-@@ -711,33 +742,35 @@
-             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
++
++            // BEGIN android-changed
++            provider.addAlgorithm("Cipher.AES/GCM/NOPADDING", PREFIX + "$GCM");
++            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "AES/GCM/NOPADDING");
++            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "AES/GCM/NOPADDING");
++            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "AES/GCM/NOPADDING");
++            // END android-changed
  
              provider.addAlgorithm("KeyGenerator.AES", PREFIX + "$KeyGen");
 -            provider.addAlgorithm("KeyGenerator." + wrongAES128, PREFIX + "$KeyGen128");
@@ -4923,7 +4930,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
              
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
-@@ -816,8 +849,10 @@
+@@ -816,8 +851,10 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
  
