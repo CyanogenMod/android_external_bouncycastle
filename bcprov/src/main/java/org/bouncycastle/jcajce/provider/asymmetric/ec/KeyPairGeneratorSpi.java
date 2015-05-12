@@ -42,7 +42,9 @@ public abstract class KeyPairGeneratorSpi
         ECKeyGenerationParameters   param;
         ECKeyPairGenerator          engine = new ECKeyPairGenerator();
         Object                      ecParams = null;
-        int                         strength = 239;
+        // BEGIN android-changed
+        int                         strength = 256;
+        // BEGIN android-changed
         int                         certainty = 50;
         SecureRandom                random = new SecureRandom();
         boolean                     initialised = false;
