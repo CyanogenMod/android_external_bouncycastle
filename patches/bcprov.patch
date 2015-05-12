@@ -4290,7 +4290,18 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      /**
       * PBEWithAES-CBC
-@@ -199,32 +217,34 @@
+@@ -190,7 +208,9 @@
+     {
+         public KeyGen()
+         {
+-            this(192);
++            // BEGIN android-changed
++            this(128);
++            // END android-changed
+         }
+ 
+         public KeyGen(int keySize)
+@@ -199,32 +219,34 @@
          }
      }
  
@@ -4351,7 +4362,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
      
      /**
       * PBEWithSHA1And128BitAES-BC
-@@ -334,119 +354,121 @@
+@@ -334,119 +356,121 @@
          }
      }
      
@@ -4586,7 +4597,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      public static class AlgParams
          extends IvAlgorithmParameters
-@@ -545,80 +567,82 @@
+@@ -545,80 +569,82 @@
          }
      }
  
@@ -4743,7 +4754,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      public static class Mappings
          extends SymmetricAlgorithmProvider
-@@ -652,58 +676,63 @@
+@@ -652,58 +678,63 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
@@ -4849,7 +4860,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
              provider.addAlgorithm("Cipher.GCM", PREFIX + "$GCM");
              provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
-@@ -711,33 +740,35 @@
+@@ -711,33 +742,35 @@
              provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
  
              provider.addAlgorithm("KeyGenerator.AES", PREFIX + "$KeyGen");
@@ -4912,7 +4923,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
              
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
-@@ -816,8 +847,10 @@
+@@ -816,8 +849,10 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
  
