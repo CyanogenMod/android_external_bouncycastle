@@ -1799,7 +1799,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/X
              //
              // certificate factories.
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-03-01 12:03:02.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-03-01 20:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2013-12-12 00:35:05.000000000 +0000
 @@ -23,13 +23,20 @@
  import org.bouncycastle.crypto.DSA;
@@ -1994,6 +1994,19 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/d
  
      static public class noneDSA
          extends DSASigner
+diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java	2015-03-01 20:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java	2015-06-01 19:10:55.000000000 +0000
+@@ -23,6 +23,9 @@
+     public static final ASN1ObjectIdentifier[] dsaOids =
+     {
+         X9ObjectIdentifiers.id_dsa,
++        // BEGIN android-added
++        X9ObjectIdentifiers.id_dsa_with_sha1,
++        // END android-added
+         OIWObjectIdentifiers.dsaWithSHA1
+     };
+ 
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java	2015-03-01 12:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyAgreementSpi.java	2014-07-28 19:51:54.000000000 +0000
