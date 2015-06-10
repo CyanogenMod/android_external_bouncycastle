@@ -7831,8 +7831,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/BouncyCastlePro
      private void loadAlgorithms(String packageName, String[] names)
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/CertBlacklist.java bcprov-jdk15on-152/org/bouncycastle/jce/provider/CertBlacklist.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/CertBlacklist.java	1970-01-01 00:00:00.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jce/provider/CertBlacklist.java	2014-05-05 17:28:58.000000000 +0000
-@@ -0,0 +1,228 @@
++++ bcprov-jdk15on-152/org/bouncycastle/jce/provider/CertBlacklist.java	2015-06-10 22:51:41.000000000 +0000
+@@ -0,0 +1,233 @@
 +/*
 + * Copyright (C) 2012 The Android Open Source Project
 + *
@@ -7957,7 +7957,15 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/CertBlacklist.j
 +
 +    private static final Set<BigInteger> readSerialBlackList(String path) {
 +
-+        // start out with a base set of known bad values
++        /* Start out with a base set of known bad values.
++         *
++         * WARNING: Do not add short serials to this list!
++         *
++         * Since this currently doesn't compare the serial + issuer, you
++         * should only add serials that have enough entropy here. Short
++         * serials may inadvertently match a certificate that was issued
++         * not in compliance with the Baseline Requirements.
++         */
 +        Set<BigInteger> bl = new HashSet<BigInteger>(Arrays.asList(
 +            // From http://src.chromium.org/viewvc/chrome/trunk/src/net/base/x509_certificate.cc?revision=78748&view=markup
 +            // Not a real certificate. For testing only.
@@ -7970,10 +7978,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jce/provider/CertBlacklist.j
 +            new BigInteger("d7558fdaf5f1105bb213282b707729a3", 16),
 +            new BigInteger("f5c86af36162f13a64f54f6dc9587c06", 16),
 +            new BigInteger("392a434f0e07df1f8aa305de34e0c229", 16),
-+            new BigInteger("3e75ced46b693021218830ae86a82a71", 16),
-+            new BigInteger("864", 16),
-+            new BigInteger("827", 16),
-+            new BigInteger("31da7", 16)
++            new BigInteger("3e75ced46b693021218830ae86a82a71", 16)
 +        ));
 +
 +        // attempt to augment it with values taken from gservices
