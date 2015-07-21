@@ -33,6 +33,10 @@ import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 // import org.bouncycastle.crypto.digests.SHA384Digest;
 // import org.bouncycastle.crypto.digests.SHA512Digest;
 // END android-removed
+// BEGIN android-added
+import org.bouncycastle.crypto.params.DSAKeyParameters;
+import org.bouncycastle.crypto.params.DSAParameters;
+// END android-added
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
@@ -86,6 +90,10 @@ public class DSASigner
                 throw new InvalidKeyException("can't recognise key type in DSA based signer");
             }
         }
+        // BEGIN android-added
+        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
+        checkKey(dsaParam);
+        // END android-added
 
         digest.reset();
         signer.init(false, param);
@@ -112,6 +120,10 @@ public class DSASigner
         {
             param = new ParametersWithRandom(param, random);
         }
+        // BEGIN android-added
+        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
+        checkKey(dsaParam);
+        // END android-added
 
         digest.reset();
         signer.init(true, param);
@@ -180,6 +192,28 @@ public class DSASigner
         throw new UnsupportedOperationException("engineSetParameter unsupported");
     }
 
+    // BEGIN android-added
+    protected void checkKey(DSAParameters params) throws InvalidKeyException {
+        int valueL = params.getP().bitLength();
+        int valueN = params.getQ().bitLength();
+        int digestSize = digest.getDigestSize();
+
+        // The checks are consistent with DSAParametersGenerator's init method.
+        if ((valueL < 1024 || valueL > 3072) || valueL % 1024 != 0) {
+            throw new InvalidKeyException("valueL values must be between 1024 and 3072 and a multiple of 1024");
+        } else if (valueL == 1024 && valueN != 160) {
+            throw new InvalidKeyException("valueN must be 160 for valueL = 1024");
+        } else if (valueL == 2048 && (valueN != 224 && valueN != 256)) {
+            throw new InvalidKeyException("valueN must be 224 or 256 for valueL = 2048");
+        } else if (valueL == 3072 && valueN != 256) {
+            throw new InvalidKeyException("valueN must be 256 for valueL = 3072");
+        }
+        if (valueN > digestSize * 8) {
+            throw new InvalidKeyException("Key is too strong for this signature algorithm");
+        }
+    }
+
+    // END android-added
     /**
      * @deprecated replaced with <a href = "#engineSetParameter(java.security.spec.AlgorithmParameterSpec)">
      */

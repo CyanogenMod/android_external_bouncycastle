@@ -1803,8 +1803,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/X
              // certificate factories.
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-03-01 12:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2013-12-12 00:35:05.000000000 +0000
-@@ -23,13 +23,20 @@
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-09-22 23:02:52.000000000 +0000
+@@ -23,13 +23,24 @@
  import org.bouncycastle.crypto.DSA;
  import org.bouncycastle.crypto.Digest;
  import org.bouncycastle.crypto.digests.NullDigest;
@@ -1823,6 +1823,10 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/d
 +// import org.bouncycastle.crypto.digests.SHA384Digest;
 +// import org.bouncycastle.crypto.digests.SHA512Digest;
 +// END android-removed
++// BEGIN android-added
++import org.bouncycastle.crypto.params.DSAKeyParameters;
++import org.bouncycastle.crypto.params.DSAParameters;
++// END android-added
  import org.bouncycastle.crypto.params.ParametersWithRandom;
 -import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 +// BEGIN android-removed
@@ -1831,7 +1835,58 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/d
  
  public class DSASigner
      extends SignatureSpi
-@@ -217,90 +224,102 @@
+@@ -79,6 +90,10 @@
+                 throw new InvalidKeyException("can't recognise key type in DSA based signer");
+             }
+         }
++        // BEGIN android-added
++        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
++        checkKey(dsaParam);
++        // END android-added
+ 
+         digest.reset();
+         signer.init(false, param);
+@@ -105,6 +120,10 @@
+         {
+             param = new ParametersWithRandom(param, random);
+         }
++        // BEGIN android-added
++        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
++        checkKey(dsaParam);
++        // END android-added
+ 
+         digest.reset();
+         signer.init(true, param);
+@@ -173,6 +192,28 @@
+         throw new UnsupportedOperationException("engineSetParameter unsupported");
+     }
+ 
++    // BEGIN android-added
++    protected void checkKey(DSAParameters params) throws InvalidKeyException {
++        int valueL = params.getP().bitLength();
++        int valueN = params.getQ().bitLength();
++        int digestSize = digest.getDigestSize();
++
++        // The checks are consistent with DSAParametersGenerator's init method.
++        if ((valueL < 1024 || valueL > 3072) || valueL % 1024 != 0) {
++            throw new InvalidKeyException("valueL values must be between 1024 and 3072 and a multiple of 1024");
++        } else if (valueL == 1024 && valueN != 160) {
++            throw new InvalidKeyException("valueN must be 160 for valueL = 1024");
++        } else if (valueL == 2048 && (valueN != 224 && valueN != 256)) {
++            throw new InvalidKeyException("valueN must be 224 or 256 for valueL = 2048");
++        } else if (valueL == 3072 && valueN != 256) {
++            throw new InvalidKeyException("valueN must be 256 for valueL = 3072");
++        }
++        if (valueN > digestSize * 8) {
++            throw new InvalidKeyException("Key is too strong for this signature algorithm");
++        }
++    }
++
++    // END android-added
+     /**
+      * @deprecated replaced with <a href = "#engineSetParameter(java.security.spec.AlgorithmParameterSpec)">
+      */
+@@ -217,90 +258,102 @@
      {
          public stdDSA()
          {
