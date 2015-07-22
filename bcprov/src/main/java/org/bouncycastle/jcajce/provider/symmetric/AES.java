@@ -3,6 +3,9 @@ package org.bouncycastle.jcajce.provider.symmetric;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+// BEGIN android-added
+import java.security.NoSuchAlgorithmException;
+// END android-added
 // BEGIN android-removed
 // import java.security.AlgorithmParameters;
 // import java.security.InvalidAlgorithmParameterException;
@@ -15,6 +18,9 @@ import java.security.spec.InvalidParameterSpecException;
 // import javax.crypto.spec.IvParameterSpec;
 // END android-removed
 
+// BEGIN android-added
+import javax.crypto.NoSuchPaddingException;
+// END android-added
 import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cms.CCMParameters;
@@ -112,6 +118,15 @@ public final class AES
         public GCM()
         {
             super(new GCMBlockCipher(new AESFastEngine()));
+            // BEGIN android-added
+            try {
+                engineSetMode("GCM");
+                engineSetPadding("NoPadding");
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+                // this should not be possible
+                throw new RuntimeException("Could not set mode or padding for GCM mode", e);
+            }
+            // END android-added
         }
     }
 
