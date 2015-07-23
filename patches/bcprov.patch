@@ -4111,12 +4111,15 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/keystore/pkc
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-03-01 20:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-05-12 00:19:13.000000000 +0000
-@@ -3,16 +3,22 @@
+@@ -3,16 +3,28 @@
  import java.io.IOException;
  import java.lang.reflect.Constructor;
  import java.lang.reflect.Method;
 -import java.security.AlgorithmParameters;
 -import java.security.InvalidAlgorithmParameterException;
++// BEGIN android-added
++import java.security.NoSuchAlgorithmException;
++// END android-added
 +// BEGIN android-removed
 +// import java.security.AlgorithmParameters;
 +// import java.security.InvalidAlgorithmParameterException;
@@ -4126,10 +4129,14 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  import java.security.spec.InvalidParameterSpecException;
  
 -import javax.crypto.spec.IvParameterSpec;
+-
 +// BEGIN android-removed
 +// import javax.crypto.spec.IvParameterSpec;
 +// END android-removed
- 
++
++// BEGIN android-added
++import javax.crypto.NoSuchPaddingException;
++// END android-added
  import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
 -import org.bouncycastle.asn1.cms.CCMParameters;
 +// BEGIN android-removed
@@ -4138,7 +4145,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  import org.bouncycastle.asn1.cms.GCMParameters;
  import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
  import org.bouncycastle.crypto.BlockCipher;
-@@ -20,22 +26,30 @@
+@@ -20,22 +32,30 @@
  import org.bouncycastle.crypto.CipherKeyGenerator;
  import org.bouncycastle.crypto.engines.AESFastEngine;
  import org.bouncycastle.crypto.engines.AESWrapEngine;
@@ -4177,7 +4184,19 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
  import org.bouncycastle.jcajce.provider.symmetric.util.BlockCipherProvider;
  import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
-@@ -101,50 +115,52 @@
+@@ -98,53 +118,64 @@
+         public GCM()
+         {
+             super(new GCMBlockCipher(new AESFastEngine()));
++            // BEGIN android-added
++            try {
++                engineSetMode("GCM");
++                engineSetPadding("NoPadding");
++            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
++                // this should not be possible
++                throw new RuntimeException("Could not set mode or padding for GCM mode", e);
++            }
++            // END android-added
          }
      }
  
@@ -4274,7 +4293,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      static public class Wrap
          extends BaseWrapCipher
-@@ -155,23 +171,25 @@
+@@ -155,23 +186,25 @@
          }
      }
  
@@ -4317,7 +4336,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      /**
       * PBEWithAES-CBC
-@@ -190,7 +208,9 @@
+@@ -190,7 +223,9 @@
      {
          public KeyGen()
          {
@@ -4328,7 +4347,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
          }
  
          public KeyGen(int keySize)
-@@ -199,32 +219,34 @@
+@@ -199,32 +234,34 @@
          }
      }
  
@@ -4389,7 +4408,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
      
      /**
       * PBEWithSHA1And128BitAES-BC
-@@ -334,119 +356,121 @@
+@@ -334,119 +371,121 @@
          }
      }
      
@@ -4624,7 +4643,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      public static class AlgParams
          extends IvAlgorithmParameters
-@@ -545,80 +569,82 @@
+@@ -545,80 +584,82 @@
          }
      }
  
@@ -4781,7 +4800,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
  
      public static class Mappings
          extends SymmetricAlgorithmProvider
-@@ -652,92 +678,101 @@
+@@ -652,92 +693,101 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
@@ -4957,7 +4976,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AE
              
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc.getId(), "PBEWITHSHAAND128BITAES-CBC-BC");
              provider.addAlgorithm("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc.getId(), "PBEWITHSHAAND192BITAES-CBC-BC");
-@@ -816,8 +851,10 @@
+@@ -816,8 +866,10 @@
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
              provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
  
