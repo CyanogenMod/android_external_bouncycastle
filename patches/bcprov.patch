@@ -1026,6 +1026,84 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/crypto/macs/HMac.java bcprov
      }
      
      private static int getByteLength(
+diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/crypto/modes/GCMBlockCipher.java bcprov-jdk15on-152/org/bouncycastle/crypto/modes/GCMBlockCipher.java
+--- bcprov-jdk15on-152.orig/org/bouncycastle/crypto/modes/GCMBlockCipher.java	2015-03-01 12:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/crypto/modes/GCMBlockCipher.java	2015-04-09 13:10:16.000000000 +0000
+@@ -24,6 +24,11 @@
+     implements AEADBlockCipher
+ {
+     private static final int BLOCK_SIZE = 16;
++    // BEGIN android-added
++    // 2^36-32 : limitation imposed by NIST GCM as otherwise the counter is wrapped and it can leak
++    // plaintext and authentication key
++    private static final long MAX_INPUT_SIZE = 68719476704L;
++    // END android-added
+ 
+     // not final due to a compiler bug
+     private BlockCipher   cipher;
+@@ -202,6 +207,14 @@
+         return totalData < macSize ? 0 : totalData - macSize;
+     }
+ 
++    // BEGIN android-added
++    /** Helper used to ensure that {@link #MAX_INPUT_SIZE} is not exceeded. */
++    private long getTotalInputSizeAfterNewInput(int newInputLen)
++    {
++        return totalLength + newInputLen + bufOff;
++    }
++    // END android-added
++
+     public int getUpdateOutputSize(int len)
+     {
+         int totalData = len + bufOff;
+@@ -218,6 +231,11 @@
+ 
+     public void processAADByte(byte in)
+     {
++        // BEGIN android-added
++        if (getTotalInputSizeAfterNewInput(1) > MAX_INPUT_SIZE) {
++            throw new DataLengthException("Input exceeded " + MAX_INPUT_SIZE + " bytes");
++        }
++        // END android-added
+         atBlock[atBlockPos] = in;
+         if (++atBlockPos == BLOCK_SIZE)
+         {
+@@ -230,6 +248,11 @@
+ 
+     public void processAADBytes(byte[] in, int inOff, int len)
+     {
++        // BEGIN android-added
++        if (getTotalInputSizeAfterNewInput(len) > MAX_INPUT_SIZE) {
++            throw new DataLengthException("Input exceeded " + MAX_INPUT_SIZE + " bytes");
++        }
++        // END android-added
+         for (int i = 0; i < len; ++i)
+         {
+             atBlock[atBlockPos] = in[inOff + i];
+@@ -267,6 +290,11 @@
+     public int processByte(byte in, byte[] out, int outOff)
+         throws DataLengthException
+     {
++        // BEGIN android-added
++        if (getTotalInputSizeAfterNewInput(1) > MAX_INPUT_SIZE) {
++            throw new DataLengthException("Input exceeded " + MAX_INPUT_SIZE + " bytes");
++        }
++        // END android-added
+         bufBlock[bufOff] = in;
+         if (++bufOff == bufBlock.length)
+         {
+@@ -279,6 +307,11 @@
+     public int processBytes(byte[] in, int inOff, int len, byte[] out, int outOff)
+         throws DataLengthException
+     {
++        // BEGIN android-added
++        if (getTotalInputSizeAfterNewInput(len) > MAX_INPUT_SIZE) {
++            throw new DataLengthException("Input exceeded " + MAX_INPUT_SIZE + " bytes");
++        }
++        // END android-added
+         if (in.length < (inOff + len))
+         {
+             throw new DataLengthException("Input buffer too short");
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/crypto/signers/RSADigestSigner.java bcprov-jdk15on-152/org/bouncycastle/crypto/signers/RSADigestSigner.java
 --- bcprov-jdk15on-152.orig/org/bouncycastle/crypto/signers/RSADigestSigner.java	2015-03-01 12:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/crypto/signers/RSADigestSigner.java	2015-04-09 13:10:16.000000000 +0000
@@ -1182,7 +1260,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/D
              registerOid(provider, PKCSObjectIdentifiers.dhKeyAgreement, "DH", new KeyFactorySpi());
              registerOid(provider, X9ObjectIdentifiers.dhpublicnumber, "DH", new KeyFactorySpi());
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/DSA.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/DSA.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/DSA.java	2015-03-01 20:03:02.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/DSA.java	2015-03-01 12:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/DSA.java	2015-06-01 19:10:55.000000000 +0000
 @@ -27,40 +27,55 @@
              provider.addAlgorithm("KeyPairGenerator.DSA", PREFIX + "KeyPairGeneratorSpi");
@@ -1998,7 +2076,7 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/d
      static public class noneDSA
          extends DSASigner
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java	2015-03-01 20:03:02.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java	2015-03-01 12:03:02.000000000 +0000
 +++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSAUtil.java	2015-06-01 19:10:55.000000000 +0000
 @@ -23,6 +23,9 @@
      public static final ASN1ObjectIdentifier[] dsaOids =
@@ -2354,8 +2432,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/e
      public static class ECDH
          extends KeyFactorySpi
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2015-03-01 20:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2014-07-28 19:51:54.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2015-03-01 12:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/ec/KeyPairGeneratorSpi.java	2015-05-12 17:22:22.000000000 +0000
 @@ -42,7 +42,9 @@
          ECKeyGenerationParameters   param;
          ECKeyPairGenerator          engine = new ECKeyPairGenerator();
@@ -4109,8 +4187,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/keystore/pkc
              KEY_SIZES = Collections.unmodifiableMap(keySizes);
          }
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-03-01 20:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-05-12 00:19:13.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-03-01 12:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/symmetric/AES.java	2015-07-22 00:42:46.000000000 +0000
 @@ -3,16 +3,28 @@
  import java.io.IOException;
  import java.lang.reflect.Constructor;
