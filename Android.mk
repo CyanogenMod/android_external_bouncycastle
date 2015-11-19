@@ -38,7 +38,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE := bouncycastle
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(android_bcprov_src_files)
-    LOCAL_JAVA_LIBRARIES := core-libart conscrypt
+    LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
@@ -49,7 +49,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE := bouncycastle-nojarjar
     LOCAL_MODULE_TAGS := optional
     LOCAL_SRC_FILES := $(android_bcprov_src_files)
-    LOCAL_JAVA_LIBRARIES := core-libart conscrypt
+    LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
     include $(BUILD_STATIC_JAVA_LIBRARY)
