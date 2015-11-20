@@ -1455,12 +1455,10 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/R
  import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
  import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi;
  import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
-@@ -24,41 +26,49 @@
-         public void configure(ConfigurableProvider provider)
-         {
+@@ -26,39 +28,47 @@
              provider.addAlgorithm("AlgorithmParameters.OAEP", PREFIX + "AlgorithmParametersSpi$OAEP");
--            provider.addAlgorithm("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
--
+             provider.addAlgorithm("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
+ 
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSAPSS", "PSS");
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSASSA-PSS", "PSS");
 -
@@ -1478,8 +1476,6 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/R
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.NONEWITHRSASSA-PSS", "PSS");
 -            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.NONEWITHRSAANDMGF1", "PSS");
 +            // BEGIN android-removed
-+            // provider.addAlgorithm("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
-+            //
 +            // provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSAPSS", "PSS");
 +            // provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSASSA-PSS", "PSS");
 +            //
