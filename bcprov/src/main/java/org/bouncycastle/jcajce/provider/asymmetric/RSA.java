@@ -26,9 +26,9 @@ public class RSA
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("AlgorithmParameters.OAEP", PREFIX + "AlgorithmParametersSpi$OAEP");
+            provider.addAlgorithm("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
+
             // BEGIN android-removed
-            // provider.addAlgorithm("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
-            //
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSAPSS", "PSS");
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameters.RSASSA-PSS", "PSS");
             //
