@@ -115,15 +115,15 @@ public class DSASigner
         CipherParameters    param;
 
         param = DSAUtil.generatePrivateKeyParameter(privateKey);
+        // BEGIN android-added
+        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
+        checkKey(dsaParam);
+        // END android-added
 
         if (random != null)
         {
             param = new ParametersWithRandom(param, random);
         }
-        // BEGIN android-added
-        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
-        checkKey(dsaParam);
-        // END android-added
 
         digest.reset();
         signer.init(true, param);

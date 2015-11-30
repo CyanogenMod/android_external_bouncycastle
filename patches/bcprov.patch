@@ -1837,8 +1837,8 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/X
              //
              // certificate factories.
 diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java
---- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-03-01 12:03:02.000000000 +0000
-+++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-09-22 23:02:52.000000000 +0000
+--- bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-03-01 20:03:02.000000000 +0000
++++ bcprov-jdk15on-152/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java	2015-07-21 14:37:00.000000000 +0000
 @@ -23,13 +23,24 @@
  import org.bouncycastle.crypto.DSA;
  import org.bouncycastle.crypto.Digest;
@@ -1881,17 +1881,17 @@ diff -Naur bcprov-jdk15on-152.orig/org/bouncycastle/jcajce/provider/asymmetric/d
  
          digest.reset();
          signer.init(false, param);
-@@ -105,6 +120,10 @@
-         {
-             param = new ParametersWithRandom(param, random);
-         }
+@@ -100,6 +115,10 @@
+         CipherParameters    param;
+ 
+         param = DSAUtil.generatePrivateKeyParameter(privateKey);
 +        // BEGIN android-added
 +        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
 +        checkKey(dsaParam);
 +        // END android-added
  
-         digest.reset();
-         signer.init(true, param);
+         if (random != null)
+         {
 @@ -173,6 +192,28 @@
          throw new UnsupportedOperationException("engineSetParameter unsupported");
      }
