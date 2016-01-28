@@ -12,6 +12,7 @@ public class RegressionTest
         new FIPSDESTest(),
         new DESedeTest(),
         new AESTest(),
+        new AEADTest(),
         new CamelliaTest(),
         new SEEDTest(),
         new AESSICTest(),
@@ -44,6 +45,7 @@ public class RegressionTest
         new WrapTest(),
         new DoFinalTest(),
         new CipherStreamTest(),
+        new CipherStreamTest2(),
         new NamedCurveTest(),
         new PKIXTest(),
         new NetscapeCertRequestTest(),
@@ -68,10 +70,15 @@ public class RegressionTest
         new MQVTest(),
         new CMacTest(),
         new GMacTest(),
+        new OCBTest(),
         new DSTU4145Test(),
         new CRL5Test(),
+        new Poly1305Test(),
         new SipHashTest(),
-        new SHA3Test()
+        new SHA3Test(),
+        new SkeinTest(),
+        new Shacal2Test(),
+        new DetDSATest()
     };
 
     public static void main(
