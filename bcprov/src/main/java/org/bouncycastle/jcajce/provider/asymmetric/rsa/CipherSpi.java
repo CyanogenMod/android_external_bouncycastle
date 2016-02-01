@@ -26,7 +26,9 @@ import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
+// END android-removed
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
@@ -201,10 +203,12 @@ public class CipherSpi
         {
             cipher = new PKCS1Encoding(new RSABlindedEngine());
         }
-        else if (pad.equals("ISO9796-1PADDING"))
-        {
-            cipher = new ISO9796d1Encoding(new RSABlindedEngine());
-        }
+        // BEGIN android-removed
+        // else if (pad.equals("ISO9796-1PADDING"))
+        // {
+        //     cipher = new ISO9796d1Encoding(new RSABlindedEngine());
+        // }
+        // END android-removed
         else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
         {
             initFromSpec(new OAEPParameterSpec("MD5", "MGF1", new MGF1ParameterSpec("MD5"), PSource.PSpecified.DEFAULT));
@@ -543,48 +547,50 @@ public class CipherSpi
         }
     }
 
-    static public class PKCS1v1_5Padding
-        extends CipherSpi
-    {
-        public PKCS1v1_5Padding()
-        {
-            super(new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PrivateOnly
-        extends CipherSpi
-    {
-        public PKCS1v1_5Padding_PrivateOnly()
-        {
-            super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class PKCS1v1_5Padding_PublicOnly
-        extends CipherSpi
-    {
-        public PKCS1v1_5Padding_PublicOnly()
-        {
-            super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
-        }
-    }
-
-    static public class OAEPPadding
-        extends CipherSpi
-    {
-        public OAEPPadding()
-        {
-            super(OAEPParameterSpec.DEFAULT);
-        }
-    }
-    
-    static public class ISO9796d1Padding
-        extends CipherSpi
-    {
-        public ISO9796d1Padding()
-        {
-            super(new ISO9796d1Encoding(new RSABlindedEngine()));
-        }
-    }
+    // BEGIN android-removed
+    // static public class PKCS1v1_5Padding
+    //     extends CipherSpi
+    // {
+    //     public PKCS1v1_5Padding()
+    //     {
+    //         super(new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PrivateOnly
+    //     extends CipherSpi
+    // {
+    //     public PKCS1v1_5Padding_PrivateOnly()
+    //     {
+    //         super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class PKCS1v1_5Padding_PublicOnly
+    //     extends CipherSpi
+    // {
+    //     public PKCS1v1_5Padding_PublicOnly()
+    //     {
+    //         super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    //
+    // static public class OAEPPadding
+    //     extends CipherSpi
+    // {
+    //     public OAEPPadding()
+    //     {
+    //         super(OAEPParameterSpec.DEFAULT);
+    //     }
+    // }
+    //
+    // static public class ISO9796d1Padding
+    //     extends CipherSpi
+    // {
+    //     public ISO9796d1Padding()
+    //     {
+    //         super(new ISO9796d1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+    // END android-removed
 }

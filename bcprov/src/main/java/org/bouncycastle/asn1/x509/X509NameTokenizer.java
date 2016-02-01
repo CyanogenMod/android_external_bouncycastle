@@ -78,6 +78,17 @@ public class X509NameTokenizer
                 }
                 else
                 {
+                    // BEGIN android-added
+                    // copied from a newer version of BouncyCastle
+                    if (c == '#' && buf.charAt(buf.length() - 1) == '=')
+                    {
+                        buf.append('\\');
+                    }
+                    else if (c == '+' && separator != '+')
+                    {
+                        buf.append('\\');
+                    }
+                    // END android-added
                     buf.append(c);
                 }
             }

@@ -6,11 +6,15 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+// END android-removed
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
+// END android-removed
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X962Parameters;
@@ -247,14 +251,16 @@ public class ECUtil
             {
                 oid = NISTNamedCurves.getOID(name);
             }
-            if (oid == null)
-            {
-                oid = TeleTrusTNamedCurves.getOID(name);
-            }
-            if (oid == null)
-            {
-                oid = ECGOST3410NamedCurves.getOID(name);
-            }
+            // BEGIN android-removed
+            // if (oid == null)
+            // {
+            //     oid = TeleTrusTNamedCurves.getOID(name);
+            // }
+            // if (oid == null)
+            // {
+            //     oid = ECGOST3410NamedCurves.getOID(name);
+            // }
+            // END android-removed
         }
 
         return oid;
@@ -276,10 +282,12 @@ public class ECUtil
             {
                 params = NISTNamedCurves.getByOID(oid);
             }
-            if (params == null)
-            {
-                params = TeleTrusTNamedCurves.getByOID(oid);
-            }
+            // BEGIN android-removed
+            // if (params == null)
+            // {
+            //     params = TeleTrusTNamedCurves.getByOID(oid);
+            // }
+            // END android-removed
         }
 
         return params;
@@ -297,14 +305,16 @@ public class ECUtil
             {
                 name = NISTNamedCurves.getName(oid);
             }
-            if (name == null)
-            {
-                name = TeleTrusTNamedCurves.getName(oid);
-            }
-            if (name == null)
-            {
-                name = ECGOST3410NamedCurves.getName(oid);
-            }
+            // BEGIN android-removed
+            // if (name == null)
+            // {
+            //     name = TeleTrusTNamedCurves.getName(oid);
+            // }
+            // if (name == null)
+            // {
+            //     name = ECGOST3410NamedCurves.getName(oid);
+            // }
+            // END android-removed
         }
 
         return name;

@@ -37,7 +37,9 @@ import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.jcajce.util.BCJcaJceHelper;
 import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
+// BEGIN android-removed
+// import org.bouncycastle.util.io.pem.PemWriter;
+// END android-removed
 
 /**
  * CertPath implementation for X.509 certificates.
@@ -54,7 +56,9 @@ public  class PKIXCertPath
     {
         List encodings = new ArrayList();
         encodings.add("PkiPath");
-        encodings.add("PEM");
+        // BEGIN android-removed
+        // encodings.add("PEM");
+        // END android-removed
         encodings.add("PKCS7");
         certPathEncodings = Collections.unmodifiableList(encodings);
     }
@@ -301,27 +305,29 @@ public  class PKIXCertPath
             return toDEREncoded(new ContentInfo(
                     PKCSObjectIdentifiers.signedData, sd));
         }
-        else if (encoding.equalsIgnoreCase("PEM"))
-        {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            PemWriter pWrt = new PemWriter(new OutputStreamWriter(bOut));
-
-            try
-            {
-                for (int i = 0; i != certificates.size(); i++)
-                {
-                    pWrt.writeObject(new PemObject("CERTIFICATE", ((X509Certificate)certificates.get(i)).getEncoded()));
-                }
-            
-                pWrt.close();
-            }
-            catch (Exception e)
-            {
-                throw new CertificateEncodingException("can't encode certificate for PEM encoded path");
-            }
-
-            return bOut.toByteArray();
-        }
+        // BEGIN android-removed
+        // else if (encoding.equalsIgnoreCase("PEM"))
+        // {
+        //     ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        //     PemWriter pWrt = new PemWriter(new OutputStreamWriter(bOut));
+        //
+        //     try
+        //     {
+        //         for (int i = 0; i != certificates.size(); i++)
+        //         {
+        //             pWrt.writeObject(new PemObject("CERTIFICATE", ((X509Certificate)certificates.get(i)).getEncoded()));
+        //         }
+        //
+        //         pWrt.close();
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         throw new CertificateEncodingException("can't encode certificate for PEM encoded path");
+        //     }
+        //
+        //     return bOut.toByteArray();
+        // }
+        // END android-removed
         else
         {
             throw new CertificateEncodingException("unsupported encoding: " + encoding);

@@ -10,12 +10,17 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.MD5Digest;
+// import org.bouncycastle.crypto.digests.SHA1Digest;
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// import org.bouncycastle.crypto.digests.SHA256Digest;
+// import org.bouncycastle.crypto.digests.SHA384Digest;
+// import org.bouncycastle.crypto.digests.SHA512Digest;
+// END android-removed
+// BEGIN android-added
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-added
 import org.bouncycastle.util.Strings;
 
 public class DigestFactory
@@ -85,27 +90,39 @@ public class DigestFactory
         
         if (sha1.contains(digestName))
         {
-            return new SHA1Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA1();
+            // END android-changed
         }
         if (md5.contains(digestName))
         {
-            return new MD5Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getMD5();
+            // END android-changed
         }
         if (sha224.contains(digestName))
         {
-            return new SHA224Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA224();
+            // END android-changed
         }
         if (sha256.contains(digestName))
         {
-            return new SHA256Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA256();
+            // END android-changed
         }
         if (sha384.contains(digestName))
         {
-            return new SHA384Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA384();
+            // END android-changed
         }
         if (sha512.contains(digestName))
         {
-            return new SHA512Digest();
+            // BEGIN android-changed
+            return AndroidDigestFactory.getSHA512();
+            // END android-changed
         }
         
         return null;

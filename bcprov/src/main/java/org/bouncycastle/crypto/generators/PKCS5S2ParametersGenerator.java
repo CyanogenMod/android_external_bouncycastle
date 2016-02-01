@@ -4,7 +4,9 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-changed
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -28,7 +30,9 @@ public class PKCS5S2ParametersGenerator
      */
     public PKCS5S2ParametersGenerator()
     {
-        this(new SHA1Digest());
+        // BEGIN android-changed
+        this(AndroidDigestFactory.getSHA1());
+        // END android-changed
     }
 
     public PKCS5S2ParametersGenerator(Digest digest)

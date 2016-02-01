@@ -57,6 +57,9 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.KeyUsage;
+// BEGIN android-added
+import org.bouncycastle.asn1.x509.X509Name;
+// END android-added
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
@@ -562,12 +565,20 @@ public class X509CertificateObject
         }
     }
 
+    // BEGIN android-changed
+    private byte[] encoded;
+    // END android-changed
     public byte[] getEncoded()
         throws CertificateEncodingException
     {
         try
         {
-            return c.getEncoded(ASN1Encoding.DER);
+            // BEGIN android-changed
+            if (encoded == null) {
+                encoded = c.getEncoded(ASN1Encoding.DER);
+            }
+            return encoded;
+            // END android-changed
         }
         catch (IOException e)
         {
@@ -858,7 +869,9 @@ public class X509CertificateObject
                     list.add(genName.getEncoded());
                     break;
                 case GeneralName.directoryName:
-                    list.add(X500Name.getInstance(RFC4519Style.INSTANCE, genName.getName()).toString());
+                    // BEGIN android-changed
+                    list.add(X509Name.getInstance(genName.getName()).toString(true, X509Name.DefaultSymbols));
+                    // END android-changed
                     break;
                 case GeneralName.dNSName:
                 case GeneralName.rfc822Name:

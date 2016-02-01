@@ -14,7 +14,9 @@ import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -66,12 +68,14 @@ class X509SignatureUtil
         
         if (params != null && !derNull.equals(params))
         {
-            if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
-            {
-                RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
-            }
+            // BEGIN android-removed
+            // if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            // {
+            //     RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
+            //     
+            //     return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
+            // }
+            // END android-removed
             if (sigAlgId.getAlgorithm().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
@@ -114,22 +118,24 @@ class X509SignatureUtil
         {
             return "SHA512";
         }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
+        // BEGIN android-removed
+        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD128";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD160";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD256";
+        // }
+        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        // {
+        //     return "GOST3411";
+        // }
+        // END android-removed
         else
         {
             return digestAlgOID.getId();            

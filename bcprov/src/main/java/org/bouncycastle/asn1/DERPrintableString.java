@@ -12,7 +12,9 @@ public class DERPrintableString
     extends ASN1Primitive
     implements ASN1String
 {
-    private byte[]  string;
+    // BEGIN android-changed
+    private final byte[]  string;
+    // END android-changed
 
     /**
      * return a printable string from the passed in object.

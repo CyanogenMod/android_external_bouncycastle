@@ -16,21 +16,27 @@ public class DefaultCMSSignatureEncryptionAlgorithmFinder
 
     static
     {
-        RSA_PKCS1d5.add(PKCSObjectIdentifiers.md2WithRSAEncryption);
-        RSA_PKCS1d5.add(PKCSObjectIdentifiers.md4WithRSAEncryption);
+        // BEGIN android-removed
+        // RSA_PKCS1d5.add(PKCSObjectIdentifiers.md2WithRSAEncryption);
+        // RSA_PKCS1d5.add(PKCSObjectIdentifiers.md4WithRSAEncryption);
+        // END android-removed
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.md5WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha1WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha224WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha256WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha384WithRSAEncryption);
         RSA_PKCS1d5.add(PKCSObjectIdentifiers.sha512WithRSAEncryption);
-        RSA_PKCS1d5.add(OIWObjectIdentifiers.md4WithRSAEncryption);
-        RSA_PKCS1d5.add(OIWObjectIdentifiers.md4WithRSA);
+        // BEGIN android-removed
+        // RSA_PKCS1d5.add(OIWObjectIdentifiers.md4WithRSAEncryption);
+        // RSA_PKCS1d5.add(OIWObjectIdentifiers.md4WithRSA);
+        // END android-removed
         RSA_PKCS1d5.add(OIWObjectIdentifiers.md5WithRSA);
         RSA_PKCS1d5.add(OIWObjectIdentifiers.sha1WithRSA);
-        RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
-        RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
-        RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+        // BEGIN android-removed
+        // RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+        // RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+        // RSA_PKCS1d5.add(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+        // END android-removed
     }
 
     public AlgorithmIdentifier findEncryptionAlgorithm(AlgorithmIdentifier signatureAlgorithm)

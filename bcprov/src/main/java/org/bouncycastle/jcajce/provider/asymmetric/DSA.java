@@ -27,40 +27,55 @@ public class DSA
             provider.addAlgorithm("KeyPairGenerator.DSA", PREFIX + "KeyPairGeneratorSpi");
             provider.addAlgorithm("KeyFactory.DSA", PREFIX + "KeyFactorySpi");
 
-            provider.addAlgorithm("Signature.DSA", PREFIX + "DSASigner$stdDSA");
+            // BEGIN android-changed
+            provider.addAlgorithm("Signature.SHA1withDSA", PREFIX + "DSASigner$stdDSA");
+            // END android-changed
             provider.addAlgorithm("Signature.NONEWITHDSA", PREFIX + "DSASigner$noneDSA");
 
             provider.addAlgorithm("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
 
-            provider.addAlgorithm("Signature.DETDSA", PREFIX + "DSASigner$detDSA");
-            provider.addAlgorithm("Signature.SHA1WITHDETDSA", PREFIX + "DSASigner$detDSA");
-            provider.addAlgorithm("Signature.SHA224WITHDETDSA", PREFIX + "DSASigner$detDSA224");
-            provider.addAlgorithm("Signature.SHA256WITHDETDSA", PREFIX + "DSASigner$detDSA256");
-            provider.addAlgorithm("Signature.SHA384WITHDETDSA", PREFIX + "DSASigner$detDSA384");
-            provider.addAlgorithm("Signature.SHA512WITHDETDSA", PREFIX + "DSASigner$detDSA512");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Signature.DETDSA", PREFIX + "DSASigner$detDSA");
+            // provider.addAlgorithm("Signature.SHA1WITHDETDSA", PREFIX + "DSASigner$detDSA");
+            // provider.addAlgorithm("Signature.SHA224WITHDETDSA", PREFIX + "DSASigner$detDSA224");
+            // provider.addAlgorithm("Signature.SHA256WITHDETDSA", PREFIX + "DSASigner$detDSA256");
+            // provider.addAlgorithm("Signature.SHA384WITHDETDSA", PREFIX + "DSASigner$detDSA384");
+            // provider.addAlgorithm("Signature.SHA512WITHDETDSA", PREFIX + "DSASigner$detDSA512");
+            // END android-removed
 
             addSignatureAlgorithm(provider, "SHA224", "DSA", PREFIX + "DSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
             addSignatureAlgorithm(provider, "SHA256", "DSA", PREFIX + "DSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
-            addSignatureAlgorithm(provider, "SHA384", "DSA", PREFIX + "DSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
-            addSignatureAlgorithm(provider, "SHA512", "DSA", PREFIX + "DSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
+            // BEGIN android-removed
+            // addSignatureAlgorithm(provider, "SHA384", "DSA", PREFIX + "DSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
+            // addSignatureAlgorithm(provider, "SHA512", "DSA", PREFIX + "DSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
+            // END android-removed
 
-            provider.addAlgorithm("Alg.Alias.Signature.SHA/DSA", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1withDSA", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1WITHDSA", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.1", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.3", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.DSAwithSHA1", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.DSAWITHSHA1", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1WithDSA", "DSA");
-            provider.addAlgorithm("Alg.Alias.Signature.DSAWithSHA1", "DSA");
+            // BEGIN android-added
+            provider.addAlgorithm("Alg.Alias.Signature.DSA", "SHA1withDSA");
+            // END android-added
+            // BEGIN android-changed
+            provider.addAlgorithm("Alg.Alias.Signature.SHA/DSA", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.SHA1withDSA", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.SHA1WITHDSA", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.1", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.3", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.DSAwithSHA1", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.DSAWITHSHA1", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.SHA1WithDSA", "SHA1withDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.DSAWithSHA1", "SHA1withDSA");
+            // END android-changed
 
-            provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
+            // END android-removed
 
             AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
 
             for (int i = 0; i != DSAUtil.dsaOids.length; i++)
             {
-                provider.addAlgorithm("Alg.Alias.Signature." + DSAUtil.dsaOids[i], "DSA");
+                // BEGIN android-changed
+                provider.addAlgorithm("Alg.Alias.Signature." + DSAUtil.dsaOids[i], "SHA1withDSA");
+                // END android-changed
 
                 registerOid(provider, DSAUtil.dsaOids[i], "DSA", keyFact);
                 registerOidAlgorithmParameters(provider, DSAUtil.dsaOids[i], "DSA");

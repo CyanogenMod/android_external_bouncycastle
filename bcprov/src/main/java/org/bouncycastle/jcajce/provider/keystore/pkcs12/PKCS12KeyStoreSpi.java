@@ -62,8 +62,10 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.GOST28147Parameters;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// import org.bouncycastle.asn1.cryptopro.GOST28147Parameters;
+// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.AuthenticatedSafe;
@@ -89,7 +91,9 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.jcajce.PKCS12StoreParameter;
 import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
-import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
+// BEGIN android-removed
+// import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
+// END android-removed
 import org.bouncycastle.jcajce.spec.PBKDF2KeySpec;
 import org.bouncycastle.jcajce.util.BCJcaJceHelper;
 import org.bouncycastle.jcajce.util.JcaJceHelper;
@@ -753,13 +757,15 @@ public class PKCS12KeyStoreSpi
         {
             cipher.init(mode, key, new IvParameterSpec(ASN1OctetString.getInstance(encParams).getOctets()));
         }
-        else
-        {
-            // TODO: at the moment it's just GOST, but...
-            GOST28147Parameters gParams = GOST28147Parameters.getInstance(encParams);
-
-            cipher.init(mode, key, new GOST28147ParameterSpec(gParams.getEncryptionParamSet(), gParams.getIV()));
-        }
+        // BEGIN android-removed
+        // else
+        // {
+        //     // TODO: at the moment it's just GOST, but...
+        //     GOST28147Parameters gParams = GOST28147Parameters.getInstance(encParams);
+        //
+        //     cipher.init(mode, key, new GOST28147ParameterSpec(gParams.getEncryptionParamSet(), gParams.getIV()));
+        // }
+        // END android-removed
         return cipher;
     }
 
@@ -1680,33 +1686,34 @@ public class PKCS12KeyStoreSpi
             super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
-
-    public static class BCPKCS12KeyStore3DES
-        extends PKCS12KeyStoreSpi
-    {
-        public BCPKCS12KeyStore3DES()
-        {
-            super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
-        }
-    }
-
-    public static class DefPKCS12KeyStore
-        extends PKCS12KeyStoreSpi
-    {
-        public DefPKCS12KeyStore()
-        {
-            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
-        }
-    }
-
-    public static class DefPKCS12KeyStore3DES
-        extends PKCS12KeyStoreSpi
-    {
-        public DefPKCS12KeyStore3DES()
-        {
-            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
-        }
-    }
+    // BEGIN android-removed
+    // public static class BCPKCS12KeyStore3DES
+    //     extends PKCS12KeyStoreSpi
+    // {
+    //     public BCPKCS12KeyStore3DES()
+    //     {
+    //         super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+    //     }
+    // }
+    // 
+    // public static class DefPKCS12KeyStore
+    //     extends PKCS12KeyStoreSpi
+    // {
+    //     public DefPKCS12KeyStore()
+    //     {
+    //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
+    //     }
+    // }
+    // 
+    // public static class DefPKCS12KeyStore3DES
+    //     extends PKCS12KeyStoreSpi
+    // {
+    //     public DefPKCS12KeyStore3DES()
+    //     {
+    //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+    //     }
+    // }
+    // END android-removed
 
     private static class IgnoresCaseHashtable
     {
@@ -1779,7 +1786,9 @@ public class PKCS12KeyStoreSpi
             keySizes.put(NTTObjectIdentifiers.id_camellia192_cbc, Integers.valueOf(192));
             keySizes.put(NTTObjectIdentifiers.id_camellia256_cbc, Integers.valueOf(256));
 
-            keySizes.put(CryptoProObjectIdentifiers.gostR28147_gcfb, Integers.valueOf(256));
+            // BEGIN android-removed
+            // keySizes.put(CryptoProObjectIdentifiers.gostR28147_gcfb, Integers.valueOf(256));
+            // END android-removed
 
             KEY_SIZES = Collections.unmodifiableMap(keySizes);
         }

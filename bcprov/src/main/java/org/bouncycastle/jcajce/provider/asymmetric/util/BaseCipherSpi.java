@@ -18,8 +18,10 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -39,8 +41,10 @@ public abstract class BaseCipherSpi
                                     {
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
-                                        RC2ParameterSpec.class,
-                                        RC5ParameterSpec.class
+                                        // BEGIN android-removed
+                                        // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class
+                                        // END android-removed
                                     };
 
     private final JcaJceHelper helper = new BCJcaJceHelper();
