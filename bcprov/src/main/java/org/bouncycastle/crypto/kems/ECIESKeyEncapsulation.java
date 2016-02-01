@@ -13,7 +13,10 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECMultiplier;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 
 /**
@@ -120,8 +123,10 @@ public class ECIESKeyEncapsulation
         // Compute the static-ephemeral key agreement
         BigInteger rPrime = CofactorMode ? r.multiply(h).mod(n) : r;
 
+        ECMultiplier basePointMultiplier = createBasePointMultiplier();
+
         ECPoint[] ghTilde = new ECPoint[]{ 
-            ecParams.getG().multiply(r),
+            basePointMultiplier.multiply(ecParams.getG(), r),
             ecPubKey.getQ().multiply(rPrime)
         };
 
@@ -131,33 +136,13 @@ public class ECIESKeyEncapsulation
         ECPoint gTilde = ghTilde[0], hTilde = ghTilde[1];
 
         // Encode the ephemeral public key
-        byte[] C = gTilde.getEncoded();
+        byte[] C = gTilde.getEncoded(false);
         System.arraycopy(C, 0, out, outOff, C.length);
 
         // Encode the shared secret value
         byte[] PEH = hTilde.getAffineXCoord().getEncoded();
 
-        // Initialise the KDF
-        byte[] kdfInput;
-        if (SingleHashMode)
-        {
-            kdfInput = new byte[C.length + PEH.length];
-            System.arraycopy(C, 0, kdfInput, 0, C.length);
-            System.arraycopy(PEH, 0, kdfInput, C.length, PEH.length);
-        }
-        else
-        {
-            kdfInput = PEH;
-        }
-
-        kdf.init(new KDFParameters(kdfInput, null));
-
-        // Generate the secret key
-        byte[] K = new byte[keyLen];
-        kdf.generateBytes(K, 0, K.length);
-
-        // Return the ciphertext
-        return new KeyParameter(K);
+        return deriveKey(keyLen, C, PEH);
     }
 
     /**
@@ -220,25 +205,7 @@ public class ECIESKeyEncapsulation
         // Encode the shared secret value
         byte[] PEH = hTilde.getAffineXCoord().getEncoded();
 
-        // Initialise the KDF
-        byte[] kdfInput;
-        if (SingleHashMode)
-        {
-            kdfInput = new byte[C.length + PEH.length];
-            System.arraycopy(C, 0, kdfInput, 0, C.length);
-            System.arraycopy(PEH, 0, kdfInput, C.length, PEH.length);
-        }
-        else
-        {
-            kdfInput = PEH;
-        }
-        kdf.init(new KDFParameters(kdfInput, null));
-
-        // Generate the secret key
-        byte[] K = new byte[keyLen];
-        kdf.generateBytes(K, 0, K.length);
-
-        return new KeyParameter(K);
+        return deriveKey(keyLen, C, PEH);
     }
 
     /**
@@ -251,5 +218,37 @@ public class ECIESKeyEncapsulation
     public CipherParameters decrypt(byte[] in, int keyLen)
     {
         return decrypt(in, 0, in.length, keyLen);
+    }
+
+    protected ECMultiplier createBasePointMultiplier()
+    {
+        return new FixedPointCombMultiplier();
+    }
+
+    protected KeyParameter deriveKey(int keyLen, byte[] C, byte[] PEH)
+    {
+        byte[] kdfInput = PEH;
+        if (SingleHashMode)
+        {
+            kdfInput = Arrays.concatenate(C, PEH);
+            Arrays.fill(PEH, (byte)0);
+        }
+
+        try
+        {
+            // Initialise the KDF
+            kdf.init(new KDFParameters(kdfInput, null));
+    
+            // Generate the secret key
+            byte[] K = new byte[keyLen];
+            kdf.generateBytes(K, 0, K.length);
+
+            // Return the ciphertext
+            return new KeyParameter(K);
+        }
+        finally
+        {
+            Arrays.fill(kdfInput, (byte)0);
+        }
     }
 }

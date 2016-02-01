@@ -4,9 +4,12 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.math.ec.ECMultiplier;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 
 /**
  * this does your basic ElGamal encryption algorithm using EC
@@ -61,13 +64,23 @@ public class ECElGamalEncryptor
             throw new IllegalStateException("ECElGamalEncryptor not initialised");
         }
 
-        BigInteger             n = key.getParameters().getN();
-        BigInteger             k = ECUtil.generateK(n, random);
+        ECDomainParameters ec = key.getParameters();
+        BigInteger k = ECUtil.generateK(ec.getN(), random);
 
-        ECPoint  g = key.getParameters().getG();
-        ECPoint  gamma = g.multiply(k);
-        ECPoint  phi = key.getQ().multiply(k).add(point);
+        ECMultiplier basePointMultiplier = createBasePointMultiplier();
 
-        return new ECPair(gamma.normalize(), phi.normalize());
+        ECPoint[] gamma_phi = new ECPoint[]{
+            basePointMultiplier.multiply(ec.getG(), k),
+            key.getQ().multiply(k).add(point)
+        };
+
+        ec.getCurve().normalizeAll(gamma_phi);
+
+        return new ECPair(gamma_phi[0], gamma_phi[1]);
+    }
+
+    protected ECMultiplier createBasePointMultiplier()
+    {
+        return new FixedPointCombMultiplier();
     }
 }

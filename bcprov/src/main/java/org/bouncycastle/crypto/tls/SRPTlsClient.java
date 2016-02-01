@@ -5,34 +5,45 @@ import java.util.Hashtable;
 
 import org.bouncycastle.util.Arrays;
 
-public abstract class SRPTlsClient
+public class SRPTlsClient
     extends AbstractTlsClient
 {
-    /**
-     * @deprecated use TlsSRPUtils.EXT_SRP instead
-     */
-    public static final Integer EXT_SRP = TlsSRPUtils.EXT_SRP;
+    protected TlsSRPGroupVerifier groupVerifier;
 
     protected byte[] identity;
     protected byte[] password;
 
     public SRPTlsClient(byte[] identity, byte[] password)
     {
-        super();
-        this.identity = Arrays.clone(identity);
-        this.password = Arrays.clone(password);
+        this(new DefaultTlsCipherFactory(), new DefaultTlsSRPGroupVerifier(), identity, password);
     }
 
     public SRPTlsClient(TlsCipherFactory cipherFactory, byte[] identity, byte[] password)
     {
+        this(cipherFactory, new DefaultTlsSRPGroupVerifier(), identity, password);
+    }
+
+    public SRPTlsClient(TlsCipherFactory cipherFactory, TlsSRPGroupVerifier groupVerifier,
+        byte[] identity, byte[] password)
+    {
         super(cipherFactory);
+        this.groupVerifier = groupVerifier;
         this.identity = Arrays.clone(identity);
         this.password = Arrays.clone(password);
     }
 
+    protected boolean requireSRPServerExtension()
+    {
+        // No explicit guidance in RFC 5054; by default an (empty) extension from server is optional
+        return false;
+    }
+
     public int[] getCipherSuites()
     {
-        return new int[] { CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA };
+        return new int[]
+        {
+            CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA
+        };
     }
 
     public Hashtable getClientExtensions()
@@ -46,16 +57,21 @@ public abstract class SRPTlsClient
     public void processServerExtensions(Hashtable serverExtensions)
         throws IOException
     {
-        if (!TlsUtils.hasExpectedEmptyExtensionData(serverExtensions, TlsSRPUtils.EXT_SRP, AlertDescription.illegal_parameter))
+        if (!TlsUtils.hasExpectedEmptyExtensionData(serverExtensions, TlsSRPUtils.EXT_SRP,
+            AlertDescription.illegal_parameter))
         {
-            // No explicit guidance in RFC 5054 here; we allow an optional empty extension from server
+            if (requireSRPServerExtension())
+            {
+                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+            }
         }
+
+        super.processServerExtensions(serverExtensions);
     }
 
     public TlsKeyExchange getKeyExchange()
         throws IOException
     {
-
         switch (selectedCipherSuite)
         {
         case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
@@ -83,10 +99,18 @@ public abstract class SRPTlsClient
         }
     }
 
+    public TlsAuthentication getAuthentication() throws IOException
+    {
+        /*
+         * Note: This method is not called unless a server certificate is sent, which may be the
+         * case e.g. for SRP_DSS or SRP_RSA key exchange.
+         */
+        throw new TlsFatalAlert(AlertDescription.internal_error);
+    }
+
     public TlsCipher getCipher()
         throws IOException
     {
-
         switch (selectedCipherSuite)
         {
         case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
@@ -116,6 +140,6 @@ public abstract class SRPTlsClient
 
     protected TlsKeyExchange createSRPKeyExchange(int keyExchange)
     {
-        return new TlsSRPKeyExchange(keyExchange, supportedSignatureAlgorithms, identity, password);
+        return new TlsSRPKeyExchange(keyExchange, supportedSignatureAlgorithms, groupVerifier, identity, password);
     }
 }

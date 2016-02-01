@@ -12,12 +12,10 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.prng.RandomGenerator;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Integers;
 
-/**
- * An implementation of all high level protocols in TLS 1.0/1.1.
- */
 public abstract class TlsProtocol
 {
     protected static final Integer EXT_RenegotiationInfo = Integers.valueOf(ExtensionType.renegotiation_info);
@@ -52,11 +50,12 @@ public abstract class TlsProtocol
     private ByteQueue applicationDataQueue = new ByteQueue();
     private ByteQueue alertQueue = new ByteQueue(2);
     private ByteQueue handshakeQueue = new ByteQueue();
+//    private ByteQueue heartbeatQueue = new ByteQueue();
 
     /*
      * The Record Stream we use
      */
-    protected RecordStream recordStream;
+    RecordStream recordStream;
     protected SecureRandom secureRandom;
 
     private TlsInputStream tlsInputStream = null;
@@ -91,7 +90,9 @@ public abstract class TlsProtocol
         this.secureRandom = secureRandom;
     }
 
-    protected abstract AbstractTlsContext getContext();
+    protected abstract TlsContext getContext();
+
+    abstract AbstractTlsContext getContextAdmin();
 
     protected abstract TlsPeer getPeer();
 
@@ -172,6 +173,8 @@ public abstract class TlsProtocol
                         .setCompressionAlgorithm(this.securityParameters.compressionAlgorithm)
                         .setMasterSecret(this.securityParameters.masterSecret)
                         .setPeerCertificate(this.peerCertificate)
+                        .setPSKIdentity(this.securityParameters.pskIdentity)
+                        .setSRPIdentity(this.securityParameters.srpIdentity)
                         // TODO Consider filtering extensions that aren't relevant to resumed sessions
                         .setServerExtensions(this.serverExtensions)
                         .build();
@@ -179,7 +182,7 @@ public abstract class TlsProtocol
                     this.tlsSession = new TlsSessionImpl(this.tlsSession.getSessionID(), this.sessionParameters);
                 }
 
-                getContext().setResumableSession(this.tlsSession);
+                getContextAdmin().setResumableSession(this.tlsSession);
             }
 
             getPeer().notifyHandshakeComplete();
@@ -227,7 +230,14 @@ public abstract class TlsProtocol
         }
         case ContentType.heartbeat:
         {
+            if (!appDataReady)
+            {
+                throw new TlsFatalAlert(AlertDescription.unexpected_message);
+            }
             // TODO[RFC 6520]
+//            heartbeatQueue.addData(buf, offset, len);
+//            processHeartbeat();
+            break;
         }
         default:
             /*
@@ -235,6 +245,7 @@ public abstract class TlsProtocol
              * 
              * RFC2246 defines on page 13, that we should ignore this.
              */
+            break;
         }
     }
 
@@ -248,18 +259,17 @@ public abstract class TlsProtocol
             /*
              * We need the first 4 bytes, they contain type and length of the message.
              */
-            if (handshakeQueue.size() >= 4)
+            if (handshakeQueue.available() >= 4)
             {
                 byte[] beginning = new byte[4];
                 handshakeQueue.read(beginning, 0, 4, 0);
-                ByteArrayInputStream bis = new ByteArrayInputStream(beginning);
-                short type = TlsUtils.readUint8(bis);
-                int len = TlsUtils.readUint24(bis);
+                short type = TlsUtils.readUint8(beginning, 0);
+                int len = TlsUtils.readUint24(beginning, 1);
 
                 /*
                  * Check if we have enough bytes in the buffer to read the full message.
                  */
-                if (handshakeQueue.size() >= (len + 4))
+                if (handshakeQueue.available() >= (len + 4))
                 {
                     /*
                      * Read the message.
@@ -313,7 +323,7 @@ public abstract class TlsProtocol
     private void processAlert()
         throws IOException
     {
-        while (alertQueue.size() >= 2)
+        while (alertQueue.available() >= 2)
         {
             /*
              * An alert is always 2 bytes. Read the alert.
@@ -378,17 +388,25 @@ public abstract class TlsProtocol
                 throw new TlsFatalAlert(AlertDescription.decode_error);
             }
 
-            if (this.receivedChangeCipherSpec)
+            if (this.receivedChangeCipherSpec
+                || alertQueue.available() > 0
+                || handshakeQueue.available() > 0)
             {
                 throw new TlsFatalAlert(AlertDescription.unexpected_message);
             }
 
+            recordStream.receivedReadCipherSpec();
+
             this.receivedChangeCipherSpec = true;
 
-            recordStream.receivedReadCipherSpec();
-    
             handleChangeCipherSpecMessage();
         }
+    }
+
+    protected int applicationDataAvailable()
+        throws IOException
+    {
+        return applicationDataQueue.available();
     }
 
     /**
@@ -409,7 +427,7 @@ public abstract class TlsProtocol
             return 0;
         }
 
-        while (applicationDataQueue.size() == 0)
+        while (applicationDataQueue.available() == 0)
         {
             /*
              * We need to read some data.
@@ -433,7 +451,7 @@ public abstract class TlsProtocol
             safeReadRecord();
         }
 
-        len = Math.min(len, applicationDataQueue.size());
+        len = Math.min(len, applicationDataQueue.available());
         applicationDataQueue.removeData(buf, offset, len, 0);
         return len;
     }
@@ -452,7 +470,7 @@ public abstract class TlsProtocol
         }
         catch (TlsFatalAlert e)
         {
-            if (!this.closed)
+            if (!closed)
             {
                 this.failWithError(AlertLevel.fatal, e.getAlertDescription(), "Failed to read record", e);
             }
@@ -460,7 +478,7 @@ public abstract class TlsProtocol
         }
         catch (IOException e)
         {
-            if (!this.closed)
+            if (!closed)
             {
                 this.failWithError(AlertLevel.fatal, AlertDescription.internal_error, "Failed to read record", e);
             }
@@ -468,7 +486,7 @@ public abstract class TlsProtocol
         }
         catch (RuntimeException e)
         {
-            if (!this.closed)
+            if (!closed)
             {
                 this.failWithError(AlertLevel.fatal, AlertDescription.internal_error, "Failed to read record", e);
             }
@@ -485,7 +503,7 @@ public abstract class TlsProtocol
         }
         catch (TlsFatalAlert e)
         {
-            if (!this.closed)
+            if (!closed)
             {
                 this.failWithError(AlertLevel.fatal, e.getAlertDescription(), "Failed to write record", e);
             }
@@ -511,9 +529,9 @@ public abstract class TlsProtocol
 
     /**
      * Send some application data to the remote system.
-     * <p/>
+     * <p>
      * The method will handle fragmentation internally.
-     *
+     * </p>
      * @param buf    The buffer with the data.
      * @param offset The position in the buffer where the data is placed.
      * @param len    The length of the data.
@@ -602,7 +620,7 @@ public abstract class TlsProtocol
      * @throws IOException
      *             If alert was fatal.
      */
-    protected void failWithError(short alertLevel, short alertDescription, String message, Exception cause)
+    protected void failWithError(short alertLevel, short alertDescription, String message, Throwable cause)
         throws IOException
     {
         /*
@@ -671,7 +689,7 @@ public abstract class TlsProtocol
         }
     }
 
-    protected void raiseAlert(short alertLevel, short alertDescription, String message, Exception cause)
+    protected void raiseAlert(short alertLevel, short alertDescription, String message, Throwable cause)
         throws IOException
     {
         getPeer().notifyAlertRaised(alertLevel, alertDescription, message, cause);
@@ -697,7 +715,7 @@ public abstract class TlsProtocol
             certificate = Certificate.EMPTY_CHAIN;
         }
 
-        if (certificate.getLength() == 0)
+        if (certificate.isEmpty())
         {
             TlsContext context = getContext();
             if (!context.isServer())
@@ -705,8 +723,8 @@ public abstract class TlsProtocol
                 ProtocolVersion serverVersion = getContext().getServerVersion();
                 if (serverVersion.isSSL())
                 {
-                    String message = serverVersion.toString() + " client didn't provide credentials";
-                    raiseWarning(AlertDescription.no_certificate, message);
+                    String errorMessage = serverVersion.toString() + " client didn't provide credentials";
+                    raiseWarning(AlertDescription.no_certificate, errorMessage);
                     return;
                 }
             }
@@ -752,15 +770,10 @@ public abstract class TlsProtocol
     protected byte[] createVerifyData(boolean isServer)
     {
         TlsContext context = getContext();
-
-        if (isServer)
-        {
-            return TlsUtils.calculateVerifyData(context, ExporterLabel.server_finished,
-                getCurrentPRFHash(getContext(), recordStream.getHandshakeHash(), TlsUtils.SSL_SERVER));
-        }
-
-        return TlsUtils.calculateVerifyData(context, ExporterLabel.client_finished,
-            getCurrentPRFHash(getContext(), recordStream.getHandshakeHash(), TlsUtils.SSL_CLIENT));
+        String asciiLabel = isServer ? ExporterLabel.server_finished : ExporterLabel.client_finished;
+        byte[] sslSender = isServer ? TlsUtils.SSL_SERVER : TlsUtils.SSL_CLIENT;
+        byte[] hash = getCurrentPRFHash(context, recordStream.getHandshakeHash(), sslSender);
+        return TlsUtils.calculateVerifyData(context, asciiLabel, hash);
     }
 
     /**
@@ -793,7 +806,13 @@ public abstract class TlsProtocol
         recordStream.flush();
     }
 
-    protected short processMaxFragmentLengthExtension(Hashtable clientExtensions, Hashtable serverExtensions, short alertDescription)
+    protected boolean isClosed()
+    {
+        return closed;
+    }
+
+    protected short processMaxFragmentLengthExtension(Hashtable clientExtensions, Hashtable serverExtensions,
+        short alertDescription)
         throws IOException
     {
         short maxFragmentLength = TlsExtensionsUtils.getMaxFragmentLengthExtension(serverExtensions);
@@ -822,18 +841,16 @@ public abstract class TlsProtocol
         }
     }
 
-    protected static byte[] createRandomBlock(SecureRandom random)
+    protected static byte[] createRandomBlock(boolean useGMTUnixTime, RandomGenerator randomGenerator)
     {
-        random.setSeed(System.currentTimeMillis());
-
         byte[] result = new byte[32];
-        random.nextBytes(result);
-        /*
-         * The consensus seems to be that using the time here is neither all that useful, nor
-         * secure. Perhaps there could be an option to (re-)enable it. Instead, we seed the random
-         * source with the current time to retain it's main benefit.
-         */
-//        TlsUtils.writeGMTUnixTime(result, 0);
+        randomGenerator.nextBytes(result);
+
+        if (useGMTUnixTime)
+        {
+            TlsUtils.writeGMTUnixTime(result, 0);
+        }
+
         return result;
     }
 
@@ -987,18 +1004,31 @@ public abstract class TlsProtocol
 
         switch (ciphersuite)
         {
+        case CipherSuite.TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_DH_anon_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA256:
         case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256:
         case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256:
+        case CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA256:
         case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256:
         case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256:
+        case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA256:
         case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256:
         case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256:
+        case CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256:
         case CipherSuite.TLS_DHE_PSK_WITH_AES_128_CCM:
         case CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256:
         case CipherSuite.TLS_DHE_PSK_WITH_AES_256_CCM:
+        case CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_128_GCM_SHA256:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8:
@@ -1006,14 +1036,32 @@ public abstract class TlsProtocol
         case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8:
+        case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256:
+        case CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
         case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256:
         case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_128_GCM_SHA256:
         case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8:
         case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:
         case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
         case CipherSuite.TLS_PSK_DHE_WITH_AES_128_CCM_8:
         case CipherSuite.TLS_PSK_DHE_WITH_AES_256_CCM_8:
         case CipherSuite.TLS_PSK_WITH_AES_128_CCM:
@@ -1021,7 +1069,9 @@ public abstract class TlsProtocol
         case CipherSuite.TLS_PSK_WITH_AES_128_GCM_SHA256:
         case CipherSuite.TLS_PSK_WITH_AES_256_CCM:
         case CipherSuite.TLS_PSK_WITH_AES_256_CCM_8:
+        case CipherSuite.TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256:
         case CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256:
+        case CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_128_GCM_SHA256:
         case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256:
         case CipherSuite.TLS_RSA_WITH_AES_128_CCM:
         case CipherSuite.TLS_RSA_WITH_AES_128_CCM_8:
@@ -1029,6 +1079,9 @@ public abstract class TlsProtocol
         case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256:
         case CipherSuite.TLS_RSA_WITH_AES_256_CCM:
         case CipherSuite.TLS_RSA_WITH_AES_256_CCM_8:
+        case CipherSuite.TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256:
+        case CipherSuite.TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256:
+        case CipherSuite.TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256:
         case CipherSuite.TLS_RSA_WITH_NULL_SHA256:
         {
             if (isTLSv12)
@@ -1038,22 +1091,39 @@ public abstract class TlsProtocol
             throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
 
+        case CipherSuite.TLS_DH_anon_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_DH_DSS_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_DHE_PSK_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384:
         case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_256_CBC_SHA384:
+        case CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384:
         case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384:
+        case CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384:
         case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384:
+        case CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
         case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384:
+        case CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_PSK_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384:
         case CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384:
+        case CipherSuite.TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384:
         {
             if (isTLSv12)
             {
@@ -1063,12 +1133,16 @@ public abstract class TlsProtocol
         }
 
         case CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA384:
+        case CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384:
         case CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA384:
         case CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384:
+        case CipherSuite.TLS_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384:
         case CipherSuite.TLS_ECDHE_PSK_WITH_NULL_SHA384:
         case CipherSuite.TLS_PSK_WITH_AES_256_CBC_SHA384:
+        case CipherSuite.TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384:
         case CipherSuite.TLS_PSK_WITH_NULL_SHA384:
         case CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384:
+        case CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384:
         case CipherSuite.TLS_RSA_PSK_WITH_NULL_SHA384:
         {
             if (isTLSv12)

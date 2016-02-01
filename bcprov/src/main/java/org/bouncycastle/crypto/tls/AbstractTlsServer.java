@@ -19,6 +19,7 @@ public abstract class AbstractTlsServer
     protected short[] offeredCompressionMethods;
     protected Hashtable clientExtensions;
 
+    protected boolean encryptThenMACOffered;
     protected short maxFragmentLengthOffered;
     protected boolean truncatedHMacOffered;
     protected Vector supportedSignatureAlgorithms;
@@ -39,6 +40,11 @@ public abstract class AbstractTlsServer
     public AbstractTlsServer(TlsCipherFactory cipherFactory)
     {
         this.cipherFactory = cipherFactory;
+    }
+
+    protected boolean allowEncryptThenMAC()
+    {
+        return true;
     }
 
     protected boolean allowTruncatedHMac()
@@ -85,7 +91,8 @@ public abstract class AbstractTlsServer
         for (int i = 0; i < namedCurves.length; ++i)
         {
             int namedCurve = namedCurves[i];
-            if (!NamedCurve.refersToASpecificNamedCurve(namedCurve) || TlsECCUtils.isSupportedNamedCurve(namedCurve))
+            if (NamedCurve.isValid(namedCurve)
+                && (!NamedCurve.refersToASpecificNamedCurve(namedCurve) || TlsECCUtils.isSupportedNamedCurve(namedCurve)))
             {
                 return true;
             }
@@ -103,6 +110,20 @@ public abstract class AbstractTlsServer
         throws IOException
     {
         this.clientVersion = clientVersion;
+    }
+
+    public void notifyFallback(boolean isFallback) throws IOException
+    {
+        /*
+         * draft-ietf-tls-downgrade-scsv-00 3. If TLS_FALLBACK_SCSV appears in
+         * ClientHello.cipher_suites and the highest protocol version supported by the server is
+         * higher than the version indicated in ClientHello.client_version, the server MUST respond
+         * with an inappropriate_fallback alert.
+         */
+        if (isFallback && getMaximumVersion().isLaterVersionOf(clientVersion))
+        {
+            throw new TlsFatalAlert(AlertDescription.inappropriate_fallback);
+        }
     }
 
     public void notifyOfferedCipherSuites(int[] offeredCipherSuites)
@@ -125,6 +146,7 @@ public abstract class AbstractTlsServer
 
         if (clientExtensions != null)
         {
+            this.encryptThenMACOffered = TlsExtensionsUtils.hasEncryptThenMACExtension(clientExtensions);
             this.maxFragmentLengthOffered = TlsExtensionsUtils.getMaxFragmentLengthExtension(clientExtensions);
             this.truncatedHMacOffered = TlsExtensionsUtils.hasTruncatedHMacExtension(clientExtensions);
 
@@ -197,9 +219,9 @@ public abstract class AbstractTlsServer
         {
             int cipherSuite = cipherSuites[i];
 
-            // TODO Certain cipher suites may only be available starting at a particular version
             if (Arrays.contains(this.offeredCipherSuites, cipherSuite)
-                && (eccCipherSuitesEnabled || !TlsECCUtils.isECCCipherSuite(cipherSuite)))
+                && (eccCipherSuitesEnabled || !TlsECCUtils.isECCCipherSuite(cipherSuite))
+                && TlsUtils.isValidCipherSuiteForVersion(cipherSuite, serverVersion))
             {
                 return this.selectedCipherSuite = cipherSuite;
             }
@@ -225,7 +247,21 @@ public abstract class AbstractTlsServer
     public Hashtable getServerExtensions()
         throws IOException
     {
-        if (this.maxFragmentLengthOffered >= 0)
+        if (this.encryptThenMACOffered && allowEncryptThenMAC())
+        {
+            /*
+             * RFC 7366 3. If a server receives an encrypt-then-MAC request extension from a client
+             * and then selects a stream or Authenticated Encryption with Associated Data (AEAD)
+             * ciphersuite, it MUST NOT send an encrypt-then-MAC response extension back to the
+             * client.
+             */
+            if (TlsUtils.isBlockCipherSuite(this.selectedCipherSuite))
+            {
+                TlsExtensionsUtils.addEncryptThenMACExtension(checkServerExtensions());
+            }
+        }
+
+        if (this.maxFragmentLengthOffered >= 0 && MaxFragmentLength.isValid(maxFragmentLengthOffered))
         {
             TlsExtensionsUtils.addMaxFragmentLengthExtension(checkServerExtensions(), this.maxFragmentLengthOffered);
         }
@@ -242,8 +278,8 @@ public abstract class AbstractTlsServer
              * message including a Supported Point Formats Extension appends this extension (along
              * with others) to its ServerHello message, enumerating the point formats it can parse.
              */
-            this.serverECPointFormats = new short[]{ ECPointFormat.ansiX962_compressed_char2,
-                ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed };
+            this.serverECPointFormats = new short[]{ ECPointFormat.uncompressed,
+                ECPointFormat.ansiX962_compressed_prime, ECPointFormat.ansiX962_compressed_char2, };
 
             TlsECCUtils.addSupportedPointFormatsExtension(checkServerExtensions(), serverECPointFormats);
         }

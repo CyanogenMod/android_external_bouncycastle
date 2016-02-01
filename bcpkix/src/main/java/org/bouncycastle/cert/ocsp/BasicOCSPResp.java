@@ -12,12 +12,14 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.util.Encodable;
 
 /**
  * <pre>
@@ -29,6 +31,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
  * </pre>
  */
 public class BasicOCSPResp
+    implements Encodable
 {
     private BasicOCSPResponse   resp;
     private ResponseData        data;
@@ -56,6 +59,16 @@ public class BasicOCSPResp
         {
             return null;
         }
+    }
+
+    /**
+     * Return the algorithm identifier describing the signature used in the response.
+     *
+     * @return an AlgorithmIdentifier
+     */
+    public AlgorithmIdentifier getSignatureAlgorithmID()
+    {
+        return resp.getSignatureAlgorithm();
     }
 
     public int getVersion()

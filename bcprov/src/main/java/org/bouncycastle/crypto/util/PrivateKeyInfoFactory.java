@@ -18,6 +18,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECNamedDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
@@ -54,11 +55,17 @@ public class PrivateKeyInfoFactory
             ECPrivateKeyParameters priv = (ECPrivateKeyParameters)privateKey;
             ECDomainParameters domainParams = priv.getParameters();
             ASN1Encodable params;
+            int orderBitLength;
 
-            // TODO: need to handle named curves
             if (domainParams == null)
             {
                 params = new X962Parameters(DERNull.INSTANCE);      // Implicitly CA
+                orderBitLength = priv.getD().bitLength();   // TODO: this is as good as currently available, must be a better way...
+            }
+            else if (domainParams instanceof ECNamedDomainParameters)
+            {
+                params = new X962Parameters(((ECNamedDomainParameters)domainParams).getName());
+                orderBitLength = domainParams.getCurve().getOrder().bitLength();
             }
             else
             {
@@ -70,9 +77,10 @@ public class PrivateKeyInfoFactory
                     domainParams.getSeed());
 
                 params = new X962Parameters(ecP);
+                orderBitLength = domainParams.getCurve().getOrder().bitLength();
             }
 
-            return new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKey(priv.getD(), params));
+            return new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKey(orderBitLength, priv.getD(), params));
         }
         else
         {
