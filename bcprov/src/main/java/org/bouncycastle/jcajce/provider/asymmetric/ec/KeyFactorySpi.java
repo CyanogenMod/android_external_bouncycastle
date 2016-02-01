@@ -201,16 +201,14 @@ public class KeyFactorySpi
         }
     }
 
-    // BEGIN android-removed
-    // public static class ECGOST3410
-    //     extends KeyFactorySpi
-    // {
-    //     public ECGOST3410()
-    //     {
-    //         super("ECGOST3410", BouncyCastleProvider.CONFIGURATION);
-    //     }
-    // }
-    // END android-removed
+    public static class ECGOST3410
+        extends KeyFactorySpi
+    {
+        public ECGOST3410()
+        {
+            super("ECGOST3410", BouncyCastleProvider.CONFIGURATION);
+        }
+    }
 
     public static class ECDH
         extends KeyFactorySpi

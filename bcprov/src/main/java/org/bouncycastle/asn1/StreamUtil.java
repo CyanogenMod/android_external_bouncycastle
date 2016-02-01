@@ -8,9 +8,7 @@ import java.nio.channels.FileChannel;
 
 class StreamUtil
 {
-    // BEGIN android-removed
-    // private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
-    // END android-removed
+    private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
 
     /**
      * Find out possible longest length...
@@ -50,15 +48,12 @@ class StreamUtil
             }
         }
 
-        // BEGIN android-changed
-        long maxMemory = Runtime.getRuntime().maxMemory();
-        if (maxMemory > Integer.MAX_VALUE)
+        if (MAX_MEMORY > Integer.MAX_VALUE)
         {
             return Integer.MAX_VALUE;
         }
 
-        return (int) maxMemory;
-        // END android-changed
+        return (int)MAX_MEMORY;
     }
 
     static int calculateBodyLength(

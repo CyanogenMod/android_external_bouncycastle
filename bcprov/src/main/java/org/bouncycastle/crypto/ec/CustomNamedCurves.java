@@ -10,9 +10,7 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECParametersHolder;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-// BEGIN android-removed
-// import org.bouncycastle.math.ec.custom.djb.Curve25519;
-// END android-removed
+import org.bouncycastle.math.ec.custom.djb.Curve25519;
 import org.bouncycastle.math.ec.custom.sec.SecP192K1Curve;
 import org.bouncycastle.math.ec.custom.sec.SecP192R1Curve;
 import org.bouncycastle.math.ec.custom.sec.SecP224K1Curve;
@@ -38,34 +36,32 @@ public class CustomNamedCurves
         return c.configure().setEndomorphism(new GLVTypeBEndomorphism(c, p)).create();
     }
 
-    // BEGIN android-removed
-    // /*
-    //  * curve25519
-    //  */
-    // static X9ECParametersHolder curve25519 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new Curve25519());
-    //
-    //         /*
-    //          * NOTE: Curve25519 was specified in Montgomery form. Rewriting in Weierstrass form
-    //          * involves substitution of variables, so the base-point x coordinate is 9 + (486662 / 3).
-    //          * 
-    //          * The Curve25519 paper doesn't say which of the two possible y values the base
-    //          * point has. The choice here is guided by language in the Ed25519 paper.
-    //          * 
-    //          * (The other possible y value is 5F51E65E475F794B1FE122D388B72EB36DC2B28192839E4DD6163A5D81312C14) 
-    //          */
-    //         ECPoint G = curve.decodePoint(Hex.decode("04"
-    //             + "2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD245A"
-    //             + "20AE19A1B8A086B4E01EDD2C7748D14C923D4D7E6D7C61B229E9C5A27ECED3D9"));
-    //
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    // END android-removed
+    /*
+     * curve25519
+     */
+    static X9ECParametersHolder curve25519 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new Curve25519());
+
+            /*
+             * NOTE: Curve25519 was specified in Montgomery form. Rewriting in Weierstrass form
+             * involves substitution of variables, so the base-point x coordinate is 9 + (486662 / 3).
+             * 
+             * The Curve25519 paper doesn't say which of the two possible y values the base
+             * point has. The choice here is guided by language in the Ed25519 paper.
+             * 
+             * (The other possible y value is 5F51E65E475F794B1FE122D388B72EB36DC2B28192839E4DD6163A5D81312C14) 
+             */
+            ECPoint G = curve.decodePoint(Hex.decode("04"
+                + "2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD245A"
+                + "20AE19A1B8A086B4E01EDD2C7748D14C923D4D7E6D7C61B229E9C5A27ECED3D9"));
+
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
     /*
      * secp192k1
@@ -258,9 +254,7 @@ public class CustomNamedCurves
 
     static
     {
-        // BEGIN android-removed
-        // defineCurve("curve25519", curve25519);
-        // END android-removed
+        defineCurve("curve25519", curve25519);
 
         defineCurveWithOID("secp192k1", SECObjectIdentifiers.secp192k1, secp192k1);
         defineCurveWithOID("secp192r1", SECObjectIdentifiers.secp192r1, secp192r1);

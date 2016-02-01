@@ -6,15 +6,11 @@ import java.security.AlgorithmParameters;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-// END android-removed
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-// END android-removed
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 
 /**
  * General JCA/JCE utility methods.
@@ -104,24 +100,22 @@ public class JcaJceUtils
         {
             return "SHA512";
         }
-        // BEGIN android-removed
-        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD128";
-        // }
-        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD160";
-        // }
-        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD256";
-        // }
-        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        // {
-        //     return "GOST3411";
-        // }
-        // END android-removed
+        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        {
+            return "RIPEMD128";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        {
+            return "RIPEMD160";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        {
+            return "RIPEMD256";
+        }
+        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        {
+            return "GOST3411";
+        }
         else
         {
             return digestAlgOID.getId();
