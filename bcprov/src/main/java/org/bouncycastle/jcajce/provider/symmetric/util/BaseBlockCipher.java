@@ -20,8 +20,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
 
 import org.bouncycastle.asn1.cms.GCMParameters;
 import org.bouncycastle.crypto.BlockCipher;
@@ -35,14 +37,20 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.CTSBlockCipher;
-import org.bouncycastle.crypto.modes.EAXBlockCipher;
-import org.bouncycastle.crypto.modes.GCFBBlockCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.modes.EAXBlockCipher;
+// import org.bouncycastle.crypto.modes.GCFBBlockCipher;
+// END android-removed
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
-import org.bouncycastle.crypto.modes.GOFBBlockCipher;
-import org.bouncycastle.crypto.modes.OCBBlockCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.modes.GOFBBlockCipher;
+// import org.bouncycastle.crypto.modes.OCBBlockCipher;
+// END android-removed
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
-import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
-import org.bouncycastle.crypto.modes.PGPCFBBlockCipher;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
+// import org.bouncycastle.crypto.modes.PGPCFBBlockCipher;
+// END android-removed
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.paddings.BlockCipherPadding;
 import org.bouncycastle.crypto.paddings.ISO10126d2Padding;
@@ -55,11 +63,15 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.params.ParametersWithSBox;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.params.ParametersWithSBox;
+// END android-removed
 import org.bouncycastle.crypto.params.RC2Parameters;
-import org.bouncycastle.crypto.params.RC5Parameters;
-import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
-import org.bouncycastle.jcajce.spec.RepeatedSecretKeySpec;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.params.RC5Parameters;
+// import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
+// import org.bouncycastle.jcajce.spec.RepeatedSecretKeySpec;
+// END android-removed
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Strings;
 
@@ -74,11 +86,15 @@ public class BaseBlockCipher
     //
     private Class[]                 availableSpecs =
                                     {
-                                        RC2ParameterSpec.class,
-                                        RC5ParameterSpec.class,
+                                        // BEGIN android-removed
+                                        // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class,
+                                        // END android-removed
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
-                                        GOST28147ParameterSpec.class,
+                                        // BEGIN android-removed
+                                        // GOST28147ParameterSpec.class,
+                                        // END android-removed
                                         gcmSpecClass
                                     };
 
@@ -284,48 +300,52 @@ public class BaseBlockCipher
                         new CFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
-        else if (modeName.startsWith("PGP"))
-        {
-            boolean inlineIV = modeName.equalsIgnoreCase("PGPCFBwithIV");
-
-            ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedGenericBlockCipher(
-                new PGPCFBBlockCipher(baseEngine, inlineIV));
-        }
-        else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
-        {
-            ivLength = 0;
-            cipher = new BufferedGenericBlockCipher(
-                new OpenPGPCFBBlockCipher(baseEngine));
-        }
-        else if (modeName.startsWith("SIC"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            if (ivLength < 16)
-            {
-                throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
-            }
-            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-                        new SICBlockCipher(baseEngine)));
-        }
+        // BEGIN android-removed
+        // else if (modeName.startsWith("PGP"))
+        // {
+        //     boolean inlineIV = modeName.equalsIgnoreCase("PGPCFBwithIV");
+        //
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new BufferedGenericBlockCipher(
+        //         new PGPCFBBlockCipher(baseEngine, inlineIV));
+        // }
+        // else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
+        // {
+        //     ivLength = 0;
+        //     cipher = new BufferedGenericBlockCipher(
+        //         new OpenPGPCFBBlockCipher(baseEngine));
+        // }
+        // else if (modeName.startsWith("SIC"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     if (ivLength < 16)
+        //     {
+        //         throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
+        //     }
+        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+        //                 new SICBlockCipher(baseEngine)));
+        // }
+        // END android-removed
         else if (modeName.startsWith("CTR"))
         {
             ivLength = baseEngine.getBlockSize();
             cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
                         new SICBlockCipher(baseEngine)));
         }
-        else if (modeName.startsWith("GOFB"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-                        new GOFBBlockCipher(baseEngine)));
-        }
-        else if (modeName.startsWith("GCFB"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-                        new GCFBBlockCipher(baseEngine)));
-        }
+        // BEGIN android-removed
+        // else if (modeName.startsWith("GOFB"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+        //                 new GOFBBlockCipher(baseEngine)));
+        // }
+        // else if (modeName.startsWith("GCFB"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+        //                 new GCFBBlockCipher(baseEngine)));
+        // }
+        // END android-removed
         else if (modeName.startsWith("CTS"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -336,26 +356,28 @@ public class BaseBlockCipher
             ivLength = 13; // CCM nonce 7..13 bytes
             cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
         }
-        else if (modeName.startsWith("OCB"))
-        {
-            if (engineProvider != null)
-            {
-                /*
-                 * RFC 7253 4.2. Nonce is a string of no more than 120 bits
-                 */
-                ivLength = 15;
-                cipher = new AEADGenericBlockCipher(new OCBBlockCipher(baseEngine, engineProvider.get()));
-            }
-            else
-            {
-                throw new NoSuchAlgorithmException("can't support mode " + mode);
-            }
-        }
-        else if (modeName.startsWith("EAX"))
-        {
-            ivLength = baseEngine.getBlockSize();
-            cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
-        }
+        // BEGIN android-removed
+        // else if (modeName.startsWith("OCB"))
+        // {
+        //     if (engineProvider != null)
+        //     {
+        //         /*
+        //          * RFC 7253 4.2. Nonce is a string of no more than 120 bits
+        //          */
+        //         ivLength = 15;
+        //         cipher = new AEADGenericBlockCipher(new OCBBlockCipher(baseEngine, engineProvider.get()));
+        //     }
+        //     else
+        //     {
+        //         throw new NoSuchAlgorithmException("can't support mode " + mode);
+        //     }
+        // }
+        // else if (modeName.startsWith("EAX"))
+        // {
+        //     ivLength = baseEngine.getBlockSize();
+        //     cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
+        // }
+        // END android-removed
         else if (modeName.startsWith("GCM"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -478,18 +500,20 @@ public class BaseBlockCipher
 
                     param = new ParametersWithIV(param, iv.getIV());
                 }
-                else if (params instanceof GOST28147ParameterSpec)
-                {
-                    // need to pick up IV and SBox.
-                    GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
-
-                    param = new ParametersWithSBox(param, gost28147Param.getSbox());
-
-                    if (gost28147Param.getIV() != null && ivLength != 0)
-                    {
-                        param = new ParametersWithIV(param, gost28147Param.getIV());
-                    }
-                }
+                // BEGIN android-removed
+                // else if (params instanceof GOST28147ParameterSpec)
+                // {
+                //     // need to pick up IV and SBox.
+                //     GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
+                //
+                //     param = new ParametersWithSBox(param, gost28147Param.getSbox());
+                //
+                //     if (gost28147Param.getIV() != null && ivLength != 0)
+                //     {
+                //         param = new ParametersWithIV(param, gost28147Param.getIV());
+                //     }
+                // }
+                // END android-removed
             }
             else if (params instanceof PBEParameterSpec)
             {
@@ -521,12 +545,14 @@ public class BaseBlockCipher
                     throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                 }
 
-                if (key instanceof RepeatedSecretKeySpec)
-                {
-                    param = new ParametersWithIV(null, p.getIV());
-                    ivParam = (ParametersWithIV)param;
-                }
-                else
+                // BEGIN android-removed
+                // if (key instanceof RepeatedSecretKeySpec)
+                // {
+                //     param = new ParametersWithIV(null, p.getIV());
+                //     ivParam = (ParametersWithIV)param;
+                // }
+                // else
+                // END android-removed
                 {
                     param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
                     ivParam = (ParametersWithIV)param;
@@ -542,63 +568,65 @@ public class BaseBlockCipher
                 param = new KeyParameter(key.getEncoded());
             }
         }
-        else if (params instanceof GOST28147ParameterSpec)
-        {
-            GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
-
-            param = new ParametersWithSBox(
-                       new KeyParameter(key.getEncoded()), ((GOST28147ParameterSpec)params).getSbox());
-
-            if (gost28147Param.getIV() != null && ivLength != 0)
-            {
-                param = new ParametersWithIV(param, gost28147Param.getIV());
-                ivParam = (ParametersWithIV)param;
-            }
-        }
-        else if (params instanceof RC2ParameterSpec)
-        {
-            RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
-
-            param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
-
-            if (rc2Param.getIV() != null && ivLength != 0)
-            {
-                param = new ParametersWithIV(param, rc2Param.getIV());
-                ivParam = (ParametersWithIV)param;
-            }
-        }
-        else if (params instanceof RC5ParameterSpec)
-        {
-            RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
-
-            param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
-            if (baseEngine.getAlgorithmName().startsWith("RC5"))
-            {
-                if (baseEngine.getAlgorithmName().equals("RC5-32"))
-                {
-                    if (rc5Param.getWordSize() != 32)
-                    {
-                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
-                    }
-                }
-                else if (baseEngine.getAlgorithmName().equals("RC5-64"))
-                {
-                    if (rc5Param.getWordSize() != 64)
-                    {
-                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
-                    }
-                }
-            }
-            else
-            {
-                throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
-            }
-            if ((rc5Param.getIV() != null) && (ivLength != 0))
-            {
-                param = new ParametersWithIV(param, rc5Param.getIV());
-                ivParam = (ParametersWithIV)param;
-            }
-        }
+        // BEGIN android-removed
+        // else if (params instanceof GOST28147ParameterSpec)
+        // {
+        //     GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
+        //
+        //     param = new ParametersWithSBox(
+        //                new KeyParameter(key.getEncoded()), ((GOST28147ParameterSpec)params).getSbox());
+        //
+        //     if (gost28147Param.getIV() != null && ivLength != 0)
+        //     {
+        //         param = new ParametersWithIV(param, gost28147Param.getIV());
+        //         ivParam = (ParametersWithIV)param;
+        //     }
+        // }
+        // else if (params instanceof RC2ParameterSpec)
+        // {
+        //     RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
+        //
+        //     param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
+        //
+        //     if (rc2Param.getIV() != null && ivLength != 0)
+        //     {
+        //         param = new ParametersWithIV(param, rc2Param.getIV());
+        //         ivParam = (ParametersWithIV)param;
+        //     }
+        // }
+        // else if (params instanceof RC5ParameterSpec)
+        // {
+        //     RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
+        //
+        //     param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
+        //     if (baseEngine.getAlgorithmName().startsWith("RC5"))
+        //     {
+        //         if (baseEngine.getAlgorithmName().equals("RC5-32"))
+        //         {
+        //             if (rc5Param.getWordSize() != 32)
+        //             {
+        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
+        //             }
+        //         }
+        //         else if (baseEngine.getAlgorithmName().equals("RC5-64"))
+        //         {
+        //             if (rc5Param.getWordSize() != 64)
+        //             {
+        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
+        //     }
+        //     if ((rc5Param.getIV() != null) && (ivLength != 0))
+        //     {
+        //         param = new ParametersWithIV(param, rc5Param.getIV());
+        //         ivParam = (ParametersWithIV)param;
+        //     }
+        // }
+        // END android-removed
         else if (gcmSpecClass != null && gcmSpecClass.isInstance(params))
         {
             if (!isAEADModeName(modeName) && !(cipher instanceof AEADGenericBlockCipher))
@@ -611,11 +639,13 @@ public class BaseBlockCipher
                 Method tLen = gcmSpecClass.getDeclaredMethod("getTLen", new Class[0]);
                 Method iv= gcmSpecClass.getDeclaredMethod("getIV", new Class[0]);
 
-                if (key instanceof RepeatedSecretKeySpec)
-                {
-                    param = aeadParams = new AEADParameters(null, ((Integer)tLen.invoke(params, new Object[0])).intValue(), (byte[])iv.invoke(params, new Object[0]));
-                }
-                else
+                // BEGIN android-removed
+                // if (key instanceof RepeatedSecretKeySpec)
+                // {
+                //     param = aeadParams = new AEADParameters(null, ((Integer)tLen.invoke(params, new Object[0])).intValue(), (byte[])iv.invoke(params, new Object[0]));
+                // }
+                // else
+                // END android-removed
                 {
                     param = aeadParams = new AEADParameters(new KeyParameter(key.getEncoded()), ((Integer)tLen.invoke(params, new Object[0])).intValue(), (byte[])iv.invoke(params, new Object[0]));
                 }
@@ -867,7 +897,9 @@ public class BaseBlockCipher
     private boolean isAEADModeName(
         String modeName)
     {
-        return "CCM".equals(modeName) || "EAX".equals(modeName) || "GCM".equals(modeName) || "OCB".equals(modeName);
+        // BEGIN android-changed
+        return "CCM".equals(modeName) || "GCM".equals(modeName);
+        // END android-changed
     }
 
     /*

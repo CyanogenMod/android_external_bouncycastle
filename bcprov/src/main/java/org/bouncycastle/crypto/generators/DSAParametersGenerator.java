@@ -4,7 +4,9 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-changed
 import org.bouncycastle.crypto.params.DSAParameterGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAValidationParameters;
@@ -31,7 +33,9 @@ public class DSAParametersGenerator
 
     public DSAParametersGenerator()
     {
-        this(new SHA1Digest());
+        // BEGIN android-changed
+        this(AndroidDigestFactory.getSHA1());
+        // END android-changed
     }
 
     public DSAParametersGenerator(Digest digest)
@@ -122,7 +126,9 @@ public class DSAParametersGenerator
         int             n = (L - 1) / 160;
         byte[]          w = new byte[L / 8];
 
-        if (!(digest instanceof SHA1Digest))
+        // BEGIN android-changed
+        if (!(digest.getAlgorithmName().equals("SHA-1")))
+        // END android-changed
         {
             throw new IllegalStateException("can only use SHA-1 for generating FIPS 186-2 parameters");
         }

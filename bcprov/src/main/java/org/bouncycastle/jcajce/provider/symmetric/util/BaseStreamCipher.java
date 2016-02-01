@@ -15,8 +15,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.RC5ParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.RC2ParameterSpec;
+// import javax.crypto.spec.RC5ParameterSpec;
+// END android-removed
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -34,8 +36,10 @@ public class BaseStreamCipher
     //
     private Class[]                 availableSpecs =
                                     {
-                                        RC2ParameterSpec.class,
-                                        RC5ParameterSpec.class,
+                                        // BEGIN android-removed
+                                        // RC2ParameterSpec.class,
+                                        // RC5ParameterSpec.class,
+                                        // END android-removed
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class
                                     };

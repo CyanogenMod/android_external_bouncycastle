@@ -29,7 +29,9 @@ public final class ARC4
     {
         public KeyGen()
         {
-            super("RC4", 128, new CipherKeyGenerator());
+            // BEGIN android-changed
+            super("ARC4", 128, new CipherKeyGenerator());
+            // END android-changed
         }
     }
 

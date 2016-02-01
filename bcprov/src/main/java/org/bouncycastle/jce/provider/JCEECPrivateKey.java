@@ -19,8 +19,10 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+// END android-removed
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -202,21 +204,23 @@ public class JCEECPrivateKey
             ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
             X9ECParameters ecP = ECUtil.getNamedCurveByOid(oid);
 
-            if (ecP == null) // GOST Curve
-            {
-                ECDomainParameters gParam = ECGOST3410NamedCurves.getByOID(oid);
-                EllipticCurve ellipticCurve = EC5Util.convertCurve(gParam.getCurve(), gParam.getSeed());
-
-                ecSpec = new ECNamedCurveSpec(
-                        ECGOST3410NamedCurves.getName(oid),
-                        ellipticCurve,
-                        new ECPoint(
-                                gParam.getG().getAffineXCoord().toBigInteger(),
-                                gParam.getG().getAffineYCoord().toBigInteger()),
-                        gParam.getN(),
-                        gParam.getH());
-            }
-            else
+            // BEGIN android-removed
+            // if (ecP == null) // GOST Curve
+            // {
+            //     ECDomainParameters gParam = ECGOST3410NamedCurves.getByOID(oid);
+            //     EllipticCurve ellipticCurve = EC5Util.convertCurve(gParam.getCurve(), gParam.getSeed());
+            //
+            //     ecSpec = new ECNamedCurveSpec(
+            //             ECGOST3410NamedCurves.getName(oid),
+            //             ellipticCurve,
+            //             new ECPoint(
+            //                     gParam.getG().getAffineXCoord().toBigInteger(),
+            //                     gParam.getG().getAffineYCoord().toBigInteger()),
+            //             gParam.getN(),
+            //             gParam.getH());
+            // }
+            // else
+            // END android-removed
             {
                 EllipticCurve ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
 
@@ -330,11 +334,13 @@ public class JCEECPrivateKey
 
         try
         {
-            if (algorithm.equals("ECGOST3410"))
-            {
-                info = new PrivateKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.toASN1Primitive()), keyStructure.toASN1Primitive());
-            }
-            else
+            // BEGIN android-removed
+            // if (algorithm.equals("ECGOST3410"))
+            // {
+            //     info = new PrivateKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.toASN1Primitive()), keyStructure.toASN1Primitive());
+            // }
+            // else
+            // END android-removed
             {
 
                 info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.toASN1Primitive()), keyStructure.toASN1Primitive());

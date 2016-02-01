@@ -23,7 +23,9 @@ public class ASN1Boolean
     private static final byte[] TRUE_VALUE = new byte[] { (byte)0xff };
     private static final byte[] FALSE_VALUE = new byte[] { 0 };
 
-    private byte[]         value;
+    // BEGIN android-changed
+    final private byte[]         value;
+    // END android-changed
 
     public static final ASN1Boolean FALSE = new ASN1Boolean(false);
     public static final ASN1Boolean TRUE  = new ASN1Boolean(true);
@@ -79,6 +81,17 @@ public class ASN1Boolean
         return (value != 0 ? TRUE : FALSE);
     }
 
+    // BEGIN android-added
+    /**
+     * return a ASN1Boolean from the passed in array.
+     */
+    public static ASN1Boolean getInstance(
+        byte[] octets)
+    {
+        return (octets[0] != 0) ? TRUE : FALSE;
+    }
+
+    // END android-added
     /**
      * return a Boolean from a tagged object.
      *
@@ -105,7 +118,9 @@ public class ASN1Boolean
         }
     }
 
-    ASN1Boolean(
+    // BEGIN android-changed
+    protected ASN1Boolean(
+    // END android-changed
         byte[] value)
     {
         if (value.length != 1)
@@ -131,8 +146,10 @@ public class ASN1Boolean
      * @deprecated use getInstance(boolean) method.
      * @param value true or false.
      */
-    public ASN1Boolean(
+    // BEGIN android-changed
+    protected ASN1Boolean(
         boolean     value)
+    // END android-changed
     {
         this.value = (value) ? TRUE_VALUE : FALSE_VALUE;
     }

@@ -23,13 +23,20 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.NullDigest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
+// BEGIN android-added
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-added
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA1Digest;
+// import org.bouncycastle.crypto.digests.SHA224Digest;
+// import org.bouncycastle.crypto.digests.SHA256Digest;
+// import org.bouncycastle.crypto.digests.SHA384Digest;
+// import org.bouncycastle.crypto.digests.SHA512Digest;
+// END android-removed
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
+// END android-removed
 
 public class DSASigner
     extends SignatureSpi
@@ -217,90 +224,102 @@ public class DSASigner
     {
         public stdDSA()
         {
-            super(new SHA1Digest(), new org.bouncycastle.crypto.signers.DSASigner());
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA1(), new org.bouncycastle.crypto.signers.DSASigner());
+            // END android-changed
         }
     }
 
-    static public class detDSA
-        extends DSASigner
-    {
-        public detDSA()
-        {
-            super(new SHA1Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA1Digest())));
-        }
-    }
+    // BEGIN android-removed
+    // static public class detDSA
+    //     extends DSASigner
+    // {
+    //     public detDSA()
+    //     {
+    //         super(new SHA1Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA1Digest())));
+    //     }
+    // }
+    // END android-removed
 
     static public class dsa224
         extends DSASigner
     {
         public dsa224()
         {
-            super(new SHA224Digest(), new org.bouncycastle.crypto.signers.DSASigner());
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA224(), new org.bouncycastle.crypto.signers.DSASigner());
+            // END android-changed
         }
     }
 
-    static public class detDSA224
-        extends DSASigner
-    {
-        public detDSA224()
-        {
-            super(new SHA224Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA224Digest())));
-        }
-    }
+    // BEGIN android-removed
+    // static public class detDSA224
+    //     extends DSASigner
+    // {
+    //     public detDSA224()
+    //     {
+    //         super(new SHA224Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA224Digest())));
+    //     }
+    // }
+    // END android-removed
 
     static public class dsa256
         extends DSASigner
     {
         public dsa256()
         {
-            super(new SHA256Digest(), new org.bouncycastle.crypto.signers.DSASigner());
+            // BEGIN android-changed
+            super(AndroidDigestFactory.getSHA256(), new org.bouncycastle.crypto.signers.DSASigner());
+            // END android-changed
         }
     }
 
-    static public class detDSA256
-        extends DSASigner
-    {
-        public detDSA256()
-        {
-            super(new SHA256Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA256Digest())));
-        }
-    }
-
-    static public class dsa384
-        extends DSASigner
-    {
-        public dsa384()
-        {
-            super(new SHA384Digest(), new org.bouncycastle.crypto.signers.DSASigner());
-        }
-    }
-
-    static public class detDSA384
-        extends DSASigner
-    {
-        public detDSA384()
-        {
-            super(new SHA384Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA384Digest())));
-        }
-    }
-
-    static public class dsa512
-        extends DSASigner
-    {
-        public dsa512()
-        {
-            super(new SHA512Digest(), new org.bouncycastle.crypto.signers.DSASigner());
-        }
-    }
-
-    static public class detDSA512
-        extends DSASigner
-    {
-        public detDSA512()
-        {
-            super(new SHA512Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA512Digest())));
-        }
-    }
+    // BEGIN android-removed
+    // static public class detDSA256
+    //     extends DSASigner
+    // {
+    //     public detDSA256()
+    //     {
+    //         super(new SHA256Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA256Digest())));
+    //     }
+    // }
+    //
+    // static public class dsa384
+    //     extends DSASigner
+    // {
+    //     public dsa384()
+    //     {
+    //         super(new SHA384Digest(), new org.bouncycastle.crypto.signers.DSASigner());
+    //     }
+    // }
+    //
+    // static public class detDSA384
+    //     extends DSASigner
+    // {
+    //     public detDSA384()
+    //     {
+    //         super(new SHA384Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA384Digest())));
+    //     }
+    // }
+    //
+    // static public class dsa512
+    //     extends DSASigner
+    // {
+    //     public dsa512()
+    //     {
+    //         super(new SHA512Digest(), new org.bouncycastle.crypto.signers.DSASigner());
+    //     }
+    // }
+    //
+    // static public class detDSA512
+    //     extends DSASigner
+    // {
+    //     public detDSA512()
+    //     {
+    //         super(new SHA512Digest(), new org.bouncycastle.crypto.signers.DSASigner(new HMacDSAKCalculator(new SHA512Digest())));
+    //     }
+    // }
+    // END android-removed
 
     static public class noneDSA
         extends DSASigner
