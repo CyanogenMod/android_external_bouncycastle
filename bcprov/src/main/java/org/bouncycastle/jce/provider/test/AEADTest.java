@@ -6,7 +6,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.security.Security;
+import java.security.spec.InvalidParameterSpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -46,18 +48,62 @@ public class AEADTest extends SimpleTest
 
     public void performTest() throws Exception
     {
+        boolean aeadAvailable = false;
         try
         {
             this.getClass().getClassLoader().loadClass("javax.crypto.spec.GCMParameterSpec");
-
+            aeadAvailable = true;
+        }
+        catch (ClassNotFoundException e)
+        {
+        }
+        if (aeadAvailable)
+        {
             checkCipherWithAD(K2, N2, A2, P2, C2_short);
             testGCMParameterSpec(K2, N2, A2, P2, C2);
             testGCMParameterSpecWithRepeatKey(K2, N2, A2, P2, C2);
             testGCMGeneric(KGCM, NGCM, new byte[0], new byte[0], CGCM);
+            testGCMParameterSpecWithMultipleUpdates(K2, N2, A2, P2, C2);
         }
-        catch (ClassNotFoundException e)
+        else
         {
-            System.err.println("AEADTest disabled due to JDK");
+            System.err.println("GCM AEADTests disabled due to JDK");
+        }
+        testTampering(aeadAvailable);
+    }
+
+    private void testTampering(boolean aeadAvailable)
+        throws InvalidKeyException,
+        InvalidAlgorithmParameterException,
+        NoSuchAlgorithmException,
+        NoSuchProviderException,
+        NoSuchPaddingException,
+        IllegalBlockSizeException,
+        BadPaddingException
+    {
+        Cipher eax = Cipher.getInstance("AES/EAX/NoPadding", "BC");
+        final SecretKeySpec key = new SecretKeySpec(new byte[eax.getBlockSize()], eax.getAlgorithm());
+        final IvParameterSpec iv = new IvParameterSpec(new byte[eax.getBlockSize()]);
+
+        eax.init(Cipher.ENCRYPT_MODE, key, iv);
+        byte[] ciphertext = eax.doFinal(new byte[100]);
+        ciphertext[0] = (byte)(ciphertext[0] + 1);  // Tamper
+
+        try
+        {
+            eax.init(Cipher.DECRYPT_MODE, key, iv);
+            eax.doFinal(ciphertext);
+            fail("Tampered ciphertext should be invalid");
+        }
+        catch (BadPaddingException e)
+        {
+            if (aeadAvailable)
+            {
+                if (!e.getClass().getName().equals("javax.crypto.AEADBadTagException"))
+                {
+                    fail("Tampered AEAD ciphertext should fail with AEADBadTagException when available.");
+                }
+            }
         }
     }
 
@@ -140,6 +186,62 @@ public class AEADTest extends SimpleTest
         }
     }
 
+    private void testGCMParameterSpecWithMultipleUpdates(byte[] K,
+                                      byte[] N,
+                                      byte[] A,
+                                      byte[] P,
+                                      byte[] C)
+        throws Exception
+    {
+        Cipher eax = Cipher.getInstance("AES/EAX/NoPadding", "BC");
+        SecretKeySpec key = new SecretKeySpec(K, "AES");
+        SecureRandom random = new SecureRandom();
+
+        // GCMParameterSpec mapped to AEADParameters and overrides default MAC
+        // size
+        GCMParameterSpec spec = new GCMParameterSpec(128, N);
+
+        for (int i = 900; i != 1024; i++)
+        {
+            byte[] message = new byte[i];
+
+            random.nextBytes(message);
+
+            eax.init(Cipher.ENCRYPT_MODE, key, spec);
+
+            byte[] out = new byte[eax.getOutputSize(i)];
+
+            int offSet = 0;
+
+            int count;
+            for (count = 0; count < i / 21; count++)
+            {
+                offSet += eax.update(message, count * 21, 21, out, offSet);
+            }
+
+            offSet += eax.doFinal(message, count * 21, i - (count * 21), out, offSet);
+
+            byte[] dec = new byte[i];
+            int    len = offSet;
+
+            eax.init(Cipher.DECRYPT_MODE, key, spec);
+
+            offSet = 0;
+            for (count = 0; count < len / 10; count++)
+            {
+                offSet += eax.update(out, count * 10, 10, dec, offSet);
+            }
+
+            offSet += eax.doFinal(out, count * 10, len - (count * 10), dec, offSet);
+
+            if (!Arrays.areEqual(message, dec) || offSet != message.length)
+            {
+                fail("message mismatch");
+            }
+        }
+    }
+
+
     private void testGCMParameterSpecWithRepeatKey(byte[] K,
                                                    byte[] N,
                                                    byte[] A,
@@ -192,7 +294,7 @@ public class AEADTest extends SimpleTest
         throws InvalidKeyException,
         NoSuchAlgorithmException, NoSuchPaddingException,
         IllegalBlockSizeException, BadPaddingException,
-        InvalidAlgorithmParameterException, NoSuchProviderException, IOException
+        InvalidAlgorithmParameterException, NoSuchProviderException, IOException, InvalidParameterSpecException
     {
         Cipher eax = Cipher.getInstance("AES/GCM/NoPadding", "BC");
         SecretKeySpec key = new SecretKeySpec(K, "AES");
@@ -229,6 +331,18 @@ public class AEADTest extends SimpleTest
         if (!Arrays.areEqual(spec.getIV(), gcmParameters.getNonce()) || spec.getTLen() != gcmParameters.getIcvLen())
         {
             fail("parameters mismatch");
+        }
+
+        GCMParameterSpec gcmSpec = algParams.getParameterSpec(GCMParameterSpec.class);
+
+        if (!Arrays.areEqual(gcmSpec.getIV(), gcmParameters.getNonce()) || gcmSpec.getTLen() != gcmParameters.getIcvLen() * 8)
+        {
+            fail("spec parameters mismatch");
+        }
+
+        if (!Arrays.areEqual(eax.getIV(), gcmParameters.getNonce()))
+        {
+            fail("iv mismatch");
         }
     }
 

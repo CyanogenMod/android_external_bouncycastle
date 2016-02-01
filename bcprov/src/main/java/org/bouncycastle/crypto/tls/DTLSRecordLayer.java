@@ -245,10 +245,6 @@ class DTLSRecordLayer
                             closeTransport();
                         }
                     }
-                    else
-                    {
-                        // TODO What exception?
-                    }
 
                     continue;
                 }
@@ -431,7 +427,7 @@ class DTLSRecordLayer
         }
     }
 
-    private void raiseAlert(short alertLevel, short alertDescription, String message, Exception cause)
+    private void raiseAlert(short alertLevel, short alertDescription, String message, Throwable cause)
         throws IOException
     {
         peer.notifyAlertRaised(alertLevel, alertDescription, message, cause);
@@ -446,17 +442,17 @@ class DTLSRecordLayer
     private int receiveRecord(byte[] buf, int off, int len, int waitMillis)
         throws IOException
     {
-        if (recordQueue.size() > 0)
+        if (recordQueue.available() > 0)
         {
             int length = 0;
-            if (recordQueue.size() >= RECORD_HEADER_LENGTH)
+            if (recordQueue.available() >= RECORD_HEADER_LENGTH)
             {
                 byte[] lengthBytes = new byte[2];
                 recordQueue.read(lengthBytes, 0, 2, 11);
                 length = TlsUtils.readUint16(lengthBytes, 0);
             }
 
-            int received = Math.min(recordQueue.size(), RECORD_HEADER_LENGTH + length);
+            int received = Math.min(recordQueue.available(), RECORD_HEADER_LENGTH + length);
             recordQueue.removeData(buf, off, received, 0);
             return received;
         }
@@ -515,6 +511,6 @@ class DTLSRecordLayer
 
     private static long getMacSequenceNumber(int epoch, long sequence_number)
     {
-        return ((long)epoch << 48) | sequence_number;
+        return ((epoch & 0xFFFFFFFFL) << 48) | sequence_number;
     }
 }

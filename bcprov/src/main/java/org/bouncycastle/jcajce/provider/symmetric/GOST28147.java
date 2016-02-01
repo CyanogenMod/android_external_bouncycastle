@@ -21,7 +21,6 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class GOST28147
 {
@@ -90,7 +89,7 @@ public final class GOST28147
             SecureRandom random)
             throws InvalidAlgorithmParameterException
         {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for GOST28147 parameter generation.");
         }
 
         protected AlgorithmParameters engineGenerateParameters()
@@ -108,7 +107,7 @@ public final class GOST28147
 
             try
             {
-                params = AlgorithmParameters.getInstance("GOST28147", BouncyCastleProvider.PROVIDER_NAME);
+                params = createParametersInstance("GOST28147");
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)

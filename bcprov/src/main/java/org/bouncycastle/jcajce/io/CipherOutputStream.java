@@ -16,14 +16,15 @@ import org.bouncycastle.crypto.io.InvalidCipherTextIOException;
  * the written data with the cipher, and the output of the cipher is in turn written to the
  * underlying OutputStream. The cipher must be fully initialized before being used by a
  * CipherInputStream.
- * <p/>
+ * <p>
  * For example, if the cipher is initialized for encryption, the CipherOutputStream will encrypt the
  * data before writing the encrypted data to the underlying stream.
- * <p/>
+ * </p><p>
  * This is a reimplementation of {@link javax.crypto.CipherOutputStream} that is safe for use with
  * AEAD block ciphers, and does not silently catch {@link BadPaddingException} and
  * {@link IllegalBlockSizeException} errors. Any errors that occur during {@link Cipher#doFinal()
  * finalisation} are rethrown wrapped in an {@link InvalidCipherTextIOException}.
+ * </p>
  */
 public class CipherOutputStream
     extends FilterOutputStream
@@ -75,13 +76,12 @@ public class CipherOutputStream
     /**
      * Flushes this output stream by forcing any buffered output bytes that have already been
      * processed by the encapsulated cipher object to be written out.
-     * <p/>
-     * <p/>
+     * <p>
      * Any bytes buffered by the encapsulated cipher and waiting to be processed by it will not be
      * written out. For example, if the encapsulated cipher is a block cipher, and the total number
      * of bytes written using one of the <code>write</code> methods is less than the cipher's block
      * size, no bytes will be written out.
-     *
+     * </p>
      * @throws java.io.IOException if an I/O error occurs.
      */
     public void flush()
@@ -92,14 +92,14 @@ public class CipherOutputStream
 
     /**
      * Closes this output stream and releases any system resources associated with this stream.
-     * <p/>
+     * <p>
      * This method invokes the <code>doFinal</code> method of the encapsulated cipher object, which
      * causes any bytes buffered by the encapsulated cipher to be processed. The result is written
      * out by calling the <code>flush</code> method of this output stream.
-     * <p/>
+     * </p><p>
      * This method resets the encapsulated cipher object to its initial state and calls the
      * <code>close</code> method of the underlying output stream.
-     *
+     * </p>
      * @throws java.io.IOException if an I/O error occurs.
      * @throws InvalidCipherTextIOException if the data written to this stream was invalid
      * ciphertext (e.g. the cipher is an AEAD cipher and the ciphertext tag check

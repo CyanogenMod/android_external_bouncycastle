@@ -13,14 +13,13 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
@@ -289,9 +288,9 @@ public class BCECGOST3410PrivateKey
             }
 
             ASN1Encodable privKey = info.parsePrivateKey();
-            if (privKey instanceof DERInteger)
+            if (privKey instanceof ASN1Integer)
             {
-                DERInteger derD = DERInteger.getInstance(privKey);
+                ASN1Integer derD = ASN1Integer.getInstance(privKey);
 
                 this.d = derD.getValue();
             }
@@ -348,19 +347,22 @@ public class BCECGOST3410PrivateKey
         else
         {
             X962Parameters params;
+            int orderBitLength;
 
             if (ecSpec instanceof ECNamedCurveSpec)
             {
-                DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+                ASN1ObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
                 if (curveOid == null)  // guess it's the OID
                 {
                     curveOid = new ASN1ObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
                 }
                 params = new X962Parameters(curveOid);
+                orderBitLength = ECUtil.getOrderBitLength(ecSpec.getOrder(), this.getS());
             }
             else if (ecSpec == null)
             {
                 params = new X962Parameters(DERNull.INSTANCE);
+                orderBitLength = ECUtil.getOrderBitLength(null, this.getS());
             }
             else
             {
@@ -374,6 +376,7 @@ public class BCECGOST3410PrivateKey
                     ecSpec.getCurve().getSeed());
 
                 params = new X962Parameters(ecP);
+                orderBitLength = ECUtil.getOrderBitLength(ecSpec.getOrder(), this.getS());
             }
 
             PrivateKeyInfo info;
@@ -381,11 +384,11 @@ public class BCECGOST3410PrivateKey
 
             if (publicKey != null)
             {
-                keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), publicKey, params);
+                keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(orderBitLength, this.getS(), publicKey, params);
             }
             else
             {
-                keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), params);
+                keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(orderBitLength, this.getS(), params);
             }
 
             try

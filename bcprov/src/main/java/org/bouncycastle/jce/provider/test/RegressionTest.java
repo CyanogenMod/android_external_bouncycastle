@@ -34,7 +34,6 @@ public class RegressionTest
         new ElGamalTest(),
         new IESTest(),
         new SigTest(),
-        new AttrCertTest(),
         new CertTest(),
         new PKCS10CertRequestTest(),
         new EncryptedPrivateKeyInfoTest(),
@@ -49,7 +48,6 @@ public class RegressionTest
         new NamedCurveTest(),
         new PKIXTest(),
         new NetscapeCertRequestTest(),
-        new X509StoreTest(),
         new X509StreamParserTest(),
         new X509CertificatePairTest(),
         new CertPathTest(),
@@ -64,7 +62,6 @@ public class RegressionTest
         new PKIXNameConstraintsTest(),
         new MultiCertStoreTest(),
         new NoekeonTest(),
-        new AttrCertSelectorTest(),
         new SerialisationTest(),
         new SigNameTest(),
         new MQVTest(),
@@ -78,7 +75,8 @@ public class RegressionTest
         new SHA3Test(),
         new SkeinTest(),
         new Shacal2Test(),
-        new DetDSATest()
+        new DetDSATest(),
+        new ThreefishTest()
     };
 
     public static void main(

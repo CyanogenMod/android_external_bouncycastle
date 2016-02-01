@@ -21,8 +21,8 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -216,8 +216,7 @@ public class CertPathValidatorTest
         CertStoreParameters ccsp = new CollectionCertStoreParameters(list);
         CertStore store = CertStore.getInstance("Collection", ccsp);
 
-        Calendar validDate = Calendar.getInstance();
-        validDate.set(2010,0,8,2,21,10);
+        Date validDate = new Date(crl.getThisUpdate().getTime() + 60 * 60 * 1000);
 
             //validating path
         List certchain = new ArrayList();
@@ -237,9 +236,40 @@ public class CertPathValidatorTest
         param.setTargetCertConstraints(certSelector);
         param.addCertStore(store);
         param.setRevocationEnabled(true);
-        param.setDate(validDate.getTime());
+        param.setDate(validDate);
 
         PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult)cpv.validate(cp, param);
+    }
+
+    private void checkPolicyProcessingAtDomainMatch()
+        throws Exception
+    {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+
+        X509Certificate   root = (X509Certificate)cf.generateCertificate(this.getClass().getResourceAsStream("qvRooCa3.crt"));
+        X509Certificate   ca1 = (X509Certificate)cf.generateCertificate(this.getClass().getResourceAsStream("suvaRoot1.crt"));
+        X509Certificate   ca2 = (X509Certificate)cf.generateCertificate(this.getClass().getResourceAsStream("suvaEmail1.crt"));
+        X509Certificate   ee = (X509Certificate)cf.generateCertificate(this.getClass().getResourceAsStream("suvaEE.crt"));
+
+        List certchain = new ArrayList();
+        certchain.add(ee);
+        certchain.add(ca2);
+        certchain.add(ca1);
+
+        Set trust = new HashSet();
+        trust.add(new TrustAnchor(root, null));
+
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        PKIXParameters param = new PKIXParameters(trust);
+        param.setRevocationEnabled(false);
+
+        CertPath cp = cf.generateCertPath(certchain);
+
+        MyChecker checker = new MyChecker();
+        param.addCertPathChecker(checker);
+
+        PKIXCertPathValidatorResult result =
+            (PKIXCertPathValidatorResult) cpv.validate(cp, param);
     }
 
     public void performTest()
@@ -261,8 +291,7 @@ public class CertPathValidatorTest
         list.add(interCrl);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
         CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
-        Calendar validDate = Calendar.getInstance();
-        validDate.set(2008,8,4,14,49,10);
+        Date validDate = new Date(rootCrl.getThisUpdate().getTime() + 60 * 60 * 1000);
             //validating path
         List certchain = new ArrayList();
         certchain.add(finalCert);
@@ -274,7 +303,7 @@ public class CertPathValidatorTest
         CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
         PKIXParameters param = new PKIXParameters(trust);
         param.addCertStore(store);
-        param.setDate(validDate.getTime());
+        param.setDate(validDate);
         MyChecker checker = new MyChecker();
         param.addCertPathChecker(checker);
 
@@ -310,8 +339,7 @@ public class CertPathValidatorTest
 
             ccsp = new CollectionCertStoreParameters(list);
             store = CertStore.getInstance("Collection", ccsp);
-            validDate = Calendar.getInstance();
-            validDate.set(2004,2,21,2,21,10);
+            validDate = new Date(finalCert.getNotBefore().getTime() + 60 * 60 * 1000);
 
                 //validating path
             certchain = new ArrayList();
@@ -325,7 +353,7 @@ public class CertPathValidatorTest
             param = new PKIXParameters(trust);
             param.addCertStore(store);
             param.setRevocationEnabled(false);
-            param.setDate(validDate.getTime());
+            param.setDate(validDate);
 
             result =(PKIXCertPathValidatorResult) cpv.validate(cp, param);
             policyTree = result.getPolicyTree();
@@ -343,6 +371,7 @@ public class CertPathValidatorTest
         }
 
         checkCircProcessing();
+        checkPolicyProcessingAtDomainMatch();
     }
 
     public String getName()

@@ -6,12 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.Integers;
 
-public final class PEMUtilities
+final class PEMUtilities
 {
     private static final Map KEYSIZES = new HashMap();
     private static final Set PKCS5_SCHEME_1 = new HashSet();
@@ -48,7 +47,7 @@ public final class PEMUtilities
         return ((Integer)KEYSIZES.get(algorithm)).intValue();
     }
 
-    static boolean isPKCS5Scheme1(DERObjectIdentifier algOid)
+    static boolean isPKCS5Scheme1(ASN1ObjectIdentifier algOid)
     {
         return PKCS5_SCHEME_1.contains(algOid);
     }
@@ -58,7 +57,7 @@ public final class PEMUtilities
         return PKCS5_SCHEME_2.contains(algOid);
     }
 
-    public static boolean isPKCS12(DERObjectIdentifier algOid)
+    public static boolean isPKCS12(ASN1ObjectIdentifier algOid)
     {
         return algOid.getId().startsWith(PKCSObjectIdentifiers.pkcs_12PbeIds.getId());
     }

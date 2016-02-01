@@ -15,6 +15,8 @@ public final class SessionParameters
         private short compressionAlgorithm = -1;
         private byte[] masterSecret = null;
         private Certificate peerCertificate = null;
+        private byte[] pskIdentity = null;
+        private byte[] srpIdentity = null;
         private byte[] encodedServerExtensions = null;
 
         public Builder()
@@ -26,8 +28,8 @@ public final class SessionParameters
             validate(this.cipherSuite >= 0, "cipherSuite");
             validate(this.compressionAlgorithm >= 0, "compressionAlgorithm");
             validate(this.masterSecret != null, "masterSecret");
-            return new SessionParameters(cipherSuite, compressionAlgorithm, masterSecret, peerCertificate,
-                encodedServerExtensions);
+            return new SessionParameters(cipherSuite, compressionAlgorithm, masterSecret, peerCertificate, pskIdentity,
+                srpIdentity, encodedServerExtensions);
         }
 
         public Builder setCipherSuite(int cipherSuite)
@@ -54,8 +56,28 @@ public final class SessionParameters
             return this;
         }
 
-        public Builder setServerExtensions(Hashtable serverExtensions)
-            throws IOException
+        /**
+         * @deprecated Use {@link #setPSKIdentity(byte[]))
+         */
+        public Builder setPskIdentity(byte[] pskIdentity)
+        {
+            this.pskIdentity = pskIdentity;
+            return this;
+        }
+
+        public Builder setPSKIdentity(byte[] pskIdentity)
+        {
+            this.pskIdentity = pskIdentity;
+            return this;
+        }
+
+        public Builder setSRPIdentity(byte[] srpIdentity)
+        {
+            this.srpIdentity = srpIdentity;
+            return this;
+        }
+
+        public Builder setServerExtensions(Hashtable serverExtensions) throws IOException
         {
             if (serverExtensions == null)
             {
@@ -83,15 +105,19 @@ public final class SessionParameters
     private short compressionAlgorithm;
     private byte[] masterSecret;
     private Certificate peerCertificate;
+    private byte[] pskIdentity = null;
+    private byte[] srpIdentity = null;
     private byte[] encodedServerExtensions;
 
     private SessionParameters(int cipherSuite, short compressionAlgorithm, byte[] masterSecret,
-        Certificate peerCertificate, byte[] encodedServerExtensions)
+        Certificate peerCertificate, byte[] pskIdentity, byte[] srpIdentity, byte[] encodedServerExtensions)
     {
         this.cipherSuite = cipherSuite;
         this.compressionAlgorithm = compressionAlgorithm;
         this.masterSecret = Arrays.clone(masterSecret);
         this.peerCertificate = peerCertificate;
+        this.pskIdentity = Arrays.clone(pskIdentity);
+        this.srpIdentity = Arrays.clone(srpIdentity);
         this.encodedServerExtensions = encodedServerExtensions;
     }
 
@@ -105,8 +131,8 @@ public final class SessionParameters
 
     public SessionParameters copy()
     {
-        return new SessionParameters(cipherSuite, compressionAlgorithm, masterSecret, peerCertificate,
-            encodedServerExtensions);
+        return new SessionParameters(cipherSuite, compressionAlgorithm, masterSecret, peerCertificate, pskIdentity,
+            srpIdentity, encodedServerExtensions);
     }
 
     public int getCipherSuite()
@@ -127,6 +153,24 @@ public final class SessionParameters
     public Certificate getPeerCertificate()
     {
         return peerCertificate;
+    }
+
+    /**
+     * @deprecated Use {@link #getPSKIdentity())
+     */
+    public byte[] getPskIdentity()
+    {
+        return pskIdentity;
+    }
+
+    public byte[] getPSKIdentity()
+    {
+        return pskIdentity;
+    }
+
+    public byte[] getSRPIdentity()
+    {
+        return srpIdentity;
     }
 
     public Hashtable readServerExtensions() throws IOException

@@ -22,10 +22,10 @@ import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.JcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.jcajce.util.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.util.JcaJceHelper;
+import org.bouncycastle.jcajce.util.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.util.ProviderJcaJceHelper;
 import org.bouncycastle.operator.DefaultSecretKeySizeProvider;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -39,6 +39,7 @@ public class JcePKCSPBEOutputEncryptorBuilder
     private ASN1ObjectIdentifier keyEncAlgorithm;
     private SecureRandom random;
     private SecretKeySizeProvider keySizeProvider = DefaultSecretKeySizeProvider.INSTANCE;
+    private int iterationCount = 1024;
 
     public JcePKCSPBEOutputEncryptorBuilder(ASN1ObjectIdentifier algorithm)
     {
@@ -83,6 +84,19 @@ public class JcePKCSPBEOutputEncryptorBuilder
         return this;
     }
 
+    /**
+     * Set the iteration count for the PBE calculation.
+     *
+     * @param iterationCount the iteration count to apply to the key creation.
+     * @return the current builder.
+     */
+    public JcePKCSPBEOutputEncryptorBuilder setIterationCount(int iterationCount)
+    {
+        this.iterationCount = iterationCount;
+
+        return this;
+    }
+
     public OutputEncryptor build(final char[] password)
         throws OperatorCreationException
     {
@@ -96,7 +110,6 @@ public class JcePKCSPBEOutputEncryptorBuilder
 
         final AlgorithmIdentifier encryptionAlg;
         final byte[] salt = new byte[20];
-        final int    iterationCount = 1024;
 
         random.nextBytes(salt);
 

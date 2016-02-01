@@ -11,16 +11,15 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Arrays;
 
 /**
- * A generic TLS 1.0-1.1 / SSLv3 block cipher. This can be used for AES or 3DES for example.
+ * A generic TLS 1.0-1.2 / SSLv3 block cipher. This can be used for AES or 3DES for example.
  */
 public class TlsBlockCipher
     implements TlsCipher
 {
-    private static boolean encryptThenMAC = false;
-
     protected TlsContext context;
     protected byte[] randomData;
     protected boolean useExplicitIV;
+    protected boolean encryptThenMAC;
 
     protected BlockCipher encryptCipher;
     protected BlockCipher decryptCipher;
@@ -44,9 +43,10 @@ public class TlsBlockCipher
         this.context = context;
 
         this.randomData = new byte[256];
-        context.getSecureRandom().nextBytes(randomData);
+        context.getNonceRandomGenerator().nextBytes(randomData);
 
         this.useExplicitIV = TlsUtils.isTLSv11(context);
+        this.encryptThenMAC = context.getSecurityParameters().encryptThenMAC;
 
         int key_block_size = (2 * cipherKeySize) + clientWriteDigest.getDigestSize()
             + serverWriteDigest.getDigestSize();
@@ -183,7 +183,7 @@ public class TlsBlockCipher
         if (useExplicitIV)
         {
             byte[] explicitIV = new byte[blockSize];
-            context.getSecureRandom().nextBytes(explicitIV);
+            context.getNonceRandomGenerator().nextBytes(explicitIV);
 
             encryptCipher.init(true, new ParametersWithIV(null, explicitIV));
 
@@ -269,9 +269,16 @@ public class TlsBlockCipher
             byte[] calculatedMac = readMac.calculateMac(seqNo, type, ciphertext, offset, len - macSize);
 
             boolean badMac = !Arrays.constantTimeAreEqual(calculatedMac, receivedMac);
-
             if (badMac)
             {
+                /*
+                 * RFC 7366 3. The MAC SHALL be evaluated before any further processing such as
+                 * decryption is performed, and if the MAC verification fails, then processing SHALL
+                 * terminate immediately. For TLS, a fatal bad_record_mac MUST be generated [2]. For
+                 * DTLS, the record MUST be discarded, and a fatal bad_record_mac MAY be generated
+                 * [4]. This immediate response to a bad MAC eliminates any timing channels that may
+                 * be available through the use of manipulated packet data.
+                 */
                 throw new TlsFatalAlert(AlertDescription.bad_record_mac);
             }
         }
@@ -291,6 +298,7 @@ public class TlsBlockCipher
 
         // If there's anything wrong with the padding, this will return zero
         int totalPad = checkPaddingConstantTime(ciphertext, offset, blocks_length, blockSize, encryptThenMAC ? 0 : macSize);
+        boolean badMac = (totalPad == 0);
 
         int dec_output_length = blocks_length - totalPad;
 
@@ -303,12 +311,12 @@ public class TlsBlockCipher
             byte[] calculatedMac = readMac.calculateMacConstantTime(seqNo, type, ciphertext, offset, macInputLen,
                 blocks_length - macSize, randomData);
 
-            boolean badMac = !Arrays.constantTimeAreEqual(calculatedMac, receivedMac);
+            badMac |= !Arrays.constantTimeAreEqual(calculatedMac, receivedMac);
+        }
 
-            if (badMac || totalPad == 0)
-            {
-                throw new TlsFatalAlert(AlertDescription.bad_record_mac);
-            }
+        if (badMac)
+        {
+            throw new TlsFatalAlert(AlertDescription.bad_record_mac);
         }
 
         return Arrays.copyOfRange(ciphertext, offset, offset + dec_output_length);

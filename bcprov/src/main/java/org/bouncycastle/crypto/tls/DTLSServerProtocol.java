@@ -46,11 +46,14 @@ public class DTLSServerProtocol
 
         SecurityParameters securityParameters = new SecurityParameters();
         securityParameters.entity = ConnectionEnd.server;
-        securityParameters.serverRandom = TlsProtocol.createRandomBlock(secureRandom);
 
         ServerHandshakeState state = new ServerHandshakeState();
         state.server = server;
         state.serverContext = new TlsServerContextImpl(secureRandom, securityParameters);
+
+        securityParameters.serverRandom = TlsProtocol.createRandomBlock(server.shouldUseGMTUnixTime(),
+            state.serverContext.getNonceRandomGenerator());
+
         server.init(state.serverContext);
 
         DTLSRecordLayer recordLayer = new DTLSRecordLayer(transport, state.serverContext, server, ContentType.handshake);
@@ -74,7 +77,7 @@ public class DTLSServerProtocol
         catch (RuntimeException e)
         {
             recordLayer.fail(AlertDescription.internal_error);
-            throw new TlsFatalAlert(AlertDescription.internal_error);
+            throw new TlsFatalAlert(AlertDescription.internal_error, e);
         }
     }
 
@@ -244,10 +247,11 @@ public class DTLSServerProtocol
             throw new TlsFatalAlert(AlertDescription.unexpected_message);
         }
 
+        TlsHandshakeHash prepareFinishHash = handshake.prepareToFinish();
+        securityParameters.sessionHash = TlsProtocol.getCurrentPRFHash(state.serverContext, prepareFinishHash, null);
+
         TlsProtocol.establishMasterSecret(state.serverContext, state.keyExchange);
         recordLayer.initPendingEpoch(state.server.getCipher());
-
-        TlsHandshakeHash prepareFinishHash = handshake.prepareToFinish();
 
         /*
          * RFC 5246 7.4.8 This message is only sent following a client certificate that has signing
@@ -340,7 +344,8 @@ public class DTLSServerProtocol
         state.selectedCipherSuite = state.server.getSelectedCipherSuite();
         if (!Arrays.contains(state.offeredCipherSuites, state.selectedCipherSuite)
             || state.selectedCipherSuite == CipherSuite.TLS_NULL_WITH_NULL_NULL
-            || state.selectedCipherSuite == CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+            || CipherSuite.isSCSV(state.selectedCipherSuite)
+            || !TlsUtils.isValidCipherSuiteForVersion(state.selectedCipherSuite, server_version))
         {
             throw new TlsFatalAlert(AlertDescription.internal_error);
         }
@@ -386,8 +391,16 @@ public class DTLSServerProtocol
             }
         }
 
+        if (securityParameters.extendedMasterSecret)
+        {
+            state.serverExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(state.serverExtensions);
+            TlsExtensionsUtils.addExtendedMasterSecretExtension(state.serverExtensions);
+        }
+
         if (state.serverExtensions != null)
         {
+            securityParameters.encryptThenMAC = TlsExtensionsUtils.hasEncryptThenMACExtension(state.serverExtensions);
+
             state.maxFragmentLength = evaluateMaxFragmentLengthExtension(state.clientExtensions, state.serverExtensions,
                 AlertDescription.internal_error);
 
@@ -467,26 +480,39 @@ public class DTLSServerProtocol
     {
         ByteArrayInputStream buf = new ByteArrayInputStream(body);
 
-        DigitallySigned clientCertificateVerify = DigitallySigned.parse(state.serverContext, buf);
+        TlsServerContextImpl context = state.serverContext;
+        DigitallySigned clientCertificateVerify = DigitallySigned.parse(context, buf);
 
         TlsProtocol.assertEmpty(buf);
 
         // Verify the CertificateVerify message contains a correct signature.
+        boolean verified = false;
         try
         {
-            // TODO For TLS 1.2, this needs to be the hash specified in the DigitallySigned
-            byte[] certificateVerifyHash = TlsProtocol.getCurrentPRFHash(state.serverContext, prepareFinishHash, null);
+            byte[] hash;
+            if (TlsUtils.isTLSv12(context))
+            {
+                hash = prepareFinishHash.getFinalHash(clientCertificateVerify.getAlgorithm().getHash());
+            }
+            else
+            {
+                hash = context.getSecurityParameters().getSessionHash();
+            }
 
             org.bouncycastle.asn1.x509.Certificate x509Cert = state.clientCertificate.getCertificateAt(0);
             SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
             AsymmetricKeyParameter publicKey = PublicKeyFactory.createKey(keyInfo);
 
             TlsSigner tlsSigner = TlsUtils.createTlsSigner(state.clientCertificateType);
-            tlsSigner.init(state.serverContext);
-            tlsSigner.verifyRawSignature(clientCertificateVerify.getAlgorithm(),
-                clientCertificateVerify.getSignature(), publicKey, certificateVerifyHash);
+            tlsSigner.init(context);
+            verified = tlsSigner.verifyRawSignature(clientCertificateVerify.getAlgorithm(),
+                clientCertificateVerify.getSignature(), publicKey, hash);
         }
         catch (Exception e)
+        {
+        }
+
+        if (!verified)
         {
             throw new TlsFatalAlert(AlertDescription.decrypt_error);
         }
@@ -545,11 +571,17 @@ public class DTLSServerProtocol
          */
         state.clientExtensions = TlsProtocol.readExtensions(buf);
 
-        state.serverContext.setClientVersion(client_version);
+        TlsServerContextImpl context = state.serverContext;
+        SecurityParameters securityParameters = context.getSecurityParameters();
+
+        securityParameters.extendedMasterSecret = TlsExtensionsUtils.hasExtendedMasterSecretExtension(state.clientExtensions);
+
+        context.setClientVersion(client_version);
 
         state.server.notifyClientVersion(client_version);
+        state.server.notifyFallback(Arrays.contains(state.offeredCipherSuites, CipherSuite.TLS_FALLBACK_SCSV));
 
-        state.serverContext.getSecurityParameters().clientRandom = client_random;
+        securityParameters.clientRandom = client_random;
 
         state.server.notifyOfferedCipherSuites(state.offeredCipherSuites);
         state.server.notifyOfferedCompressionMethods(state.offeredCompressionMethods);

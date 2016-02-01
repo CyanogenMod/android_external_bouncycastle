@@ -11,11 +11,14 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
@@ -27,22 +30,29 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.bsi.BSIObjectIdentifiers;
+import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962Parameters;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.jce.ECKeyUtil;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.FixedSecureRandom;
@@ -147,6 +157,61 @@ public class ECDSA5Test
             fail("s component wrong." + System.getProperty("line.separator")
                 + " expecting: " + s + System.getProperty("line.separator")
                 + " got      : " + sig[1]);
+        }
+    }
+
+    // test BSI algorithm support.
+    private void testBSI()
+        throws Exception
+    {
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        kpGen.initialize(new ECGenParameterSpec(TeleTrusTObjectIdentifiers.brainpoolP512r1.getId()));
+
+        KeyPair kp = kpGen.generateKeyPair();
+
+        byte[] data = "Hello World!!!".getBytes();
+        String[] cvcAlgs = { "SHA1WITHCVC-ECDSA", "SHA224WITHCVC-ECDSA",
+                             "SHA256WITHCVC-ECDSA", "SHA384WITHCVC-ECDSA",
+                             "SHA512WITHCVC-ECDSA" };
+        String[] cvcOids = { EACObjectIdentifiers.id_TA_ECDSA_SHA_1.getId(), EACObjectIdentifiers.id_TA_ECDSA_SHA_224.getId(),
+                             EACObjectIdentifiers.id_TA_ECDSA_SHA_256.getId(), EACObjectIdentifiers.id_TA_ECDSA_SHA_384.getId(),
+                             EACObjectIdentifiers.id_TA_ECDSA_SHA_512.getId() };
+
+        testBsiAlgorithms(kp, data, cvcAlgs, cvcOids);
+
+        String[] plainAlgs = { "SHA1WITHPLAIN-ECDSA", "SHA224WITHPLAIN-ECDSA",
+                             "SHA256WITHPLAIN-ECDSA", "SHA384WITHPLAIN-ECDSA",
+                             "SHA512WITHPLAIN-ECDSA", "RIPEMD160WITHPLAIN-ECDSA" };
+        String[] plainOids = { BSIObjectIdentifiers.ecdsa_plain_SHA1.getId(), BSIObjectIdentifiers.ecdsa_plain_SHA224.getId(),
+                                BSIObjectIdentifiers.ecdsa_plain_SHA256.getId(), BSIObjectIdentifiers.ecdsa_plain_SHA384.getId(),
+                                BSIObjectIdentifiers.ecdsa_plain_SHA512.getId(), BSIObjectIdentifiers.ecdsa_plain_RIPEMD160.getId() };
+
+        testBsiAlgorithms(kp, data, plainAlgs, plainOids);
+    }
+
+    private void testBsiAlgorithms(KeyPair kp, byte[] data, String[] algs, String[] oids)
+        throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException
+    {
+        for (int i = 0; i != algs.length; i++)
+        {
+            Signature sig1 = Signature.getInstance(algs[i], "BC");
+            Signature sig2 = Signature.getInstance(oids[i], "BC");
+
+            sig1.initSign(kp.getPrivate());
+
+            sig1.update(data);
+
+            byte[] sig = sig1.sign();
+
+            sig2.initVerify(kp.getPublic());
+
+            sig2.update(data);
+
+            if (!sig2.verify(sig))
+            {
+                fail("BSI CVC signature failed: " + algs[i]);
+            }
         }
     }
 
@@ -695,8 +760,16 @@ public class ECDSA5Test
     {
         public void nextBytes(byte[] bytes)
         {
-            byte[] src = BigInteger.valueOf(1000).toByteArray();
-            System.arraycopy(src, 0, bytes, bytes.length - src.length, src.length);
+            byte[] src = new BigInteger("e2eb6663f551331bda00b90f1272c09d980260c1a70cab1ec481f6c937f34b62", 16).toByteArray();
+
+            if (src.length <= bytes.length)
+            {
+                System.arraycopy(src, 0, bytes, bytes.length - src.length, src.length);
+            }
+            else
+            {
+                System.arraycopy(src, 0, bytes, 0, bytes.length);
+            }
         }
     }
 
@@ -734,6 +807,87 @@ public class ECDSA5Test
         }
     }
 
+    private void testNamedCurveSigning()
+        throws Exception
+    {
+        testCustomNamedCurveSigning("secp256r1");
+
+        try
+        {
+            testCustomNamedCurveSigning("secp256k1");
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (!e.getMessage().equals("first coefficient is negative"))     // bogus jdk 1.5 exception...
+            {
+                throw e;
+            }
+        }
+    }
+
+    private void testCustomNamedCurveSigning(String name)
+        throws Exception
+    {
+        X9ECParameters x9Params = ECUtil.getNamedCurveByOid(ECUtil.getNamedCurveOid(name));
+
+        // TODO: one day this may have to change
+        if (x9Params.getCurve() instanceof ECCurve.Fp)
+        {
+            fail("curve not custom curve!!");
+        }
+
+        AlgorithmParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(name);
+        KeyPairGenerator keygen = KeyPairGenerator.getInstance("EC", "BC");
+        keygen.initialize(ecSpec, new ECRandom());
+
+        KeyPair keys = keygen.generateKeyPair();
+
+        PrivateKeyInfo priv1 = PrivateKeyInfo.getInstance(keys.getPrivate().getEncoded());
+        SubjectPublicKeyInfo pub1 = SubjectPublicKeyInfo.getInstance(keys.getPublic().getEncoded());
+
+        keygen = KeyPairGenerator.getInstance("EC", "BC");
+        keygen.initialize(new ECGenParameterSpec("secp256r1"), new ECRandom());
+
+        Signature ecdsaSigner = Signature.getInstance("ECDSA", "BC");
+
+        ecdsaSigner.initSign(keys.getPrivate());
+
+        ecdsaSigner.update(new byte[100]);
+
+        byte[] sig = ecdsaSigner.sign();
+
+        ecdsaSigner.initVerify(keys.getPublic());
+
+        ecdsaSigner.update(new byte[100]);
+
+        if (!ecdsaSigner.verify(sig))
+        {
+            fail("signature failed to verify");
+        }
+
+        KeyFactory kFact = KeyFactory.getInstance("EC", "BC");
+
+        PublicKey pub = kFact.generatePublic(new X509EncodedKeySpec(pub1.getEncoded()));
+        PrivateKey pri = kFact.generatePrivate(new PKCS8EncodedKeySpec(priv1.getEncoded()));
+
+        ecdsaSigner = Signature.getInstance("ECDSA", "BC");
+
+        ecdsaSigner.initSign(pri);
+
+        ecdsaSigner.update(new byte[100]);
+
+        sig = ecdsaSigner.sign();
+
+        ecdsaSigner.initVerify(pub);
+
+        ecdsaSigner.update(new byte[100]);
+
+        if (!ecdsaSigner.verify(sig))
+        {
+            fail("signature failed to verify");
+        }
+    }
+
     protected BigInteger[] derDecode(
         byte[]  encoding)
         throws IOException
@@ -744,8 +898,8 @@ public class ECDSA5Test
 
         BigInteger[]            sig = new BigInteger[2];
 
-        sig[0] = ((DERInteger)s.getObjectAt(0)).getValue();
-        sig[1] = ((DERInteger)s.getObjectAt(1)).getValue();
+        sig[0] = ((ASN1Integer)s.getObjectAt(0)).getValue();
+        sig[1] = ((ASN1Integer)s.getObjectAt(1)).getValue();
 
         return sig;
     }
@@ -766,6 +920,8 @@ public class ECDSA5Test
         testGeneration();
         testKeyPairGenerationWithOIDs();
         testNamedCurveParameterPreservation();
+        testNamedCurveSigning();
+        testBSI();
     }
 
     public static void main(

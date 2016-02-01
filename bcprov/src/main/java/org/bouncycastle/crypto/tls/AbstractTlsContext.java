@@ -2,9 +2,22 @@ package org.bouncycastle.crypto.tls;
 
 import java.security.SecureRandom;
 
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.prng.DigestRandomGenerator;
+import org.bouncycastle.crypto.prng.RandomGenerator;
+import org.bouncycastle.util.Times;
+
 abstract class AbstractTlsContext
     implements TlsContext
 {
+    private static long counter = Times.nanoTime();
+
+    private synchronized static long nextCounterValue()
+    {
+        return ++counter;
+    }
+
+    private RandomGenerator nonceRandom;
     private SecureRandom secureRandom;
     private SecurityParameters securityParameters;
 
@@ -15,8 +28,22 @@ abstract class AbstractTlsContext
 
     AbstractTlsContext(SecureRandom secureRandom, SecurityParameters securityParameters)
     {
+        Digest d = TlsUtils.createHash(HashAlgorithm.sha256);
+        byte[] seed = new byte[d.getDigestSize()];
+        secureRandom.nextBytes(seed);
+
+        this.nonceRandom = new DigestRandomGenerator(d);
+        nonceRandom.addSeedMaterial(nextCounterValue());
+        nonceRandom.addSeedMaterial(Times.nanoTime());
+        nonceRandom.addSeedMaterial(seed);
+
         this.secureRandom = secureRandom;
         this.securityParameters = securityParameters;
+    }
+
+    public RandomGenerator getNonceRandomGenerator()
+    {
+        return nonceRandom;
     }
 
     public SecureRandom getSecureRandom()

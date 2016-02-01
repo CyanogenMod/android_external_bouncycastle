@@ -29,11 +29,6 @@ public class ExtensionType
     public static final int srp = 12;
 
     /*
-     * RFC 5077 7.
-     */
-    public static final int session_ticket = 35;
-
-    /*
      * RFC 5246 7.4.1.4.
      */
     public static final int signature_algorithms = 13;
@@ -47,6 +42,30 @@ public class ExtensionType
      * RFC 6520 6.
      */
     public static final int heartbeat = 15;
+
+    /*
+     * RFC 7366
+     */
+    public static final int encrypt_then_mac = 22;
+
+    /*
+     * draft-ietf-tls-session-hash-01
+     * 
+     * NOTE: Early code-point assignment
+     */
+    public static final int extended_master_secret = 23;
+
+    /*
+     * RFC 5077 7.
+     */
+    public static final int session_ticket = 35;
+
+    /*
+     * draft-ietf-tls-negotiated-ff-dhe-01
+     * 
+     * WARNING: Placeholder value; the real value is TBA
+     */
+    public static final int negotiated_ff_dhe_groups = 101;
 
     /*
      * RFC 5746 3.2.

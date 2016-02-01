@@ -7,8 +7,10 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
@@ -43,6 +45,8 @@ import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.crypto.parsers.DHIESPublicKeyParser;
 import org.bouncycastle.jcajce.provider.asymmetric.util.DHUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.IESUtil;
+import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.IESParameterSpec;
@@ -53,6 +57,8 @@ import org.bouncycastle.util.Strings;
 public class IESCipher
     extends CipherSpi
 {
+    private final JcaJceHelper helper = new BCJcaJceHelper();
+
     private IESEngine engine;
     private int state = -1;
     private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -106,7 +112,7 @@ public class IESCipher
         {
             try
             {
-                engineParam = AlgorithmParameters.getInstance("IES", BouncyCastleProvider.PROVIDER_NAME);
+                engineParam = helper.createAlgorithmParameters("IES");
                 engineParam.init(engineSpec);
             }
             catch (Exception e)
@@ -464,7 +470,6 @@ public class IESCipher
         return buf.length;
 
     }
-
 
     /**
      * Classes that inherit from us
