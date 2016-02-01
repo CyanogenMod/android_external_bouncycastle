@@ -33,6 +33,10 @@ import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 // import org.bouncycastle.crypto.digests.SHA384Digest;
 // import org.bouncycastle.crypto.digests.SHA512Digest;
 // END android-removed
+// BEGIN android-added
+import org.bouncycastle.crypto.params.DSAKeyParameters;
+import org.bouncycastle.crypto.params.DSAParameters;
+// END android-added
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
