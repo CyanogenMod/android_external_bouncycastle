@@ -5,9 +5,7 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-// END android-removed
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -27,20 +25,16 @@ public class DefaultDigestAlgorithmIdentifierFinder
         //
         // digests
         //
-        // BEGIN android-removed
-        // digestOids.put(OIWObjectIdentifiers.md4WithRSAEncryption, PKCSObjectIdentifiers.md4);
-        // digestOids.put(OIWObjectIdentifiers.md4WithRSA, PKCSObjectIdentifiers.md4);
-        // END android-removed
+        digestOids.put(OIWObjectIdentifiers.md4WithRSAEncryption, PKCSObjectIdentifiers.md4);
+        digestOids.put(OIWObjectIdentifiers.md4WithRSA, PKCSObjectIdentifiers.md4);
         digestOids.put(OIWObjectIdentifiers.sha1WithRSA, OIWObjectIdentifiers.idSHA1);
 
         digestOids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, NISTObjectIdentifiers.id_sha224);
         digestOids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, NISTObjectIdentifiers.id_sha256);
         digestOids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, NISTObjectIdentifiers.id_sha384);
         digestOids.put(PKCSObjectIdentifiers.sha512WithRSAEncryption, NISTObjectIdentifiers.id_sha512);
-        // BEGIN android-removed
-        // digestOids.put(PKCSObjectIdentifiers.md2WithRSAEncryption, PKCSObjectIdentifiers.md2);
-        // digestOids.put(PKCSObjectIdentifiers.md4WithRSAEncryption, PKCSObjectIdentifiers.md4);
-        // END android-removed
+        digestOids.put(PKCSObjectIdentifiers.md2WithRSAEncryption, PKCSObjectIdentifiers.md2);
+        digestOids.put(PKCSObjectIdentifiers.md4WithRSAEncryption, PKCSObjectIdentifiers.md4);
         digestOids.put(PKCSObjectIdentifiers.md5WithRSAEncryption, PKCSObjectIdentifiers.md5);
         digestOids.put(PKCSObjectIdentifiers.sha1WithRSAEncryption, OIWObjectIdentifiers.idSHA1);
 
@@ -56,14 +50,12 @@ public class DefaultDigestAlgorithmIdentifierFinder
         digestOids.put(NISTObjectIdentifiers.dsa_with_sha384, NISTObjectIdentifiers.id_sha384);
         digestOids.put(NISTObjectIdentifiers.dsa_with_sha512, NISTObjectIdentifiers.id_sha512);
 
-        // BEGIN android-removed
-        // digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128, TeleTrusTObjectIdentifiers.ripemd128);
-        // digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160, TeleTrusTObjectIdentifiers.ripemd160);
-        // digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256, TeleTrusTObjectIdentifiers.ripemd256);
-        //
-        // digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, CryptoProObjectIdentifiers.gostR3411);
-        // digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, CryptoProObjectIdentifiers.gostR3411);
-        // END android-removed
+        digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128, TeleTrusTObjectIdentifiers.ripemd128);
+        digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160, TeleTrusTObjectIdentifiers.ripemd160);
+        digestOids.put(TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256, TeleTrusTObjectIdentifiers.ripemd256);
+
+        digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, CryptoProObjectIdentifiers.gostR3411);
+        digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, CryptoProObjectIdentifiers.gostR3411);
 
         digestNameToOids.put("SHA-1", OIWObjectIdentifiers.idSHA1);
         digestNameToOids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
@@ -71,19 +63,15 @@ public class DefaultDigestAlgorithmIdentifierFinder
         digestNameToOids.put("SHA-384", NISTObjectIdentifiers.id_sha384);
         digestNameToOids.put("SHA-512", NISTObjectIdentifiers.id_sha512);
 
-        // BEGIN android-removed
-        // digestNameToOids.put("GOST3411", CryptoProObjectIdentifiers.gostR3411);
-        //
-        // digestNameToOids.put("MD2", PKCSObjectIdentifiers.md2);
-        // digestNameToOids.put("MD4", PKCSObjectIdentifiers.md4);
-        // END android-removed
+        digestNameToOids.put("GOST3411", CryptoProObjectIdentifiers.gostR3411);
+
+        digestNameToOids.put("MD2", PKCSObjectIdentifiers.md2);
+        digestNameToOids.put("MD4", PKCSObjectIdentifiers.md4);
         digestNameToOids.put("MD5", PKCSObjectIdentifiers.md5);
 
-        // BEGIN android-removed
-        // digestNameToOids.put("RIPEMD128", TeleTrusTObjectIdentifiers.ripemd128);
-        // digestNameToOids.put("RIPEMD160", TeleTrusTObjectIdentifiers.ripemd160);
-        // digestNameToOids.put("RIPEMD256", TeleTrusTObjectIdentifiers.ripemd256);
-        // END android-removed
+        digestNameToOids.put("RIPEMD128", TeleTrusTObjectIdentifiers.ripemd128);
+        digestNameToOids.put("RIPEMD160", TeleTrusTObjectIdentifiers.ripemd160);
+        digestNameToOids.put("RIPEMD256", TeleTrusTObjectIdentifiers.ripemd256);
     }
 
     public AlgorithmIdentifier find(AlgorithmIdentifier sigAlgId)

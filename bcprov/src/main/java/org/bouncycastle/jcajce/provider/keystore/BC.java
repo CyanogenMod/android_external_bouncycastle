@@ -17,9 +17,7 @@ public class BC
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("KeyStore.BKS", PREFIX + "BcKeyStoreSpi$Std");
-            // BEGIN android-removed
-            // provider.addAlgorithm("KeyStore.BKS-V1", PREFIX + "BcKeyStoreSpi$Version1");
-            // END android-removed
+            provider.addAlgorithm("KeyStore.BKS-V1", PREFIX + "BcKeyStoreSpi$Version1");
             provider.addAlgorithm("KeyStore.BouncyCastle", PREFIX + "BcKeyStoreSpi$BouncyCastleStore");
             provider.addAlgorithm("Alg.Alias.KeyStore.UBER", "BouncyCastle");
             provider.addAlgorithm("Alg.Alias.KeyStore.BOUNCYCASTLE", "BouncyCastle");

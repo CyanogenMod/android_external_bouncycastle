@@ -11,9 +11,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.oiw.ElGamalParameter;
-// END android-removed
+import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -40,10 +38,8 @@ import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECNamedDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.params.ElGamalParameters;
-// import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
-// END android-removed
+import org.bouncycastle.crypto.params.ElGamalParameters;
+import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 /**
@@ -137,16 +133,14 @@ public class PublicKeyFactory
 
             return new DHPublicKeyParameters(derY.getValue(), dhParams);
         }
-        // BEGIN android-removed
-        // else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
-        // {
-        //     ElGamalParameter params = ElGamalParameter.getInstance(algId.getParameters());
-        //     ASN1Integer derY = (ASN1Integer)keyInfo.parsePublicKey();
-        //
-        //     return new ElGamalPublicKeyParameters(derY.getValue(), new ElGamalParameters(
-        //         params.getP(), params.getG()));
-        // }
-        // END android-removed
+        else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        {
+            ElGamalParameter params = ElGamalParameter.getInstance(algId.getParameters());
+            ASN1Integer derY = (ASN1Integer)keyInfo.parsePublicKey();
+
+            return new ElGamalPublicKeyParameters(derY.getValue(), new ElGamalParameters(
+                params.getP(), params.getG()));
+        }
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa)
             || algId.getAlgorithm().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {

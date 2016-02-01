@@ -3,9 +3,7 @@ package org.bouncycastle.crypto.generators;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-// BEGIN android-changed
-import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-changed
+import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
@@ -19,9 +17,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 public class OpenSSLPBEParametersGenerator
     extends PBEParametersGenerator
 {
-    // BEGIN android-changed
-    private Digest  digest = AndroidDigestFactory.getMD5();
-    // END android-changed
+    private Digest  digest = new MD5Digest();
 
     /**
      * Construct a OpenSSL Parameters generator. 
