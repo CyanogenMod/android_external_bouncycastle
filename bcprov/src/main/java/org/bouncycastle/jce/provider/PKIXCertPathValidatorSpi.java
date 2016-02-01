@@ -1,8 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-// BEGIN android-added
-import java.math.BigInteger;
-// END android-added
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
@@ -44,11 +41,6 @@ public class PKIXCertPathValidatorSpi
     public PKIXCertPathValidatorSpi()
     {
     }
-    // BEGIN android-added
-    private static class NoPreloadHolder {
-        private final static CertBlacklist blacklist = new CertBlacklist();
-    }
-    // END android-added
 
     public CertPathValidatorResult engineValidate(
             CertPath certPath,
@@ -81,18 +73,10 @@ public class PKIXCertPathValidatorSpi
         {
             paramsPKIX = ((PKIXExtendedBuilderParameters)params).getBaseParameters();
         }
-        // BEGIN android-changed
-        // else
-        else if (params instanceof PKIXExtendedParameters)
-        // END android-changed
+        else
         {
             paramsPKIX = (PKIXExtendedParameters)params;
         }
-        // BEGIN android-added
-        else {
-            throw new InvalidAlgorithmParameterException("Expecting PKIX algorithm parameters");
-        }
-        // END android-added
 
         if (paramsPKIX.getTrustAnchors() == null)
         {
@@ -114,22 +98,6 @@ public class PKIXCertPathValidatorSpi
         {
             throw new CertPathValidatorException("Certification path is empty.", null, certPath, 0);
         }
-        // BEGIN android-added
-        {
-            X509Certificate cert = (X509Certificate) certs.get(0);
-
-            if (cert != null) {
-                BigInteger serial = cert.getSerialNumber();
-                if (NoPreloadHolder.blacklist.isSerialNumberBlackListed(serial)) {
-                    // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
-                    String message = "Certificate revocation of serial 0x" + serial.toString(16);
-                    System.out.println(message);
-                    AnnotatedException e = new AnnotatedException(message);
-                    throw new CertPathValidatorException(e.getMessage(), e, certPath, 0);
-                }
-            }
-        }
-        // END android-added
 
         //
         // (b)
@@ -309,15 +277,6 @@ public class PKIXCertPathValidatorSpi
 
         for (index = certs.size() - 1; index >= 0; index--)
         {
-            // BEGIN android-added
-            if (NoPreloadHolder.blacklist.isPublicKeyBlackListed(workingPublicKey)) {
-                // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
-                String message = "Certificate revocation of public key " + workingPublicKey;
-                System.out.println(message);
-                AnnotatedException e = new AnnotatedException(message);
-                throw new CertPathValidatorException(e.getMessage(), e, certPath, index);
-            }
-            // END android-added
             // try
             // {
             //

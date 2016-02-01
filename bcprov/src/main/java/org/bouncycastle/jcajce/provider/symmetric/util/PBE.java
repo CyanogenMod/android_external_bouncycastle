@@ -7,18 +7,13 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-// BEGIN android-removed
-// import org.bouncycastle.crypto.digests.GOST3411Digest;
-// import org.bouncycastle.crypto.digests.MD2Digest;
-// import org.bouncycastle.crypto.digests.MD5Digest;
-// import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-// import org.bouncycastle.crypto.digests.SHA1Digest;
-// import org.bouncycastle.crypto.digests.SHA256Digest;
-// import org.bouncycastle.crypto.digests.TigerDigest;
-// END android-removed
-// BEGIN android-added
-import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-added
+import org.bouncycastle.crypto.digests.GOST3411Digest;
+import org.bouncycastle.crypto.digests.MD2Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.TigerDigest;
 import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS12ParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S1ParametersGenerator;
@@ -34,15 +29,11 @@ public interface PBE
     //
     static final int        MD5          = 0;
     static final int        SHA1         = 1;
-    // BEGIN android-removed
-    // static final int        RIPEMD160    = 2;
-    // static final int        TIGER        = 3;
-    // END android-removed
+    static final int        RIPEMD160    = 2;
+    static final int        TIGER        = 3;
     static final int        SHA256       = 4;
-    // BEGIN android-removed
-    // static final int        MD2          = 5;
-    // static final int        GOST3411     = 6;
-    // END android-removed
+    static final int        MD2          = 5;
+    static final int        GOST3411     = 6;
 
     static final int        PKCS5S1      = 0;
     static final int        PKCS5S2      = 1;
@@ -66,20 +57,14 @@ public interface PBE
             {
                 switch (hash)
                 {
-                // BEGIN android-removed
-                // case MD2:
-                //     generator = new PKCS5S1ParametersGenerator(new MD2Digest());
-                //     break;
-                // END android-removed
+                case MD2:
+                    generator = new PKCS5S1ParametersGenerator(new MD2Digest());
+                    break;
                 case MD5:
-                    // BEGIN android-changed
-                    generator = new PKCS5S1ParametersGenerator(AndroidDigestFactory.getMD5());
-                    // END android-changed
+                    generator = new PKCS5S1ParametersGenerator(new MD5Digest());
                     break;
                 case SHA1:
-                    // BEGIN android-changed
-                    generator = new PKCS5S1ParametersGenerator(AndroidDigestFactory.getSHA1());
-                    // END android-changed
+                    generator = new PKCS5S1ParametersGenerator(new SHA1Digest());
                     break;
                 default:
                     throw new IllegalStateException("PKCS5 scheme 1 only supports MD2, MD5 and SHA1.");
@@ -89,39 +74,27 @@ public interface PBE
             {
                 switch (hash)
                 {
-                // BEGIN android-removed
-                // case MD2:
-                //     generator = new PKCS5S2ParametersGenerator(new MD2Digest());
-                //     break;
-                // END android-removed
+                case MD2:
+                    generator = new PKCS5S2ParametersGenerator(new MD2Digest());
+                    break;
                 case MD5:
-                    // BEGIN android-changed
-                    generator = new PKCS5S2ParametersGenerator(AndroidDigestFactory.getMD5());
-                    // END android-changed
+                    generator = new PKCS5S2ParametersGenerator(new MD5Digest());
                     break;
                 case SHA1:
-                    // BEGIN android-changed
-                    generator = new PKCS5S2ParametersGenerator(AndroidDigestFactory.getSHA1());
-                    // END android-changed
+                    generator = new PKCS5S2ParametersGenerator(new SHA1Digest());
                     break;
-                // BEGIN android-removed
-                // case RIPEMD160:
-                //     generator = new PKCS5S2ParametersGenerator(new RIPEMD160Digest());
-                //     break;
-                // case TIGER:
-                //     generator = new PKCS5S2ParametersGenerator(new TigerDigest());
-                //     break;
-                // END android-removed
+                case RIPEMD160:
+                    generator = new PKCS5S2ParametersGenerator(new RIPEMD160Digest());
+                    break;
+                case TIGER:
+                    generator = new PKCS5S2ParametersGenerator(new TigerDigest());
+                    break;
                 case SHA256:
-                    // BEGIN android-changed
-                    generator = new PKCS5S2ParametersGenerator(AndroidDigestFactory.getSHA256());
-                    // END android-changed
+                    generator = new PKCS5S2ParametersGenerator(new SHA256Digest());
                     break;
-                // BEGIN android-removed
-                // case GOST3411:
-                //     generator = new PKCS5S2ParametersGenerator(new GOST3411Digest());
-                //     break;
-                // END android-removed
+                case GOST3411:
+                    generator = new PKCS5S2ParametersGenerator(new GOST3411Digest());
+                    break;
                 default:
                     throw new IllegalStateException("unknown digest scheme for PBE PKCS5S2 encryption.");
                 }
@@ -130,39 +103,27 @@ public interface PBE
             {
                 switch (hash)
                 {
-                // BEGIN android-removed
-                // case MD2:
-                //     generator = new PKCS12ParametersGenerator(new MD2Digest());
-                //     break;
-                // END android-removed
+                case MD2:
+                    generator = new PKCS12ParametersGenerator(new MD2Digest());
+                    break;
                 case MD5:
-                    // BEGIN android-changed
-                    generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getMD5());
-                    // END android-changed
+                    generator = new PKCS12ParametersGenerator(new MD5Digest());
                     break;
                 case SHA1:
-                    // BEGIN android-changed
-                    generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA1());
-                    // END android-changed
+                    generator = new PKCS12ParametersGenerator(new SHA1Digest());
                     break;
-                // BEGIN android-removed
-                // case RIPEMD160:
-                //     generator = new PKCS12ParametersGenerator(new RIPEMD160Digest());
-                //     break;
-                // case TIGER:
-                //     generator = new PKCS12ParametersGenerator(new TigerDigest());
-                //     break;
-                // END android-removed
+                case RIPEMD160:
+                    generator = new PKCS12ParametersGenerator(new RIPEMD160Digest());
+                    break;
+                case TIGER:
+                    generator = new PKCS12ParametersGenerator(new TigerDigest());
+                    break;
                 case SHA256:
-                    // BEGIN android-changed
-                    generator = new PKCS12ParametersGenerator(AndroidDigestFactory.getSHA256());
-                    // END android-changed
+                    generator = new PKCS12ParametersGenerator(new SHA256Digest());
                     break;
-                // BEGIN android-removed
-                // case GOST3411:
-                //     generator = new PKCS12ParametersGenerator(new GOST3411Digest());
-                //     break;
-                // END android-removed
+                case GOST3411:
+                    generator = new PKCS12ParametersGenerator(new GOST3411Digest());
+                    break;
                 default:
                     throw new IllegalStateException("unknown digest scheme for PBE encryption.");
                 }

@@ -35,7 +35,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Enumerated;
@@ -74,9 +73,7 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.StoreException;
 import org.bouncycastle.x509.X509AttributeCertificate;
-// BEGIN android-removed
-// import org.bouncycastle.x509.extension.X509ExtensionUtil;
-// END android-removed
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 class CertPathValidatorUtilities
 {
@@ -656,22 +653,20 @@ class CertPathValidatorUtilities
         {
             Object obj = iter.next();
 
-            // BEGIN android-removed
-            // if (obj instanceof X509Store)
-            // {
-            //     X509Store certStore = (X509Store)obj;
-            //     try
-            //     {
-            //         certs.addAll(certStore.getMatches(certSelect));
-            //     }
-            //     catch (StoreException e)
-            //     {
-            //         throw new AnnotatedException(
-            //                 "Problem while picking certificates from X.509 store.", e);
-            //     }
-            // }
-            // else
-            // END android-removed
+            if (obj instanceof Store)
+            {
+                Store certStore = (Store)obj;
+                try
+                {
+                    certs.addAll(certStore.getMatches(certSelect));
+                }
+                catch (StoreException e)
+                {
+                    throw new AnnotatedException(
+                            "Problem while picking certificates from X.509 store.", e);
+                }
+            }
+            else
             {
                 CertStore certStore = (CertStore)obj;
 
@@ -720,14 +715,7 @@ class CertPathValidatorUtilities
 
                         for (int j = 0; j < genNames.length; j++)
                         {
-                            // BEGIN android-removed
-                            // PKIXCRLStore store = namedCRLStoreMap.get(genNames[i]);
-                            // END android-removed
-                            // BEGIN android-added
-                            // Seems like a bug, unless there should be a guarantee that j < i,
-                            // However, it's breaking the tests.
-                            PKIXCRLStore store = namedCRLStoreMap.get(genNames[j]);
-                            // END android-added
+                            PKIXCRLStore store = namedCRLStoreMap.get(genNames[i]);
                             if (store != null)
                             {
                                 stores.add(store);
@@ -900,20 +888,8 @@ class CertPathValidatorUtilities
             {
                 return;
             }
-            // BEGIN android-removed
-            // X500Name certIssuer = X500Name.getInstance(crl_entry.getCertificateIssuer().getEncoded());
-            // END android-removed
-            // BEGIN android-added
-            // The original code throws null pointer exception for OpenSSLX509CRL,
-            // which uses the implementation for getCertificateIssuer() in X509CRL, method
-            // whose reference implementation has the following JavaDoc: "If the certificate
-            // issuer is also the CRL issuer, this method returns null."
-            X500Name certIssuer = null;
-            X500Principal certificateIssuerPrincipal = crl_entry.getCertificateIssuer();
-            if (certificateIssuerPrincipal != null) {
-                certIssuer = X500Name.getInstance(certificateIssuerPrincipal.getEncoded());
-            }
-            // END android-added
+
+            X500Name certIssuer = X500Name.getInstance(crl_entry.getCertificateIssuer().getEncoded());
 
             if (certIssuer == null)
             {

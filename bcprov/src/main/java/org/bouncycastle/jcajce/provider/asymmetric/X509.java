@@ -18,10 +18,8 @@ public class X509
 
         public void configure(ConfigurableProvider provider)
         {
-            // BEGIN android-removed
-            // provider.addAlgorithm("KeyFactory.X.509", "org.bouncycastle.jcajce.provider.asymmetric.x509.KeyFactory");
-            // provider.addAlgorithm("Alg.Alias.KeyFactory.X509", "X.509");
-            // END android-removed
+            provider.addAlgorithm("KeyFactory.X.509", "org.bouncycastle.jcajce.provider.asymmetric.x509.KeyFactory");
+            provider.addAlgorithm("Alg.Alias.KeyFactory.X509", "X.509");
 
             //
             // certificate factories.
