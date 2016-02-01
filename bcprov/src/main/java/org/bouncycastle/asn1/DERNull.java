@@ -15,7 +15,9 @@ public class DERNull
     /**
      * @deprecated use DERNull.INSTANCE
      */
-    public DERNull()
+    // BEGIN android-changed
+    protected DERNull()
+    // END android-changed
     {
     }
 

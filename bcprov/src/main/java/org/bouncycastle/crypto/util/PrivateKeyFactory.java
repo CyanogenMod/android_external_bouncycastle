@@ -9,7 +9,9 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.oiw.ElGamalParameter;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.oiw.ElGamalParameter;
+// END android-removed
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -31,8 +33,10 @@ import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECNamedDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.crypto.params.ElGamalParameters;
-import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.params.ElGamalParameters;
+// import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
+// END android-removed
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
 /**
@@ -98,14 +102,16 @@ public class PrivateKeyFactory
 
             return new DHPrivateKeyParameters(derX.getValue(), dhParams);
         }
-        else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
-        {
-            ElGamalParameter params = ElGamalParameter.getInstance(algId.getParameters());
-            ASN1Integer derX = (ASN1Integer)keyInfo.parsePrivateKey();
-
-            return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
-                params.getP(), params.getG()));
-        }
+        // BEGIN android-removed
+        // else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        // {
+        //     ElGamalParameter params = ElGamalParameter.getInstance(algId.getParameters());
+        //     ASN1Integer derX = (ASN1Integer)keyInfo.parsePrivateKey();
+        //
+        //     return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
+        //         params.getP(), params.getG()));
+        // }
+        // END android-removed
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa))
         {
             ASN1Integer derX = (ASN1Integer)keyInfo.parsePrivateKey();

@@ -1,30 +1,42 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
+// BEGIN android-removed
+// import java.security.AlgorithmParameters;
+// import java.security.InvalidAlgorithmParameterException;
+// END android-removed
 import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+// BEGIN android-removed
+// import java.security.spec.AlgorithmParameterSpec;
+// END android-removed
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DESedeKeySpec;
-import javax.crypto.spec.IvParameterSpec;
+// BEGIN android-removed
+// import javax.crypto.spec.IvParameterSpec;
+// END android-removed
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.DESedeWrapEngine;
-import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
+// END android-removed
 import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
-import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
-import org.bouncycastle.crypto.macs.CMac;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
+// import org.bouncycastle.crypto.macs.CMac;
+// END android-removed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
-import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
+// BEGIN android-removed
+// import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
+// END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
@@ -56,17 +68,19 @@ public final class DESede
         }
     }
 
-    /**
-     * DESede   CFB8
-     */
-    public static class DESedeCFB8
-        extends BaseMac
-    {
-        public DESedeCFB8()
-        {
-            super(new CFBBlockCipherMac(new DESedeEngine()));
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * DESede   CFB8
+    //  */
+    // public static class DESedeCFB8
+    //     extends BaseMac
+    // {
+    //     public DESedeCFB8()
+    //     {
+    //         super(new CFBBlockCipherMac(new DESedeEngine()));
+    //     }
+    // }
+    // END android-removed
 
     /**
      * DESede64
@@ -101,15 +115,17 @@ public final class DESede
         }
     }
 
-    static public class CMAC
-        extends BaseMac
-    {
-        public CMAC()
-        {
-            super(new CMac(new DESedeEngine()));
-        }
-    }
-
+    // BEGIN android-removed
+    // static public class CMAC
+    //     extends BaseMac
+    // {
+    //     public CMAC()
+    //     {
+    //         super(new CMac(new DESedeEngine()));
+    //     }
+    // }
+    // END android-removed
+    
     public static class Wrap
         extends BaseWrapCipher
     {
@@ -118,15 +134,17 @@ public final class DESede
             super(new DESedeWrapEngine());
         }
     }
-
-    public static class RFC3211
-        extends BaseWrapCipher
-    {
-        public RFC3211()
-        {
-            super(new RFC3211WrapEngine(new DESedeEngine()), 8);
-        }
-    }
+    
+    // BEGIN android-removed
+    // public static class RFC3211
+    //     extends BaseWrapCipher
+    // {
+    //     public RFC3211()
+    //     {
+    //         super(new RFC3211WrapEngine(new DESedeEngine()), 8);
+    //     }
+    // }
+    // END android-removed
 
   /**
      * DESede - the default for this is to generate a key in
@@ -240,43 +258,45 @@ public final class DESede
         }
     }
 
-    public static class AlgParamGen
-        extends BaseAlgorithmParameterGenerator
-    {
-        protected void engineInit(
-            AlgorithmParameterSpec genParamSpec,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
-        }
+    // BEGIN android-removed
+    // public static class AlgParamGen
+    //     extends BaseAlgorithmParameterGenerator
+    // {
+    //     protected void engineInit(
+    //         AlgorithmParameterSpec genParamSpec,
+    //         SecureRandom            random)
+    //         throws InvalidAlgorithmParameterException
+    //     {
+    //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
+    //     }
 
-        protected AlgorithmParameters engineGenerateParameters()
-        {
-            byte[]  iv = new byte[8];
+    //     protected AlgorithmParameters engineGenerateParameters()
+    //     {
+    //         byte[]  iv = new byte[8];
 
-            if (random == null)
-            {
-                random = new SecureRandom();
-            }
+    //         if (random == null)
+    //         {
+    //             random = new SecureRandom();
+    //         }
 
-            random.nextBytes(iv);
+    //         random.nextBytes(iv);
 
-            AlgorithmParameters params;
+    //         AlgorithmParameters params;
 
-            try
-            {
-                params = createParametersInstance("DES");
-                params.init(new IvParameterSpec(iv));
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e.getMessage());
-            }
+    //         try
+    //         {
+    //             params = createParametersInstance("DES");
+    //             params.init(new IvParameterSpec(iv));
+    //         }
+    //         catch (Exception e)
+    //         {
+    //             throw new RuntimeException(e.getMessage());
+    //         }
 
-            return params;
-        }
-    }
+    //         return params;
+    //     }
+    // }
+    // END android-removed
 
     static public class KeyFactory
         extends BaseSecretKeyFactory
@@ -360,25 +380,37 @@ public final class DESede
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("Cipher.DESEDE", PREFIX + "$ECB");
-            provider.addAlgorithm("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$CBC");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$CBC");
+            // END android-removed
             provider.addAlgorithm("Cipher.DESEDEWRAP", PREFIX + "$Wrap");
-            provider.addAlgorithm("Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, PREFIX + "$Wrap");
-            provider.addAlgorithm("Cipher.DESEDERFC3211WRAP", PREFIX + "$RFC3211");
+            // BEGIN android-changed
+            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "DESEDEWRAP");
+            // END android-changed
+            // BEGIN android-removed
+            // provider.addAlgorithm("Cipher.DESEDERFC3211WRAP", PREFIX + "$RFC3211");
+            // END android-removed
 
             provider.addAlgorithm("Alg.Alias.Cipher.TDEA", "DESEDE");
             provider.addAlgorithm("Alg.Alias.Cipher.TDEAWRAP", "DESEDEWRAP");
             provider.addAlgorithm("Alg.Alias.KeyGenerator.TDEA", "DESEDE");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.TDEA", "DESEDE");
-            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator.TDEA", "DESEDE");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator.TDEA", "DESEDE");
+            // END android-removed
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.TDEA", "DESEDE");
 
             if (provider.hasAlgorithm("MessageDigest", "SHA-1"))
             {
                 provider.addAlgorithm("Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES3Key");
-                provider.addAlgorithm("Cipher.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES3Key");
-                provider.addAlgorithm("Cipher.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$OldPBEWithSHAAndDES3Key");
+                // BEGIN android-removed
+                // provider.addAlgorithm("Cipher.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES3Key");
+                // provider.addAlgorithm("Cipher.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$OldPBEWithSHAAndDES3Key");
+                // END android-removed
                 provider.addAlgorithm("Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES2Key");
-                provider.addAlgorithm("Cipher.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES2Key");
+                // BEGIN android-removed
+                // provider.addAlgorithm("Cipher.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES2Key");
+                // END android-removed
                 provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC, "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
                 provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd2_KeyTripleDES_CBC, "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
                 provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1ANDDESEDE", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
@@ -387,31 +419,37 @@ public final class DESede
             }
 
             provider.addAlgorithm("KeyGenerator.DESEDE", PREFIX + "$KeyGenerator");
-            provider.addAlgorithm("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$KeyGenerator3");
-            provider.addAlgorithm("KeyGenerator.DESEDEWRAP", PREFIX + "$KeyGenerator");
+            // BEGIN android-removed
+            // provider.addAlgorithm("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$KeyGenerator3");
+            // provider.addAlgorithm("KeyGenerator.DESEDEWRAP", PREFIX + "$KeyGenerator");
+            // END android-removed
 
             provider.addAlgorithm("SecretKeyFactory.DESEDE", PREFIX + "$KeyFactory");
 
-            provider.addAlgorithm("Mac.DESEDECMAC", PREFIX + "$CMAC");
-            provider.addAlgorithm("Mac.DESEDEMAC", PREFIX + "$CBCMAC");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
-
-            provider.addAlgorithm("Mac.DESEDEMAC/CFB8", PREFIX + "$DESedeCFB8");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
-
-            provider.addAlgorithm("Mac.DESEDEMAC64", PREFIX + "$DESede64");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
-
-            provider.addAlgorithm("Mac.DESEDEMAC64WITHISO7816-4PADDING", PREFIX + "$DESede64with7816d4");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
-            provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Mac.DESEDECMAC", PREFIX + "$CMAC");
+            // provider.addAlgorithm("Mac.DESEDEMAC", PREFIX + "$CBCMAC");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
+            //
+            // provider.addAlgorithm("Mac.DESEDEMAC/CFB8", PREFIX + "$DESedeCFB8");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
+            //
+            // provider.addAlgorithm("Mac.DESEDEMAC64", PREFIX + "$DESede64");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
+            //
+            // provider.addAlgorithm("Mac.DESEDEMAC64WITHISO7816-4PADDING", PREFIX + "$DESede64with7816d4");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+            // provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+            // END android-removed
 
             provider.addAlgorithm("AlgorithmParameters.DESEDE", PACKAGE + ".util.IvAlgorithmParameters");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
 
-            provider.addAlgorithm("AlgorithmParameterGenerator.DESEDE",  PREFIX + "$AlgParamGen");
-            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
+            // BEGIN android-removed
+            // provider.addAlgorithm("AlgorithmParameterGenerator.DESEDE",  PREFIX + "$AlgParamGen");
+            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
+            // END android-removed
 
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES3KeyFactory");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES2KeyFactory");

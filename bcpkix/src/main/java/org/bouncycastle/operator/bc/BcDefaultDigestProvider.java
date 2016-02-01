@@ -4,20 +4,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.ExtendedDigest;
-import org.bouncycastle.crypto.digests.GOST3411Digest;
-import org.bouncycastle.crypto.digests.MD2Digest;
-import org.bouncycastle.crypto.digests.MD4Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.GOST3411Digest;
+// import org.bouncycastle.crypto.digests.MD2Digest;
+// import org.bouncycastle.crypto.digests.MD4Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.RIPEMD128Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.RIPEMD256Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.RIPEMD128Digest;
+// import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+// import org.bouncycastle.crypto.digests.RIPEMD256Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -76,48 +82,50 @@ public class BcDefaultDigestProvider
                 return new MD5Digest();
             }
         });
-        table.put(PKCSObjectIdentifiers.md4, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new MD4Digest();
-            }
-        });
-        table.put(PKCSObjectIdentifiers.md2, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new MD2Digest();
-            }
-        });
-        table.put(CryptoProObjectIdentifiers.gostR3411, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new GOST3411Digest();
-            }
-        });
-        table.put(TeleTrusTObjectIdentifiers.ripemd128, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new RIPEMD128Digest();
-            }
-        });
-        table.put(TeleTrusTObjectIdentifiers.ripemd160, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new RIPEMD160Digest();
-            }
-        });
-        table.put(TeleTrusTObjectIdentifiers.ripemd256, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new RIPEMD256Digest();
-            }
-        });
+        // BEGIN android-removed
+        // table.put(PKCSObjectIdentifiers.md4, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new MD4Digest();
+        //     }
+        // });
+        // table.put(PKCSObjectIdentifiers.md2, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new MD2Digest();
+        //     }
+        // });
+        // table.put(CryptoProObjectIdentifiers.gostR3411, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new GOST3411Digest();
+        //     }
+        // });
+        // table.put(TeleTrusTObjectIdentifiers.ripemd128, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new RIPEMD128Digest();
+        //     }
+        // });
+        // table.put(TeleTrusTObjectIdentifiers.ripemd160, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new RIPEMD160Digest();
+        //     }
+        // });
+        // table.put(TeleTrusTObjectIdentifiers.ripemd256, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new RIPEMD256Digest();
+        //     }
+        // });
+        // END android-removed
 
         return Collections.unmodifiableMap(table);
     }

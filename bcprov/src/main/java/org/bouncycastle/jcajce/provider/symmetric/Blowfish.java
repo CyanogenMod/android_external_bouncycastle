@@ -64,7 +64,9 @@ public final class Blowfish
         {
 
             provider.addAlgorithm("Cipher.BLOWFISH", PREFIX + "$ECB");
-            provider.addAlgorithm("Cipher.1.3.6.1.4.1.3029.1.2", PREFIX + "$CBC");
+            // BEGIN android-removed
+            // provider.addAlgorithm("Cipher.1.3.6.1.4.1.3029.1.2", PREFIX + "$CBC");
+            // END android-removed
             provider.addAlgorithm("KeyGenerator.BLOWFISH", PREFIX + "$KeyGen");
             provider.addAlgorithm("Alg.Alias.KeyGenerator.1.3.6.1.4.1.3029.1.2", "BLOWFISH");
             provider.addAlgorithm("AlgorithmParameters.BLOWFISH", PREFIX + "$AlgParams");

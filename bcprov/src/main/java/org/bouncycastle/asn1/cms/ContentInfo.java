@@ -28,7 +28,9 @@ import org.bouncycastle.asn1.BERTaggedObject;
  */
 public class ContentInfo
     extends ASN1Object
-    implements CMSObjectIdentifiers
+    // BEGIN android-removed
+    // implements CMSObjectIdentifiers
+    // END android-removed
 {
     private ASN1ObjectIdentifier contentType;
     private ASN1Encodable        content;
