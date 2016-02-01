@@ -24,10 +24,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
-// BEGIN android-removed
-// import javax.crypto.spec.RC2ParameterSpec;
-// import javax.crypto.spec.RC5ParameterSpec;
-// END android-removed
+import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.RC5ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -52,10 +50,8 @@ public abstract class BaseWrapCipher
                                     {
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
-                                        // BEGIN android-removed
-                                        // RC2ParameterSpec.class,
-                                        // RC5ParameterSpec.class
-                                        // END android-removed
+                                        RC2ParameterSpec.class,
+                                        RC5ParameterSpec.class
                                     };
 
     protected int                     pbeType = PKCS12;
@@ -280,8 +276,6 @@ public abstract class BaseWrapCipher
         return null;
     }
 
-    // BEGIN android-changed
-    // added ShortBufferException to throws statement
     protected int engineDoFinal(
         byte[]  input,
         int     inputOffset,
@@ -292,7 +286,6 @@ public abstract class BaseWrapCipher
     {
         return 0;
     }
-    // END android-changed
 
     protected byte[] engineWrap(
         Key     key)

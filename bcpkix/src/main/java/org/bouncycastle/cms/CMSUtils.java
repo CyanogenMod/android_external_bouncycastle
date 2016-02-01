@@ -20,11 +20,9 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
-// import org.bouncycastle.asn1.ocsp.OCSPResponse;
-// import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
-// END android-removed
+import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
+import org.bouncycastle.asn1.ocsp.OCSPResponse;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -115,16 +113,14 @@ class CMSUtils
 
                     crls.add(c.toASN1Structure());
                 }
-                // BEGIN android-removed
-                // else if (rev instanceof OtherRevocationInfoFormat)
-                // {
-                //     OtherRevocationInfoFormat infoFormat = OtherRevocationInfoFormat.getInstance(rev);
-                //
-                //     validateInfoFormat(infoFormat);
-                //
-                //     crls.add(new DERTaggedObject(false, 1, infoFormat));
-                // }
-                // END android-removed
+                else if (rev instanceof OtherRevocationInfoFormat)
+                {
+                    OtherRevocationInfoFormat infoFormat = OtherRevocationInfoFormat.getInstance(rev);
+
+                    validateInfoFormat(infoFormat);
+
+                    crls.add(new DERTaggedObject(false, 1, infoFormat));
+                }
                 else if (rev instanceof ASN1TaggedObject)
                 {
                     crls.add(rev);
@@ -139,36 +135,35 @@ class CMSUtils
         }
     }
 
-    // BEGIN android-removed
-    // private static void validateInfoFormat(OtherRevocationInfoFormat infoFormat)
-    // {
-    //     if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(infoFormat.getInfoFormat()))
-    //     {
-    //         OCSPResponse resp = OCSPResponse.getInstance(infoFormat.getInfo());
-    //
-    //         if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
-    //         {
-    //             throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
-    //         }
-    //     }
-    // }
-    //
-    // static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
-    // {
-    //     List others = new ArrayList();
-    //
-    //     for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
-    //     {
-    //         ASN1Encodable info = (ASN1Encodable)it.next();
-    //         OtherRevocationInfoFormat infoFormat = new OtherRevocationInfoFormat(otherRevocationInfoFormat, info);
-    //         validateInfoFormat(infoFormat);
-    //
-    //         others.add(new DERTaggedObject(false, 1, infoFormat));
-    //     }
-    //
-    //     return others;
-    // }
-    // END android-removed
+    private static void validateInfoFormat(OtherRevocationInfoFormat infoFormat)
+    {
+        if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(infoFormat.getInfoFormat()))
+        {
+            OCSPResponse resp = OCSPResponse.getInstance(infoFormat.getInfo());
+
+            if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
+            {
+                throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
+            }
+        }
+    }
+
+    static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
+    {
+        List others = new ArrayList();
+
+        for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
+        {
+            ASN1Encodable info = (ASN1Encodable)it.next();
+            OtherRevocationInfoFormat infoFormat = new OtherRevocationInfoFormat(otherRevocationInfoFormat, info);
+
+            validateInfoFormat(infoFormat);
+
+            others.add(new DERTaggedObject(false, 1, infoFormat));
+        }
+
+        return others;
+    }
 
     static ASN1Set createBerSetFromList(List derObjects)
     {

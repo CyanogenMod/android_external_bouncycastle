@@ -6,9 +6,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
-// BEGIN android-removed
-// import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-// END android-removed
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 
 /**
  * A general class that reads all X9.62 style EC curve tables.
@@ -32,12 +30,10 @@ public class ECNamedCurveTable
             ecP = SECNamedCurves.getByName(name);
         }
 
-        // BEGIN android-removed
-        // if (ecP == null)
-        // {
-        //     ecP = TeleTrusTNamedCurves.getByName(name);
-        // }
-        // END android-removed
+        if (ecP == null)
+        {
+            ecP = TeleTrusTNamedCurves.getByName(name);
+        }
 
         if (ecP == null)
         {
@@ -63,12 +59,10 @@ public class ECNamedCurveTable
             oid = SECNamedCurves.getOID(name);
         }
 
-        // BEGIN android-removed
-        // if (oid == null)
-        // {
-        //     oid = TeleTrusTNamedCurves.getOID(name);
-        // }
-        // END android-removed
+        if (oid == null)
+        {
+            oid = TeleTrusTNamedCurves.getOID(name);
+        }
 
         if (oid == null)
         {
@@ -95,12 +89,10 @@ public class ECNamedCurveTable
             ecP = SECNamedCurves.getByOID(oid);
         }
 
-        // BEGIN android-removed
-        // if (ecP == null)
-        // {
-        //     ecP = TeleTrusTNamedCurves.getByOID(oid);
-        // }
-        // END android-removed
+        if (ecP == null)
+        {
+            ecP = TeleTrusTNamedCurves.getByOID(oid);
+        }
 
         // NOTE: All the NIST curves are currently from SEC, so no point in redundant OID lookup
 
@@ -119,9 +111,7 @@ public class ECNamedCurveTable
         addEnumeration(v, X962NamedCurves.getNames());
         addEnumeration(v, SECNamedCurves.getNames());
         addEnumeration(v, NISTNamedCurves.getNames());
-        // BEGIN android-removed
-        // addEnumeration(v, TeleTrusTNamedCurves.getNames());
-        // END android-removed
+        addEnumeration(v, TeleTrusTNamedCurves.getNames());
 
         return v.elements();
     }
