@@ -16,12 +16,16 @@ import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+// BEGIN android-removed
+// import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -143,22 +147,24 @@ class X509SignatureUtil
         {
             return "SHA512";
         }
-        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        {
-            return "RIPEMD128";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        {
-            return "RIPEMD160";
-        }
-        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        {
-            return "RIPEMD256";
-        }
-        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        {
-            return "GOST3411";
-        }
+        // BEGIN android-removed
+        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD128";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD160";
+        // }
+        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        // {
+        //     return "RIPEMD256";
+        // }
+        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        // {
+        //     return "GOST3411";
+        // }
+        // END android-removed
         else
         {
             return digestAlgOID.getId();            

@@ -42,7 +42,9 @@ public abstract class KeyPairGeneratorSpi
         ECKeyGenerationParameters   param;
         ECKeyPairGenerator          engine = new ECKeyPairGenerator();
         Object                      ecParams = null;
-        int                         strength = 239;
+        // BEGIN android-changed
+        int                         strength = 256;
+        // BEGIN android-changed
         int                         certainty = 50;
         SecureRandom                random = new SecureRandom();
         boolean                     initialised = false;
@@ -84,7 +86,13 @@ public abstract class KeyPairGeneratorSpi
             SecureRandom    random)
         {
             this.strength = strength;
+            // BEGIN android-added
+            if (random != null) {
+            // END android-added
             this.random = random;
+            // BEGIN android-added
+            }
+            // END android-added
 
             ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(Integers.valueOf(strength));
             if (ecParams == null)
@@ -107,6 +115,11 @@ public abstract class KeyPairGeneratorSpi
             SecureRandom            random)
             throws InvalidAlgorithmParameterException
         {
+            // BEGIN android-added
+            if (random == null) {
+                random = this.random;
+            }
+            // END android-added
             if (params == null)
             {
                 ECParameterSpec implicitCA = configuration.getEcImplicitlyCa();

@@ -45,17 +45,19 @@ public class SHA256
         }
     }
 
-    /**
-     * PBEWithHmacSHA
-     */
-    public static class PBEWithMacKeyFactory
-        extends PBESecretKeyFactory
-    {
-        public PBEWithMacKeyFactory()
-        {
-            super("PBEwithHmacSHA256", null, false, PKCS12, SHA256, 256, 0);
-        }
-    }
+    // BEGIN android-removed
+    // /**
+    //  * PBEWithHmacSHA
+    //  */
+    // public static class PBEWithMacKeyFactory
+    //     extends PBESecretKeyFactory
+    // {
+    //     public PBEWithMacKeyFactory()
+    //     {
+    //         super("PBEwithHmacSHA256", null, false, PKCS12, SHA256, 256, 0);
+    //     }
+    // }
+    // END android-removed
 
     /**
      * HMACSHA256
@@ -84,9 +86,11 @@ public class SHA256
             provider.addAlgorithm("Alg.Alias.MessageDigest.SHA256", "SHA-256");
             provider.addAlgorithm("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
 
-            provider.addAlgorithm("SecretKeyFactory.PBEWITHHMACSHA256", PREFIX + "$PBEWithMacKeyFactory");
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHHMACSHA-256", "PBEWITHHMACSHA256");
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + NISTObjectIdentifiers.id_sha256, "PBEWITHHMACSHA256");
+            // BEGIN android-removed
+            // provider.addAlgorithm("SecretKeyFactory.PBEWITHHMACSHA256", PREFIX + "$PBEWithMacKeyFactory");
+            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHHMACSHA-256", "PBEWITHHMACSHA256");
+            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + NISTObjectIdentifiers.id_sha256, "PBEWITHHMACSHA256");
+            // END android-removed
 
             addHMACAlgorithm(provider, "SHA256", PREFIX + "$HashMac",  PREFIX + "$KeyGenerator");
             addHMACAlias(provider, "SHA256", PKCSObjectIdentifiers.id_hmacWithSHA256);

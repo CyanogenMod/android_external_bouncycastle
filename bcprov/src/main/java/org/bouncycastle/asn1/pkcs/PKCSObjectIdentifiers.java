@@ -13,10 +13,12 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    pkcs_1                    = new ASN1ObjectIdentifier("1.2.840.113549.1.1");
     /** PKCS#1: 1.2.840.113549.1.1.1 */
     static final ASN1ObjectIdentifier    rsaEncryption             = pkcs_1.branch("1");
-    /** PKCS#1: 1.2.840.113549.1.1.2 */
-    static final ASN1ObjectIdentifier    md2WithRSAEncryption      = pkcs_1.branch("2");
-    /** PKCS#1: 1.2.840.113549.1.1.3 */
-    static final ASN1ObjectIdentifier    md4WithRSAEncryption      = pkcs_1.branch("3");
+    // BEGIN android-removed
+    // /** PKCS#1: 1.2.840.113549.1.1.2 */
+    // static final ASN1ObjectIdentifier    md2WithRSAEncryption      = pkcs_1.branch("2");
+    // /** PKCS#1: 1.2.840.113549.1.1.3 */
+    // static final ASN1ObjectIdentifier    md4WithRSAEncryption      = pkcs_1.branch("3");
+    // END android-removed
     /** PKCS#1: 1.2.840.113549.1.1.4 */
     static final ASN1ObjectIdentifier    md5WithRSAEncryption      = pkcs_1.branch("4");
     /** PKCS#1: 1.2.840.113549.1.1.5 */
@@ -96,15 +98,19 @@ public interface PKCSObjectIdentifiers
     // md2 OBJECT IDENTIFIER ::=
     //      {iso(1) member-body(2) US(840) rsadsi(113549) digestAlgorithm(2) 2}
     //
-    /**  1.2.840.113549.2.2 */
-    static final ASN1ObjectIdentifier    md2                    = digestAlgorithm.branch("2");
+    // BEGIN android-removed
+    // /**  1.2.840.113549.2.2 */
+    // static final ASN1ObjectIdentifier    md2                    = digestAlgorithm.branch("2");
+    // END android-removed
 
     //
     // md4 OBJECT IDENTIFIER ::=
     //      {iso(1) member-body(2) US(840) rsadsi(113549) digestAlgorithm(2) 4}
     //
-    /**  1.2.840.113549.2.4 */
-    static final ASN1ObjectIdentifier    md4                    = digestAlgorithm.branch("4");
+    // BEGIN android-removed
+    // /**  1.2.840.113549.2.4 */
+    // static final ASN1ObjectIdentifier    md4                    = digestAlgorithm.branch("4");
+    // END android-removed
 
     //
     // md5 OBJECT IDENTIFIER ::=

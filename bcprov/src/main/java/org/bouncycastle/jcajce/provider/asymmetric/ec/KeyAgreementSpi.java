@@ -24,22 +24,28 @@ import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DerivationFunction;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
-import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
-import org.bouncycastle.crypto.agreement.ECMQVBasicAgreement;
-import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
-import org.bouncycastle.crypto.agreement.kdf.ECDHKEKGenerator;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.agreement.ECDHCBasicAgreement;
+// import org.bouncycastle.crypto.agreement.ECMQVBasicAgreement;
+// import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
+// import org.bouncycastle.crypto.agreement.kdf.ECDHKEKGenerator;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.params.MQVPrivateParameters;
-import org.bouncycastle.crypto.params.MQVPublicParameters;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.params.MQVPrivateParameters;
+// import org.bouncycastle.crypto.params.MQVPublicParameters;
+// END android-removed
 import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.interfaces.MQVPrivateKey;
-import org.bouncycastle.jce.interfaces.MQVPublicKey;
+// BEGIN android-removed
+// import org.bouncycastle.jce.interfaces.MQVPrivateKey;
+// import org.bouncycastle.jce.interfaces.MQVPublicKey;
+// END android-removed
 import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.Strings;
 
@@ -89,7 +95,9 @@ public class KeyAgreementSpi
     private BigInteger             result;
     private ECDomainParameters     parameters;
     private BasicAgreement         agreement;
-    private DerivationFunction     kdf;
+    // BEGIN android-removed
+    // private DerivationFunction     kdf;
+    // END android-removed
 
     private byte[] bigIntToBytes(
         BigInteger    r)
@@ -104,7 +112,9 @@ public class KeyAgreementSpi
     {
         this.kaAlgorithm = kaAlgorithm;
         this.agreement = agreement;
-        this.kdf = kdf;
+        // BEGIN android-removed
+        // this.kdf = kdf;
+        // END android-removed
     }
 
     protected Key engineDoPhase(
@@ -123,25 +133,27 @@ public class KeyAgreementSpi
         }
 
         CipherParameters pubKey;        
-        if (agreement instanceof ECMQVBasicAgreement)
-        {
-            if (!(key instanceof MQVPublicKey))
-            {
-                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + getSimpleName(MQVPublicKey.class) + " for doPhase");
-            }
-
-            MQVPublicKey mqvPubKey = (MQVPublicKey)key;
-            ECPublicKeyParameters staticKey = (ECPublicKeyParameters)
-                ECUtil.generatePublicKeyParameter(mqvPubKey.getStaticKey());
-            ECPublicKeyParameters ephemKey = (ECPublicKeyParameters)
-                ECUtil.generatePublicKeyParameter(mqvPubKey.getEphemeralKey());
-
-            pubKey = new MQVPublicParameters(staticKey, ephemKey);
-
-            // TODO Validate that all the keys are using the same parameters?
-        }
-        else
+        // BEGIN android-removed
+        // if (agreement instanceof ECMQVBasicAgreement)
+        // {
+        //     if (!(key instanceof MQVPublicKey))
+        //     {
+        //         throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+        //             + getSimpleName(MQVPublicKey.class) + " for doPhase");
+        //     }
+        //
+        //     MQVPublicKey mqvPubKey = (MQVPublicKey)key;
+        //     ECPublicKeyParameters staticKey = (ECPublicKeyParameters)
+        //         ECUtil.generatePublicKeyParameter(mqvPubKey.getStaticKey());
+        //     ECPublicKeyParameters ephemKey = (ECPublicKeyParameters)
+        //         ECUtil.generatePublicKeyParameter(mqvPubKey.getEphemeralKey());
+        //
+        //     pubKey = new MQVPublicParameters(staticKey, ephemKey);
+        //
+        //     // TODO Validate that all the keys are using the same parameters?
+        // }
+        // else
+        // END android-removed
         {
             if (!(key instanceof PublicKey))
             {
@@ -162,11 +174,13 @@ public class KeyAgreementSpi
     protected byte[] engineGenerateSecret()
         throws IllegalStateException
     {
-        if (kdf != null)
-        {
-            throw new UnsupportedOperationException(
-                "KDF can only be used when algorithm is known");
-        }
+        // BEGIN android-removed
+        // if (kdf != null)
+        // {
+        //     throw new UnsupportedOperationException(
+        //         "KDF can only be used when algorithm is known");
+        // }
+        // END android-removed
 
         return bigIntToBytes(result);
     }
@@ -201,23 +215,25 @@ public class KeyAgreementSpi
             oidAlgorithm = ((ASN1ObjectIdentifier)oids.get(algKey)).getId();
         }
 
-        if (kdf != null)
-        {
-            if (!algorithms.containsKey(oidAlgorithm))
-            {
-                throw new NoSuchAlgorithmException("unknown algorithm encountered: " + algorithm);
-            }
-            
-            int    keySize = ((Integer)algorithms.get(oidAlgorithm)).intValue();
-
-            DHKDFParameters params = new DHKDFParameters(new ASN1ObjectIdentifier(oidAlgorithm), keySize, secret);
-
-            byte[] keyBytes = new byte[keySize / 8];
-            kdf.init(params);
-            kdf.generateBytes(keyBytes, 0, keyBytes.length);
-            secret = keyBytes;
-        }
-        else
+        // BEGIN android-removed
+        // if (kdf != null)
+        // {
+        //     if (!algorithms.containsKey(oidAlgorithm))
+        //     {
+        //         throw new NoSuchAlgorithmException("unknown algorithm encountered: " + algorithm);
+        //     }
+        //     
+        //     int    keySize = ((Integer)algorithms.get(oidAlgorithm)).intValue();
+        //
+        //     DHKDFParameters params = new DHKDFParameters(new ASN1ObjectIdentifier(oidAlgorithm), keySize, secret);
+        //
+        //     byte[] keyBytes = new byte[keySize / 8];
+        //     kdf.init(params);
+        //     kdf.generateBytes(keyBytes, 0, keyBytes.length);
+        //     secret = keyBytes;
+        // }
+        // else
+        // END android-removed
         {
             if (algorithms.containsKey(oidAlgorithm))
             {
@@ -264,35 +280,37 @@ public class KeyAgreementSpi
     private void initFromKey(Key key)
         throws InvalidKeyException
     {
-        if (agreement instanceof ECMQVBasicAgreement)
-        {
-            if (!(key instanceof MQVPrivateKey))
-            {
-                throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
-                    + getSimpleName(MQVPrivateKey.class) + " for initialisation");
-            }
-
-            MQVPrivateKey mqvPrivKey = (MQVPrivateKey)key;
-            ECPrivateKeyParameters staticPrivKey = (ECPrivateKeyParameters)
-                ECUtil.generatePrivateKeyParameter(mqvPrivKey.getStaticPrivateKey());
-            ECPrivateKeyParameters ephemPrivKey = (ECPrivateKeyParameters)
-                ECUtil.generatePrivateKeyParameter(mqvPrivKey.getEphemeralPrivateKey());
-
-            ECPublicKeyParameters ephemPubKey = null;
-            if (mqvPrivKey.getEphemeralPublicKey() != null)
-            {
-                ephemPubKey = (ECPublicKeyParameters)
-                    ECUtil.generatePublicKeyParameter(mqvPrivKey.getEphemeralPublicKey());
-            }
-
-            MQVPrivateParameters localParams = new MQVPrivateParameters(staticPrivKey, ephemPrivKey, ephemPubKey);
-            this.parameters = staticPrivKey.getParameters();
-
-            // TODO Validate that all the keys are using the same parameters?
-
-            agreement.init(localParams);
-        }
-        else
+        // BEGIN android-removed
+        // if (agreement instanceof ECMQVBasicAgreement)
+        // {
+        //     if (!(key instanceof MQVPrivateKey))
+        //     {
+        //         throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
+        //             + getSimpleName(MQVPrivateKey.class) + " for initialisation");
+        //     }
+        //
+        //     MQVPrivateKey mqvPrivKey = (MQVPrivateKey)key;
+        //     ECPrivateKeyParameters staticPrivKey = (ECPrivateKeyParameters)
+        //         ECUtil.generatePrivateKeyParameter(mqvPrivKey.getStaticPrivateKey());
+        //     ECPrivateKeyParameters ephemPrivKey = (ECPrivateKeyParameters)
+        //         ECUtil.generatePrivateKeyParameter(mqvPrivKey.getEphemeralPrivateKey());
+        //
+        //     ECPublicKeyParameters ephemPubKey = null;
+        //     if (mqvPrivKey.getEphemeralPublicKey() != null)
+        //     {
+        //         ephemPubKey = (ECPublicKeyParameters)
+        //             ECUtil.generatePublicKeyParameter(mqvPrivKey.getEphemeralPublicKey());
+        //     }
+        //
+        //     MQVPrivateParameters localParams = new MQVPrivateParameters(staticPrivKey, ephemPrivKey, ephemPubKey);
+        //     this.parameters = staticPrivKey.getParameters();
+        //
+        //     // TODO Validate that all the keys are using the same parameters?
+        //
+        //     agreement.init(localParams);
+        // }
+        // else
+        // END android-removed
         {
             if (!(key instanceof PrivateKey))
             {
@@ -323,39 +341,41 @@ public class KeyAgreementSpi
         }
     }
 
-    public static class DHC
-        extends KeyAgreementSpi
-    {
-        public DHC()
-        {
-            super("ECDHC", new ECDHCBasicAgreement(), null);
-        }
-    }
-
-    public static class MQV
-        extends KeyAgreementSpi
-    {
-        public MQV()
-        {
-            super("ECMQV", new ECMQVBasicAgreement(), null);
-        }
-    }
-
-    public static class DHwithSHA1KDF
-        extends KeyAgreementSpi
-    {
-        public DHwithSHA1KDF()
-        {
-            super("ECDHwithSHA1KDF", new ECDHBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
-        }
-    }
-
-    public static class MQVwithSHA1KDF
-        extends KeyAgreementSpi
-    {
-        public MQVwithSHA1KDF()
-        {
-            super("ECMQVwithSHA1KDF", new ECMQVBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
-        }
-    }
+    // BEGIN android-removed
+    // public static class DHC
+    //     extends KeyAgreementSpi
+    // {
+    //     public DHC()
+    //     {
+    //         super("ECDHC", new ECDHCBasicAgreement(), null);
+    //     }
+    // }
+    //
+    // public static class MQV
+    //     extends KeyAgreementSpi
+    // {
+    //     public MQV()
+    //     {
+    //         super("ECMQV", new ECMQVBasicAgreement(), null);
+    //     }
+    // }
+    //
+    // public static class DHwithSHA1KDF
+    //     extends KeyAgreementSpi
+    // {
+    //     public DHwithSHA1KDF()
+    //     {
+    //         super("ECDHwithSHA1KDF", new ECDHBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
+    //     }
+    // }
+    //
+    // public static class MQVwithSHA1KDF
+    //     extends KeyAgreementSpi
+    // {
+    //     public MQVwithSHA1KDF()
+    //     {
+    //         super("ECMQVwithSHA1KDF", new ECMQVBasicAgreement(), new ECDHKEKGenerator(new SHA1Digest()));
+    //     }
+    // }
+    // END android-removed
 }

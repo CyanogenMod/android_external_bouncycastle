@@ -6,7 +6,9 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-changed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -52,7 +54,9 @@ public class DESedeWrapEngine
     //
     // checksum digest
     //
-    Digest  sha1 = new SHA1Digest();
+    // BEGIN android-changed
+    Digest  sha1 = AndroidDigestFactory.getSHA1();
+    // END android-changed
     byte[]  digest = new byte[20];
 
    /**

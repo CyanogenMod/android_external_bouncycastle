@@ -6,7 +6,9 @@ import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+// BEGIN android-changed
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-changed
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
@@ -25,7 +27,9 @@ public class OAEPEncoding
     public OAEPEncoding(
         AsymmetricBlockCipher   cipher)
     {
-        this(cipher, new SHA1Digest(), null);
+        // BEGIN android-changed
+        this(cipher, AndroidDigestFactory.getSHA1(), null);
+        // END android-changed
     }
     
     public OAEPEncoding(

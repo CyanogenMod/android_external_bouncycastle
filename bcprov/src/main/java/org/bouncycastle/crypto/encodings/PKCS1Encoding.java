@@ -378,6 +378,12 @@ public class PKCS1Encoding
                 throw new InvalidCipherTextException("unknown block type");
             }
         }
+        // BEGIN android-added
+        if ((type == 1 && forPrivateKey) || (type == 2 && !forPrivateKey))
+        {
+            throw new InvalidCipherTextException("invalid block type " + type);
+        }
+        // END android-added
 
         if (useStrictLength && block.length != engine.getOutputBlockSize())
         {
