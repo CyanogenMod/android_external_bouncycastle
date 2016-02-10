@@ -208,7 +208,7 @@ public class DSASigner
         } else if (valueL == 3072 && valueN != 256) {
             throw new InvalidKeyException("valueN must be 256 for valueL = 3072");
         }
-        if (valueN > digestSize * 8) {
+        if (!(digest instanceof NullDigest) && valueN > digestSize * 8) {
             throw new InvalidKeyException("Key is too strong for this signature algorithm");
         }
     }
