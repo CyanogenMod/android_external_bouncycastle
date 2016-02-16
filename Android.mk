@@ -42,6 +42,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    LOCAL_JAVA_LANGUAGE_VERSION := 1.7
     include $(BUILD_JAVA_LIBRARY)
 
     # non-jarjar version to build okhttp-tests
@@ -52,6 +53,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt
     LOCAL_NO_STANDARD_LIBRARIES := true
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    LOCAL_JAVA_LANGUAGE_VERSION := 1.7
     include $(BUILD_STATIC_JAVA_LIBRARY)
 
     # unbundled bouncycastle jar
@@ -62,6 +64,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_SRC_FILES := $(ri_bcprov_src_files)
     LOCAL_MODULE_TAGS := optional
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    LOCAL_JAVA_LANGUAGE_VERSION := 1.7
     include $(BUILD_STATIC_JAVA_LIBRARY)
 endif # TARGET_BUILD_PDK != true
 
@@ -117,6 +120,7 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_JAVA_LIBRARIES := conscrypt-hostdex
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+    LOCAL_JAVA_LANGUAGE_VERSION := 1.7
     include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
   endif  # ($(HOST_OS),linux)
 endif
@@ -127,6 +131,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(ri_bcprov_src_files)
 LOCAL_MODULE_TAGS := optional
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+LOCAL_JAVA_LANGUAGE_VERSION := 1.7
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -136,4 +141,5 @@ LOCAL_SRC_FILES := $(call all-java-files-under,bcpkix/src/main/java)
 LOCAL_MODULE_TAGS := optional
 LOCAL_JAVA_LIBRARIES := bouncycastle-host
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
+LOCAL_JAVA_LANGUAGE_VERSION := 1.7
 include $(BUILD_HOST_JAVA_LIBRARY)
