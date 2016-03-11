@@ -85,9 +85,6 @@ ifneq ($(TARGET_BUILD_PDK),true)
     LOCAL_MODULE := bouncycastle-bcpkix
     LOCAL_MODULE_TAGS := optional
     LOCAL_STATIC_JAVA_LIBRARIES := bouncycastle-bcpkix-nojarjar
-    # This shouldn't be necessary, but there is currently a bug in Jack where
-    # classes not in the classpath will not be renamed. b/27491842
-    LOCAL_JAVA_LIBRARIES := bouncycastle-nojarjar
     LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
     include $(BUILD_STATIC_JAVA_LIBRARY)
 
