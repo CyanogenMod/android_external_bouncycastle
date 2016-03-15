@@ -175,16 +175,18 @@ public class EC
             // provider.addAlgorithm("Cipher.OldECIESWITHDESEDE-CBC", PREFIX + "IESCipher$OldECIESwithDESedeCBC");
             // END android-removed
 
-            provider.addAlgorithm("Signature.ECDSA", PREFIX + "SignatureSpi$ecDSA");
+            // BEGIN android-changed
+            provider.addAlgorithm("Signature.SHA1withECDSA", PREFIX + "SignatureSpi$ecDSA");
             provider.addAlgorithm("Signature.NONEwithECDSA", PREFIX + "SignatureSpi$ecDSAnone");
 
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1withECDSA", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.ECDSAwithSHA1", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1WITHECDSA", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.ECDSAWITHSHA1", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.SHA1WithECDSA", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.ECDSAWithSHA1", "ECDSA");
-            provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10045.4.1", "ECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.ECDSA", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.ECDSAwithSHA1", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.SHA1WITHECDSA", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.ECDSAWITHSHA1", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.SHA1WithECDSA", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.ECDSAWithSHA1", "SHA1withECDSA");
+            provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10045.4.1", "SHA1withECDSA");
+            // END android-changed
             // BEGIN android-removed
             // provider.addAlgorithm("Alg.Alias.Signature." + TeleTrusTObjectIdentifiers.ecSignWithSha1, "ECDSA");
             //
