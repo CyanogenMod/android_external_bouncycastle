@@ -65,7 +65,6 @@ public class KeyPairGeneratorSpi
         param = new RSAKeyGenerationParameters(
             rsaParams.getPublicExponent(),
             // BEGIN android-changed
-            // TODO(27063703): check whether this change is correct
             // Was: random, rsaParams.getKeysize(), defaultTests);
             (random != null) ? random : new SecureRandom(), rsaParams.getKeysize(), defaultTests);
             // END android-changed
