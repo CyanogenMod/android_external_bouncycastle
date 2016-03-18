@@ -553,7 +553,15 @@ public class BaseBlockCipher
             }
             if (key instanceof BCPBEKey)
             {
-                if (((BCPBEKey)key).getParam() != null)
+                // BEGIN android-changed
+                // Was:
+                // if (((BCPBEKey)key).getParam() != null)
+                // Change taken from:
+                // https://github.com/bcgit/bc-java/commit/fcba5c782188d772148ba168beae368d06646ee2
+                // PKCS#12 sets an IV, if we get a key that doesn't have ParametersWithIV we need to forget about the fact
+                // it's a BCPBEKey
+                if (((BCPBEKey)key).getParam() != null && ((BCPBEKey)key).getParam() instanceof ParametersWithIV)
+                // END android-changed
                 {
                     param = ((BCPBEKey)key).getParam();
                 }
