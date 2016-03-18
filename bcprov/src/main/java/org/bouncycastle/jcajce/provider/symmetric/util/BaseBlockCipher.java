@@ -539,7 +539,6 @@ public class BaseBlockCipher
             {
                 // BEGIN android-added
                 if (((PBEKey)k).getSalt() == null) {
-                    // TODO(27061541): check whether this is the correct fix
                     throw new InvalidAlgorithmParameterException("Parameters for the algorithm are null "
                         + "and the PBEKey has null salt");
                 }
