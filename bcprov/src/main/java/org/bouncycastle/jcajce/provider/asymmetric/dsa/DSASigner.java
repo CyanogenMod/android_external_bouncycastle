@@ -90,10 +90,6 @@ public class DSASigner
                 throw new InvalidKeyException("can't recognise key type in DSA based signer");
             }
         }
-        // BEGIN android-added
-        DSAParameters dsaParam = ((DSAKeyParameters) param).getParameters();
-        checkKey(dsaParam);
-        // END android-added
 
         digest.reset();
         signer.init(false, param);
