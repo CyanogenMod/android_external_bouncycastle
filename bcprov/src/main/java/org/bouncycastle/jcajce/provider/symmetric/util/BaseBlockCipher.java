@@ -485,6 +485,14 @@ public class BaseBlockCipher
         }
     }
 
+    // BEGIN android-added
+    // TODO(27995180): This might need to be removed if we drop support for BCPBE keys without IV
+    // in PKCS12
+    private boolean isBCPBEKeyWithoutIV(Key key) {
+        return (key instanceof BCPBEKey) && !(((BCPBEKey)key).getParam() instanceof ParametersWithIV);
+    }
+    // END android-added
+
     protected void engineInit(
         int                     opmode,
         Key                     key,
@@ -518,7 +526,12 @@ public class BaseBlockCipher
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
         //
-        if (scheme == PKCS12 || key instanceof PKCS12Key)
+        // BEGIN android-changed
+        // Was: if (scheme == PKCS12 || key instanceof PKCS12Key)
+        // If the key is a BCPBE one without an IV, ignore the fact that the scheme is PKCS12.
+        // TODO(27995180): consider whether we want to keep support for these keys and PKCS12.
+        if ((scheme == PKCS12 || key instanceof PKCS12Key) && !isBCPBEKeyWithoutIV(key))
+        // END android-changed
         {
             SecretKey k;
             try
@@ -566,7 +579,13 @@ public class BaseBlockCipher
                 }
                 else
                 {
-                    param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS12, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
+                    // BEGIN android-changed
+                    // Was: param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS12, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
+                    // TODO(27995180): consider rejecting such keys for PKCS12
+                    // See above for the android-changed with a TODO for the same bug that makes
+                    // this code unreachable.
+                    // END android-changed
+                    throw new IllegalStateException("Unreachable code");
                 }
             }
             else
@@ -814,18 +833,35 @@ public class BaseBlockCipher
             {
                 ivRandom = new SecureRandom();
             }
-
             if ((opmode == Cipher.ENCRYPT_MODE) || (opmode == Cipher.WRAP_MODE))
             {
                 byte[]  iv = new byte[ivLength];
 
-                ivRandom.nextBytes(iv);
+                // BEGIN android-changed
+                // Was: ivRandom.nextBytes(iv);
+                // TODO(27995180): for such keys, consider whether we want to reject them or
+                // allow them if the IV is passed in the parameters
+                if (!isBCPBEKeyWithoutIV(key)) {
+                    ivRandom.nextBytes(iv);
+                }
+                // END android-changed
                 param = new ParametersWithIV(param, iv);
                 ivParam = (ParametersWithIV)param;
             }
             else if (cipher.getUnderlyingCipher().getAlgorithmName().indexOf("PGPCFB") < 0)
             {
-                throw new InvalidAlgorithmParameterException("no IV set when one expected");
+                // BEGIN android-changed
+                // Was: throw new InvalidAlgorithmParameterException("no IV set when one expected");
+                // TODO(27995180): for such keys, consider whether we want to reject them or
+                // allow them if the IV is passed in the parameters
+                if (!isBCPBEKeyWithoutIV(key)) {
+                    throw new InvalidAlgorithmParameterException("no IV set when one expected");
+                } else {
+                    // Mimic behaviour in 1.52 by using an IV of 0's
+                    param = new ParametersWithIV(param, new byte[ivLength]);
+                    ivParam = (ParametersWithIV)param;
+                }
+                // END android-changed
             }
         }
 
