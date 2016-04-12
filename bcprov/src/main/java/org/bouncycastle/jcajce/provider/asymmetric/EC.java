@@ -83,12 +83,17 @@ public class EC
             // registerOid(provider, SECObjectIdentifiers.dhSinglePass_stdDH_sha512kdf_scheme, "EC", new KeyFactorySpi.EC());
             // registerOid(provider, SECObjectIdentifiers.dhSinglePass_cofactorDH_sha512kdf_scheme, "EC", new KeyFactorySpi.EC());
             //
-            // // Android comment: the registration below is causing CTS tests to fail and doesn't seem
-            // // to be implemented by bouncycastle (so looks like an bug in bouncycastle).
-            // // TODO(26929227): check this still happens
+            // END android-removed
+            // BEGIN android-removed
+            // // Android comment: the registrations in this block are causing CTS tests to fail
+            // // and don't seem to be implemented by bouncycastle (so looks like an bug in
+            // // bouncycastle).
+            // // TODO(20447540): check if this occurs in upstream bouncycastle and report accordingly
             // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.id_ecPublicKey, "EC");
             //
             // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
+            // END android-removed
+            // BEGIN android-removed
             // registerOidAlgorithmParameters(provider, X9ObjectIdentifiers.dhSinglePass_cofactorDH_sha1kdf_scheme, "EC");
             //
             // registerOidAlgorithmParameters(provider, SECObjectIdentifiers.dhSinglePass_stdDH_sha224kdf_scheme, "EC");
