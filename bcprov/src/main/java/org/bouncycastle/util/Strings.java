@@ -13,42 +13,35 @@ import java.util.Vector;
  */
 public final class Strings
 {
-    // BEGIN android-changed
-    // Was: private static String LINE_SEPARATOR;
-    // It was using the static block below to initialize, calling System.getProperty, which caused
-    // BouncyCastleProvider not to be compile-time initializable, thus causing performance problems
-    // (see b/28108158 ). Anyway, this is already hardcoded in System.java
-    private static String LINE_SEPARATOR = "\n";
-    // END android-changed
-    // BEGIN android-removed
-    // static
-    // {
-    //    try
-    //    {
-    //        LINE_SEPARATOR = AccessController.doPrivileged(new PrivilegedAction<String>()
-    //        {
-    //            public String run()
-    //            {
-    //                // the easy way
-    //                return System.getProperty("line.separator");
-    //            }
-    //        });
+    private static String LINE_SEPARATOR;
 
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        try
-    //        {
-    //            // the harder way
-    //            LINE_SEPARATOR = String.format("%n");
-    //        }
-    //        catch (Exception ef)
-    //        {
-    //            LINE_SEPARATOR = "\n";   // we're desperate use this...
-    //        }
-    //    }
-    // }
-    // END android-removed
+    static
+    {
+       try
+       {
+           LINE_SEPARATOR = AccessController.doPrivileged(new PrivilegedAction<String>()
+           {
+               public String run()
+               {
+                   // the easy way
+                   return System.getProperty("line.separator");
+               }
+           });
+
+       }
+       catch (Exception e)
+       {
+           try
+           {
+               // the harder way
+               LINE_SEPARATOR = String.format("%n");
+           }
+           catch (Exception ef)
+           {
+               LINE_SEPARATOR = "\n";   // we're desperate use this...
+           }
+       }
+    }
 
     public static String fromUTF8ByteArray(byte[] bytes)
     {
